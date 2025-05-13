@@ -50,7 +50,6 @@ Cuenta con un sistema de **autenticación de usuarios (login)** y utiliza **MySQ
 
 ## 📁 Estructura del proyecto
 
-/
 ├── backend/       # Proyecto Django (API + autenticación + lógica de pedidos)  
 ├── frontend/      # Proyecto React (Vite + MUI + autenticación)  
 ├── docs/          # Documentación adicional (MkDocs)  
