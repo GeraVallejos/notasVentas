@@ -42,7 +42,7 @@ Cuenta con un sistema de **autenticación de usuarios (login)** y utiliza **MySQ
 
 ### Requisitos
 - Python 3.10+
-- Node.js 18+
+- Node.js 22+
 - npm o yarn
 - MySQL
 
