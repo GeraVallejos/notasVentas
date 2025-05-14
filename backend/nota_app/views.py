@@ -25,14 +25,14 @@ class UsuarioView(viewsets.ModelViewSet):
         return [permissions.IsAdminUser()]
 
     @action(detail=False, methods=['get'], permission_classes=[permissions.IsAuthenticated])
-    def actual(self, request):
+    def actual(self, request, **kwargs):
         # Devuelve el usuario autenticado
         user = self.request.user  # Usuario autenticado
         serializer = self.get_serializer(user)
         return Response(serializer.data)
     
     @action(detail=False, methods=['post'], permission_classes=[permissions.IsAuthenticated])
-    def verify_password(self, request):
+    def verify_password(self, request, **kwargs):
         password = request.data.get('password')
         
         if not password:
@@ -44,7 +44,7 @@ class UsuarioView(viewsets.ModelViewSet):
             return Response({'valid': False}, status=400)
     
     @action(detail=False, methods=['post'], permission_classes=[permissions.IsAuthenticated])
-    def logout(self, request):
+    def logout(self, request, **kwargs):
         response = Response({"message": "Logout exitoso"}, status=status.HTTP_200_OK)
         response.delete_cookie('access_token')
         response.delete_cookie('refresh_token')

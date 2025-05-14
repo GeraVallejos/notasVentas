@@ -21,8 +21,8 @@ urlpatterns = [
     path('admin/', admin.site.urls),
 
     # Autenticación 
-    path('api/token/', include('nota_app.auth_urls')),
+    path('api/v1/token/', include('nota_app.auth_urls')),
     
     # Version de API
-    path('api/<str:version>/', include('nota_app.urls')),
+    path('api/v1/', include('nota_app.urls')),
 ]

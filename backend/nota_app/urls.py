@@ -2,12 +2,9 @@ from django.urls import path, include
 from rest_framework import routers
 from .views import UsuarioView, NotasView
 
-
-#Se usa versionado de API en urls de pedidosApp
-
 router = routers.DefaultRouter()
 router.register(r'usuario', UsuarioView, 'usuario')
-router.register(r'pedido', NotasView, 'pedido')
+router.register(r'nota', NotasView, 'nota')
 
 # URLs para acciones personalizadas
 usuario_extra_routes = [
