@@ -188,7 +188,6 @@ SESSION_COOKIE_SAMESITE = 'Lax'
 
 CORS_ALLOW_CREDENTIALS = True
 CORS_EXPOSE_HEADERS = ['Content-Type', 'X-CSRFToken']  # Necesario para CSRF
-CORS_ALLOW_CREDENTIALS = True  # Permite cookies entre dominios
 
 CSRF_USE_SESSIONS = False
 CSRF_COOKIE_HTTPONLY = False  # React debe leer el token

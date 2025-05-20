@@ -5,9 +5,8 @@ import themeJJ from './themeJJ'
 const AppTheme = ({ children }) => {
     return (
         <ThemeProvider theme={themeJJ}>
-            <CssBaseline>
-                {children}
-            </CssBaseline>
+            <CssBaseline />
+            {children}
         </ThemeProvider>
     )
 }

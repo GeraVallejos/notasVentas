@@ -1,35 +1,39 @@
 import { createBrowserRouter } from "react-router-dom";
-import App from "../App";
 import { privateLoader, publicLoader } from "./loader";
 import NotasPage from "../pages/NotasPage";
 import HomePage from "../pages/HomePage";
 import Loginpage from "../pages/LoginPage";
+import AuthLayout from "../layouts/AuthLayout";
+import AppLayout from "../layouts/Applayout";
 
 export const getRoutes = () => createBrowserRouter([
     {
-        path: "/",
-        element: <App />,
+        element: <AppLayout />,
         loader: privateLoader,
         children: [
             {
-                path: "/",
+                index: true,
                 element: <HomePage />,
+                
             },
             {
                 path: "notas",
                 element: <NotasPage />,
-            },      
+            },
         ]
     },
     {
-        path: "login",
+        element: <AuthLayout />,
         loader: publicLoader,
-        element: <Loginpage />,
+        children: [
+            {
+                path: "*",
+                element: <Loginpage />,
+            },
+            {
+                path: "login",
+                element: <Loginpage />,
+            },
+        ]
     },
-    {
-        path: "*",
-        loader: publicLoader,
-        element: <Loginpage />,
-    },
-    
 ])

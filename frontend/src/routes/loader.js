@@ -1,11 +1,13 @@
-import { store } from '../store';
+import store from '../store';
 import { fetchUserThunk } from '../auth/authThunk';
 
-// Para rutas protegidas (requiere sesión)
 export const privateLoader = async () => {
+  const { user } = store.getState().auth;
+  if (user) return null;
+
   try {
-    await store.dispatch(fetchUserThunk()).unwrap(); // Pre-carga el usuario en Redux
-    return null; // Permitir el acceso
+    await store.dispatch(fetchUserThunk()).unwrap();
+    return null;
   } catch {
     throw new Response('Unauthorized', {
       status: 302,
@@ -14,16 +16,22 @@ export const privateLoader = async () => {
   }
 };
 
-// Para rutas públicas (no debe haber sesión)
 export const publicLoader = async () => {
-  try {
-    await store.dispatch(fetchUserThunk()).unwrap();
-    // Ya autenticado → redirigir
+  const { user } = store.getState().auth;
+  if (user) {
     throw new Response('Already Authenticated', {
       status: 302,
-      headers: { Location: '/productos' },
+      headers: { Location: '/notas' },
+    });
+  }
+
+  try {
+    await store.dispatch(fetchUserThunk()).unwrap();
+    throw new Response('Already Authenticated', {
+      status: 302,
+      headers: { Location: '/notas' },
     });
   } catch {
-    return null; // No autenticado → permitir acceso
+    return null;
   }
 };

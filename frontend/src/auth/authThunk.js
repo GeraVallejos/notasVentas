@@ -1,45 +1,39 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
-import api from '../utils/api';
+import { api } from '../utils/api';
 
-// Login (con cookies)
-export const loginThunk = createAsyncThunk(
-  'auth/login',
-  async (credentials, { rejectWithValue, dispatch }) => {
-    try {
-      await api.post('/token/', credentials);
-      await dispatch(fetchUserThunk()).unwrap();
-    } catch (error) {
-      const msg =
-        error.response?.data?.detail ||
-        'Error al iniciar sesión';
-      return rejectWithValue(msg);
-    }
+// Login
+export const login = createAsyncThunk('auth/login', async (credentials, thunkAPI) => {
+  try {
+    const res = await api.post('/token/', credentials);
+    return res.data.message;
+  } catch (error) {
+    const message = error.response?.data?.detail || 'Error de login';
+    return thunkAPI.rejectWithValue({detail: message});
   }
-);
+});
 
 // Obtener usuario actual
-export const fetchUserThunk = createAsyncThunk(
-  'auth/me',
-  async (_, { rejectWithValue }) => {
-    try {
-      const res = await api.get('/usuario/actual/');
-      return res.data;
-    } catch (error) {
-        const msg = error.response?.data?.detail || 'No autenticado';
-      return rejectWithValue(msg);
+export const fetchUserThunk = createAsyncThunk('auth/fetchUserThunk', async (_, thunkAPI) => {
+
+  if (window.location.pathname === '/login') {
+      return ;
     }
+  try {
+    const res = await api.get('/usuario/actual/');
+    return res.data;
+  } catch (error) {
+    console.error(error)
+    return thunkAPI.rejectWithValue({ detail: 'Usuario no autenticado' });
   }
-);
+});
 
 // Logout
-export const logoutThunk = createAsyncThunk(
-  'auth/logout',
-  async (_, { rejectWithValue }) => {
-    try {
-      await api.post('/usuario/logout/');
-    } catch (error) {
-        const msg = error.response?.data?.detail || 'Error al cerrar sesión';
-      return rejectWithValue(msg);
-    }
+export const logout = createAsyncThunk('auth/logout', async (_, thunkAPI) => {
+  try {
+    await api.post('/usuario/logout/');
+    return true;
+  } catch (error) {
+    console.error(error)
+    return thunkAPI.rejectWithValue({ detail: 'Error al cerrar sesión' });
   }
-);
+});

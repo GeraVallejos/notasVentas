@@ -1,19 +1,11 @@
-import { Outlet } from "react-router"
-import AppTheme from "./theme/AppTheme"
-import LoginLayout from "./layouts/LoginLayout"
-import { SnackbarProvider } from "notistack"
-
+import { Outlet } from 'react-router-dom';
 
 function App() {
 
   return (
-    <SnackbarProvider maxSnack={3}>
-      <AppTheme>
-        <LoginLayout>
-          <Outlet />
-        </LoginLayout>
-      </AppTheme>
-    </SnackbarProvider>
+
+        <Outlet />
+
   )
 }
 

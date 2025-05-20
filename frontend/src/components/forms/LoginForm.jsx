@@ -1,28 +1,37 @@
-// components/forms/LoginForm.js
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
+  Box,
   Button,
-  Card,
-  CardContent,
+  Checkbox,
+  FormControlLabel,
+  IconButton,
+  InputAdornment,
   Stack,
+  TextField,
   Typography,
 } from '@mui/material';
+import { Visibility, VisibilityOff, Person, Lock } from '@mui/icons-material';
 import { FormProvider } from 'react-hook-form';
-
 import { useLoginForm } from '../../hooks/useLoginForm';
-import api from '../../utils/api';
+import { api } from '../../utils/api';
 import { useSnackbar } from 'notistack';
-import { TextInputsForm } from './TextInputForm';
 
 export const LoginForm = () => {
   const [showPassword, setShowPassword] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
   const { enqueueSnackbar } = useSnackbar();
 
   const form = useLoginForm(async (data) => {
     try {
-      await api.post('/token/', data); // Login con cookies
+      if (rememberMe) {
+        localStorage.setItem('rememberedUsername', data.username);
+      } else {
+        localStorage.removeItem('rememberedUsername');
+      }
+
+      await api.post('/token/', data);
       enqueueSnackbar('Inicio de sesión exitoso', { variant: 'success' });
-      window.location.replace('/'); // Redirige al home
+      window.location.replace('/');
     } catch (error) {
       const msg = error.response?.data?.detail || 'Error al iniciar sesión';
       enqueueSnackbar(msg, { variant: 'error' });
@@ -31,40 +40,141 @@ export const LoginForm = () => {
 
   const togglePasswordVisibility = () => setShowPassword((prev) => !prev);
 
+  useEffect(() => {
+    const savedUsername = localStorage.getItem('rememberedUsername');
+    if (savedUsername) {
+      form.setValue('username', savedUsername);
+      setRememberMe(true);
+    }
+  }, []);
+
   return (
-    <FormProvider {...form}>
-      <Card
+    <Box
+      sx={{
+        width: 360,
+        mx: 'auto',
+        mt: 0,
+        px: 4,
+        py: 5,
+        bgcolor: '#f0faff', // fondo azul muy suave
+        borderRadius: 3,
+        boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
+        textAlign: 'center',
+      }}
+    >
+      <Typography
+        variant="h4"
         sx={{
-          maxWidth: 400,
-          mx: 'auto',
-          mt: 8,
-          p: 3,
-          borderRadius: 3,
-          boxShadow: 4,
+          background: 'linear-gradient(to right, #00BFFF, #1E90FF)', // celeste-azul
+          WebkitBackgroundClip: 'text',
+          WebkitTextFillColor: 'transparent',
+          my: 1,
         }}
       >
-        <CardContent>
-          <Typography variant="h5" align="center" gutterBottom>
-            Iniciar sesión
-          </Typography>
+        PEDIDOS AIS
+      </Typography>
 
-          <form onSubmit={form.onSubmit} noValidate>
-            <Stack spacing={3}>
-              <TextInputsForm name="username" label="Nombre de Usuario" type="text" />
-              <TextInputsForm
-                name="password"
-                label="Contraseña"
-                type={showPassword ? 'text' : 'password'}
-                toggleVisibility={togglePasswordVisibility}
-                isPasswordVisible={showPassword}
-              />
-              <Button type="submit" variant="contained" size="large" fullWidth>
-                Ingresar
-              </Button>
-            </Stack>
-          </form>
-        </CardContent>
-      </Card>
-    </FormProvider>
+      <Typography variant="subtitle2" color="text.secondary" mb={4}>
+        Ingresa para gestionar los pedidos de Comercializadora AIS
+      </Typography>
+
+      <FormProvider {...form}>
+        <form onSubmit={form.onSubmit} noValidate>
+          <Stack spacing={2}>
+            <TextField
+              placeholder="Username"
+              type="text"
+              spellCheck={false}
+              autoCorrect="off"
+              autoComplete="off"
+              {...form.register('username')}
+              error={!!form.formState.errors.username}
+              helperText={form.formState.errors.username?.message}
+              fullWidth
+              variant="outlined"
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <Person />
+                  </InputAdornment>
+                ),
+              }}
+            />
+
+            <TextField
+              placeholder="Password"
+              type={showPassword ? 'text' : 'password'}
+              {...form.register('password')}
+              error={!!form.formState.errors.password}
+              helperText={form.formState.errors.password?.message}
+              fullWidth
+              variant="outlined"
+              autoComplete="current-password"
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <Lock />
+                  </InputAdornment>
+                ),
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton onClick={togglePasswordVisibility} edge="end">
+                      {showPassword ? <VisibilityOff /> : <Visibility />}
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              }}
+            />
+
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={rememberMe}
+                  onChange={(e) => {
+                    const checked = e.target.checked;
+                    setRememberMe(checked);
+                    if (!checked) {
+                      localStorage.removeItem('rememberedUsername');
+                    }
+                  }}
+                  sx={{
+                    color: '#1E90FF',
+                    '&.Mui-checked': {
+                      color: '#1E90FF',
+                    },
+                  }}
+                />
+              }
+              label="Recordarme"
+              sx={{ justifyContent: 'flex-start', ml: 1 }}
+            />
+
+            <Button
+              type="submit"
+              size="large"
+              fullWidth
+              disabled={form.formState.isSubmitting}
+              sx={{
+                mt: 1,
+                borderRadius: 1.5,
+                background: 'linear-gradient(to right, #00BFFF, #1E90FF)',
+                color: 'white',
+                textTransform: 'uppercase',
+                '&:hover': {
+                  background: 'linear-gradient(to right, #00B2EE, #1C86EE)',
+                  color: 'white',
+                },
+                opacity: form.formState.isSubmitting ? 0.6 : 1,
+                '&.Mui-disabled': {
+                  color: 'white', // fuerza texto blanco
+                },
+              }}
+            >
+              {form.formState.isSubmitting ? 'Cargando...' : 'INGRESAR'}
+            </Button>
+          </Stack>
+        </form>
+      </FormProvider>
+    </Box>
   );
 };

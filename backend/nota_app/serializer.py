@@ -28,11 +28,12 @@ class UsuariosSerializer(serializers.ModelSerializer):
 
 class NotasSerializer(serializers.ModelSerializer):
 
-    notas_usuario = serializers.ReadOnlyField(source = 'id_usuario')
+    notas_usuario = serializers.CharField(source='id_usuario.username', read_only=True)
 
     class Meta():
         model = Notas
         fields = '__all__'
+        read_only_fields = ['id_usuario']
     
     def create(self, validated_data):
     

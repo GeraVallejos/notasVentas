@@ -96,13 +96,18 @@ class CookieTokenRefreshView(TokenRefreshView):
         response = super().post(request, *args, **kwargs)
 
         access = response.data.get("access")
+        if not access:
+            return Response({"error": "No se pudo refrescar el token"}, status=401)
+
+        # Set cookie
         response.set_cookie(
-            key="access_token",
+            key=settings.SIMPLE_JWT['AUTH_COOKIE'],
             value=access,
             httponly=True,
-            secure=True,
-            samesite='Lax',
-            max_age=60 * 60,  # 1 hora
+            secure=settings.SIMPLE_JWT['AUTH_COOKIE_SECURE'],
+            samesite=settings.SIMPLE_JWT['AUTH_COOKIE_SAMESITE'],
+            max_age=settings.SIMPLE_JWT['ACCESS_TOKEN_LIFETIME'].total_seconds(),
+            path=settings.SIMPLE_JWT['AUTH_COOKIE_PATH'],
         )
-        response.data = {"message": "Token actualizado"}
+
         return response

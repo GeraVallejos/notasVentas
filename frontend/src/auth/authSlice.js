@@ -1,48 +1,60 @@
 import { createSlice } from '@reduxjs/toolkit';
-import { loginThunk, fetchUserThunk, logoutThunk } from './authThunk';
+import { login, fetchUserThunk, logout } from './authThunk';
 
 const initialState = {
   user: null,
   loading: false,
   error: null,
+  isAuthenticated: false,
 };
 
 const authSlice = createSlice({
   name: 'auth',
   initialState,
   reducers: {
-
+    clearError: (state) => {
+      state.error = null;
+    },
+    clearStore: () => initialState,
   },
   extraReducers: (builder) => {
     builder
-      .addCase(loginThunk.pending, (state) => {
+      // Login
+      .addCase(login.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
-      .addCase(loginThunk.fulfilled, (state) => {
+      .addCase(login.fulfilled, (state) => {
         state.loading = false;
+        state.isAuthenticated = true;
       })
-      .addCase(loginThunk.rejected, (state, action) => {
+      .addCase(login.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload || 'Error al iniciar sesión';
+        state.error = action.payload?.detail || 'Error desconocido';
       })
+
+      // Fetch current user
       .addCase(fetchUserThunk.pending, (state) => {
         state.loading = true;
-        state.error = null;
       })
       .addCase(fetchUserThunk.fulfilled, (state, action) => {
+        state.loading = false;
         state.user = action.payload;
-        state.loading = false;
+        state.isAuthenticated = true;
       })
-      .addCase(fetchUserThunk.rejected, (state, action) => {
-        state.user = null;
+      .addCase(fetchUserThunk.rejected, (state) => {
         state.loading = false;
-        state.error = action.payload || 'No autenticado';
-      })
-      .addCase(logoutThunk.fulfilled, (state) => {
+        state.isAuthenticated = false;
         state.user = null;
+      })
+
+      // Logout
+      .addCase(logout.fulfilled, (state) => {
+        state.user = null;
+        state.isAuthenticated = false;
       });
-  },
+  }
 });
 
+export const { clearError, clearStore } = authSlice.actions;
 export default authSlice.reducer;
