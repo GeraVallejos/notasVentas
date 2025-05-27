@@ -5,6 +5,7 @@ import HomePage from "../pages/HomePage";
 import Loginpage from "../pages/LoginPage";
 import AuthLayout from "../layouts/AuthLayout";
 import AppLayout from "../layouts/Applayout";
+import NotasDataPage from "../pages/NotasDataPage";
 
 export const getRoutes = () => createBrowserRouter([
     {
@@ -19,6 +20,10 @@ export const getRoutes = () => createBrowserRouter([
             {
                 path: "notas",
                 element: <NotasPage />,
+            },
+            {
+                path: "lista-notas",
+                element: <NotasDataPage />,
             },
         ]
     },

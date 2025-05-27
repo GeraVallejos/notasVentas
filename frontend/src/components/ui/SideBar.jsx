@@ -15,7 +15,7 @@ const drawerWidth = 240;
 
 const SidebarContent = ({ onClick }) => (
   <List sx={{mt:10}}>
-    <ListItemButton component={NavLink} to="/" onClick={onClick}>
+    <ListItemButton component={NavLink} to="/lista-notas" onClick={onClick}>
       <ListItemIcon><ListAltIcon /></ListItemIcon>
       <ListItemText primary="Lista de Notas" />
     </ListItemButton>

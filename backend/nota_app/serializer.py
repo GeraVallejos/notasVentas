@@ -28,15 +28,22 @@ class UsuariosSerializer(serializers.ModelSerializer):
 
 class NotasSerializer(serializers.ModelSerializer):
 
-    notas_usuario = serializers.CharField(source='id_usuario.username', read_only=True)
+    usuario_creador = serializers.CharField(source='id_usuario.username', read_only=True)
+    usuario_modificador = serializers.CharField(source='id_usuario_modificacion.username', read_only=True)
 
     class Meta():
         model = Notas
         fields = '__all__'
-        read_only_fields = ['id_usuario']
+        read_only_fields = ['id_usuario', 'id_usuario_modificacion']
     
     def create(self, validated_data):
     
         # Asigna automáticamente el id_usuario del usuario autenticado
         validated_data['id_usuario'] = self.context['request'].user 
         return super().create(validated_data)
+    
+    def update(self, instance, validated_data):
+        
+        # Asigna automáticamente el id_usuario_modificacion del usuario autenticado al actualizar
+        validated_data['id_usuario_modificacion'] = self.context['request'].user
+        return super().update(instance, validated_data)

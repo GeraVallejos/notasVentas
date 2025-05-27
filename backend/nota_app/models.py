@@ -34,7 +34,8 @@ class Notas(models.Model):
     observacion = models.CharField(max_length=1000, blank=True, null=True)
     horario_desde = models.CharField(max_length=50, blank=True, null=True)
     horario_hasta = models.CharField(max_length=50, blank=True, null=True)
-    id_usuario = models.ForeignKey('Usuarios', models.DO_NOTHING, db_column='id', related_name='notas_usuario')
+    id_usuario = models.ForeignKey('Usuarios', models.DO_NOTHING, db_column='id_usuario', related_name='notas_creadas')
+    id_usuario_modificacion = models.ForeignKey('Usuarios', models.DO_NOTHING, db_column='id_usuario_modificacion', related_name='notas_modificadas', null=True, blank=True)
     
     class Meta:
         managed = True

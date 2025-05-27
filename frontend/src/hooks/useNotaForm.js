@@ -14,8 +14,8 @@ const schema = yup.object().shape({
   comuna: yup.string().required('Comuna requerida'),
   telefono: yup.string().required('Teléfono requerido'),
   observacion: yup.string(),
-  horario_desde: yup.date(),
-horario_hasta: yup.date(),
+  horario_desde: yup.string(),
+  horario_hasta: yup.string(),
 });
 
 export const useNotaForm = (onSubmit) => {

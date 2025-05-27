@@ -91,8 +91,20 @@ export const NotaForm = () => {
                                 />
                                 <TimePicker
                                     label="Horario Desde"
-                                    value={form.watch('horario_desde') ? dayjs(form.watch('horario_desde')) : null}
-                                    onChange={(time) => form.setValue('horario_desde', time?.toISOString())}
+                                    ampm={false} // formato 24 horas
+                                    value={
+                                        form.watch('horario_desde')
+                                            ? dayjs(form.watch('horario_desde'), 'HH:mm')
+                                            : null
+                                    }
+                                    onChange={(time) => {
+                                        if (time && time.isValid()) {
+                                            form.setValue('horario_desde', time.format('HH:mm'));
+                                        } else {
+                                            form.setValue('horario_desde', '');
+                                        }
+                                    }}
+
                                     slotProps={{
                                         textField: {
                                             fullWidth: true,
@@ -101,6 +113,7 @@ export const NotaForm = () => {
                                             helperText: form.formState.errors.horario_desde?.message,
                                         },
                                     }}
+
                                 />
                             </Stack>
                         </Grid>
@@ -142,14 +155,25 @@ export const NotaForm = () => {
                                 />
                                 <TimePicker
                                     label="Horario Hasta"
-                                    value={form.watch('horario_hasta') ? dayjs(form.watch('horario_hasta')) : null}
-                                    onChange={(time) => form.setValue('horario_hasta', time?.toISOString())}
+                                    ampm={false} // formato 24 horas
+                                    value={
+                                        form.watch('horario_hasta')
+                                            ? dayjs(form.watch('horario_hasta'), 'HH:mm')
+                                            : null
+                                    }
+                                    onChange={(time) => {
+                                        if (time && time.isValid()) {
+                                            form.setValue('horario_hasta', time.format('HH:mm'));
+                                        } else {
+                                            form.setValue('horario_hasta', '');
+                                        }
+                                    }}
                                     slotProps={{
                                         textField: {
                                             fullWidth: true,
                                             size: 'small',
-                                            error: !!form.formState.errors.horario_hasta,
-                                            helperText: form.formState.errors.horario_hasta?.message,
+                                            error: !!form.formState.errors.horario_desde,
+                                            helperText: form.formState.errors.horario_desde?.message,
                                         },
                                     }}
                                 />

@@ -41,7 +41,7 @@ class UsuarioView(viewsets.ModelViewSet):
         if check_password(password, request.user.password):
             return Response({'valid': True})
         else:
-            return Response({'valid': False}, status=400)
+            return Response({'valid': False})
     
     @action(detail=False, methods=['post'], permission_classes=[permissions.IsAuthenticated])
     def logout(self, request, **kwargs):
@@ -82,7 +82,6 @@ class CookieTokenObtainPairView(TokenObtainPairView):
             max_age=7 * 24 * 60 * 60,  # 7 días
         )
 
-        # También puedes limpiar los tokens del body si quieres
         response.data = {"message": "Login exitoso"}
         return response
 
