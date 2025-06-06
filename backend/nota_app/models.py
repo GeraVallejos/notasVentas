@@ -20,7 +20,7 @@ class Usuarios(AbstractUser):
 class Notas(models.Model):
     id_nota = models.AutoField(primary_key=True)
     num_nota = models.IntegerField(null=False)
-    nombre_cliente = models.CharField(max_length=300)
+    razon_social = models.CharField(max_length=300)
     rut_cliente = models.CharField(max_length=30, blank=True, null=True) 
     fecha_creacion = models.DateTimeField(auto_now_add=True)
     fecha_modificacion = models.DateTimeField(auto_now=True)
@@ -29,9 +29,12 @@ class Notas(models.Model):
     correo = models.CharField(max_length=50, blank=True, null=True)
     direccion = models.CharField(max_length=200, blank=False, null=False)
     comuna = models.CharField(max_length=50, blank=False, null=False)
+    ciudad = models.CharField(max_length=50, blank=True, null=True)
+    region = models.CharField(max_length=50, blank=True, null=True)
     telefono = models.CharField(max_length=20, blank=False, null=False)
     estado_solicitud = models.CharField(max_length=30, default='No Solicitado')
     observacion = models.CharField(max_length=1000, blank=True, null=True)
+    despacho_retira = models.CharField(max_length=50, blank=True, null=True)
     horario_desde = models.CharField(max_length=50, blank=True, null=True)
     horario_hasta = models.CharField(max_length=50, blank=True, null=True)
     id_usuario = models.ForeignKey('Usuarios', models.DO_NOTHING, db_column='id_usuario', related_name='notas_creadas')
@@ -40,3 +43,22 @@ class Notas(models.Model):
     class Meta:
         managed = True
         db_table = 'notas'
+
+class Clientes(models.Model):
+    id_cliente = models.AutoField(primary_key=True)
+    razon_social = models.CharField(max_length=300)
+    rut_cliente = models.CharField(max_length=30, blank=True, null=True, unique=True) 
+    fecha_creacion = models.DateTimeField(auto_now_add=True)
+    fecha_modificacion = models.DateTimeField(auto_now=True)
+    contacto = models.CharField(max_length=200, blank=True, null=True)
+    correo = models.CharField(max_length=50, blank=True, null=True)
+    direccion = models.CharField(max_length=200, blank=False, null=False)
+    comuna = models.CharField(max_length=50, blank=False, null=False)
+    telefono = models.CharField(max_length=20, blank=True, null=True)
+    giro = models.CharField(max_length=1000, blank=True, null=True)
+    id_usuario = models.ForeignKey('Usuarios', models.DO_NOTHING, db_column='id_usuario', related_name='clientes_creados')
+    id_usuario_modificacion = models.ForeignKey('Usuarios', models.DO_NOTHING, db_column='id_usuario_modificacion', related_name='clientes_modificados', null=True, blank=True)
+    
+    class Meta:
+        managed = True
+        db_table = 'clientes'

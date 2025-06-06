@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Usuarios, Notas
+from .models import Usuarios, Notas, Clientes
 from .forms import UsuarioAdminForm
 
 class UsuarioAdmin(admin.ModelAdmin):
@@ -17,3 +17,4 @@ class UsuarioAdmin(admin.ModelAdmin):
 
 admin.site.register(Usuarios, UsuarioAdmin)
 admin.site.register(Notas)
+admin.site.register(Clientes)

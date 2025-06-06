@@ -1,15 +1,11 @@
+import Dashboard from "../components/common/Dashboard"
 
 
 const HomePage = () => {
 
-
-
-
-
-
   return (
     <>
-  Home Page
+      <Dashboard />
     </>
   )
 }

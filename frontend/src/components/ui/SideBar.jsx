@@ -23,6 +23,10 @@ const SidebarContent = ({ onClick }) => (
       <ListItemIcon><NoteIcon /></ListItemIcon>
       <ListItemText primary="Nueva Nota" />
     </ListItemButton>
+    <ListItemButton component={NavLink} to="/lista-historico" onClick={onClick}>
+      <ListItemIcon><NoteIcon /></ListItemIcon>
+      <ListItemText primary="Histórico" />
+    </ListItemButton>
   </List>
 );
 

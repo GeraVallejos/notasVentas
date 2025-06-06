@@ -30,7 +30,6 @@ export const LoginForm = () => {
       }
 
       await api.post('/token/', data);
-      enqueueSnackbar('Inicio de sesión exitoso', { variant: 'success' });
       window.location.replace('/');
     } catch (error) {
       const msg = error.response?.data?.detail || 'Error al iniciar sesión';
@@ -56,7 +55,7 @@ export const LoginForm = () => {
         mt: 0,
         px: 4,
         py: 5,
-        bgcolor: '#f0faff', // fondo azul muy suave
+        bgcolor: '#f0faff',
         borderRadius: 3,
         boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
         textAlign: 'center',
@@ -65,7 +64,7 @@ export const LoginForm = () => {
       <Typography
         variant="h4"
         sx={{
-          background: 'linear-gradient(to right, #00BFFF, #1E90FF)', // celeste-azul
+          background: 'linear-gradient(to right, #00BFFF, #1E90FF)',
           WebkitBackgroundClip: 'text',
           WebkitTextFillColor: 'transparent',
           my: 1,
@@ -79,14 +78,14 @@ export const LoginForm = () => {
       </Typography>
 
       <FormProvider {...form}>
-        <form onSubmit={form.onSubmit} noValidate>
+        <form onSubmit={form.onSubmit} noValidate autoComplete="off">
           <Stack spacing={2}>
             <TextField
               placeholder="Username"
               type="text"
               spellCheck={false}
               autoCorrect="off"
-              autoComplete="off"
+              autoComplete="username"
               {...form.register('username')}
               error={!!form.formState.errors.username}
               helperText={form.formState.errors.username?.message}
@@ -102,6 +101,7 @@ export const LoginForm = () => {
             />
 
             <TextField
+              name='login-password'
               placeholder="Password"
               type={showPassword ? 'text' : 'password'}
               {...form.register('password')}
@@ -109,7 +109,8 @@ export const LoginForm = () => {
               helperText={form.formState.errors.password?.message}
               fullWidth
               variant="outlined"
-              autoComplete="current-password"
+              autoComplete="new-password"
+              autoCorrect="off"
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">

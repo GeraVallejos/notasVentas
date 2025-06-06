@@ -8,6 +8,8 @@ import './index.css';
 import { getRoutes } from './routes/Routes';
 import store from './store';
 import AppTheme from './theme/AppTheme';
+import { LocalizationProvider } from '@mui/x-date-pickers';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 
 const router = getRoutes();
 
@@ -19,9 +21,11 @@ createRoot(document.getElementById('root')).render(
         autoHideDuration={3000}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
       >
+        <LocalizationProvider dateAdapter={AdapterDayjs}>
         <AppTheme>
           <RouterProvider router={router} />
         </AppTheme>
+        </LocalizationProvider>
       </SnackbarProvider>
     </Provider>
   </StrictMode>

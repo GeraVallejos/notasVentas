@@ -1,16 +1,23 @@
 from rest_framework import viewsets
-from .serializer import UsuariosSerializer, NotasSerializer
-from .models import Usuarios, Notas
+from .serializer import UsuariosSerializer, NotasSerializer, ClientesSerializer
+from .models import Usuarios, Notas, Clientes
 from rest_framework import permissions
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from django.contrib.auth.hashers import check_password
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
-from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.permissions import AllowAny
-from django.conf import settings
-from datetime import timedelta
 from rest_framework import status
+from django.db.models import Count, Q
+from datetime import datetime
+from django.db.models.functions import TruncDate
+import logging
+from datetime import datetime
+from django.utils.timezone import make_aware
+from django.db.models import DateField
+from django.db.models.functions import Cast, Trunc
+
+logger = logging.getLogger(__name__)
 
 
 # Create your views here.
@@ -26,10 +33,15 @@ class UsuarioView(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['get'], permission_classes=[permissions.IsAuthenticated])
     def actual(self, request, **kwargs):
-        # Devuelve el usuario autenticado
         user = self.request.user  # Usuario autenticado
         serializer = self.get_serializer(user)
-        return Response(serializer.data)
+    
+        # Obtener nombres de grupos del usuario
+        grupos = list(user.groups.values_list('name', flat=True))
+    
+        data = serializer.data
+        data['groups'] = grupos  # agregar grupos a la respuesta
+        return Response(data)
     
     @action(detail=False, methods=['post'], permission_classes=[permissions.IsAuthenticated])
     def verify_password(self, request, **kwargs):
@@ -54,6 +66,40 @@ class NotasView(viewsets.ModelViewSet):
     serializer_class = NotasSerializer
     queryset = Notas.objects.all()
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+
+    @action(detail=False, methods=['get'], url_path='validar-numero')
+    def validar_numero(self, request):
+        num_nota = request.query_params.get('num_nota')
+        if not num_nota:
+            return Response({'error': 'El número de nota es requerido'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        existe = Notas.objects.filter(num_nota=num_nota).exists()
+        return Response({'existe': existe})
+
+
+class ClientesView(viewsets.ModelViewSet):
+    serializer_class = ClientesSerializer
+    queryset = Clientes.objects.all()
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+
+    @action(detail=False, methods=['get'], url_path='por-rut')
+    def obtener_por_rut(self, request):
+        rut = request.query_params.get('rut')
+        if not rut:
+            return Response({'error': 'RUT es requerido'}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            cliente = Clientes.objects.get(rut_cliente=rut)
+            data = {
+                'direccion': cliente.direccion,
+                'comuna': cliente.comuna,
+                'telefono': cliente.telefono,
+                'correo': cliente.correo,
+                'contacto': cliente.contacto,
+                'razon_social': cliente.razon_social,
+            }
+            return Response(data)
+        except Clientes.DoesNotExist:
+            return Response({'error': 'Cliente no encontrado'}, status=status.HTTP_404_NOT_FOUND)
 
 
 class CookieTokenObtainPairView(TokenObtainPairView):
@@ -84,6 +130,7 @@ class CookieTokenObtainPairView(TokenObtainPairView):
 
         response.data = {"message": "Login exitoso"}
         return response
+    
 
 class CookieTokenRefreshView(TokenRefreshView):
     def post(self, request, *args, **kwargs):
@@ -94,19 +141,112 @@ class CookieTokenRefreshView(TokenRefreshView):
         request.data["refresh"] = refresh_token
         response = super().post(request, *args, **kwargs)
 
-        access = response.data.get("access")
-        if not access:
-            return Response({"error": "No se pudo refrescar el token"}, status=401)
+        # Si hubo error al refrescar el token
+        if response.status_code != 200:
+            return response
 
-        # Set cookie
+        access = response.data.get("access")
+
+        # Setear nuevamente el access_token en la cookie
         response.set_cookie(
-            key=settings.SIMPLE_JWT['AUTH_COOKIE'],
+            key="access_token",
             value=access,
             httponly=True,
-            secure=settings.SIMPLE_JWT['AUTH_COOKIE_SECURE'],
-            samesite=settings.SIMPLE_JWT['AUTH_COOKIE_SAMESITE'],
-            max_age=settings.SIMPLE_JWT['ACCESS_TOKEN_LIFETIME'].total_seconds(),
-            path=settings.SIMPLE_JWT['AUTH_COOKIE_PATH'],
+            secure=True,
+            samesite='Lax',
+            max_age=60 * 60,  # 1 hora
         )
 
+        response.data = {"message": "Token refrescado exitosamente"}
         return response
+
+
+class DashboardViewSet(viewsets.ViewSet):
+    permission_classes = [permissions.IsAuthenticated]
+    
+    @action(detail=False, methods=['get'])
+    def resumen(self, request):
+        try:
+            # Obtener y validar parámetros de fecha
+            fecha_inicio_str = request.query_params.get('fecha_inicio')
+            fecha_fin_str = request.query_params.get('fecha_fin')
+            
+            if not fecha_inicio_str or not fecha_fin_str:
+                return Response(
+                    {'error': 'Se requieren ambos parámetros: fecha_inicio y fecha_fin'},
+                    status=400
+                )
+            
+            # Convertir a datetime para incluir toda la jornada
+            fecha_inicio = make_aware(datetime.strptime(fecha_inicio_str + ' 00:00:00', '%Y-%m-%d %H:%M:%S'))
+            fecha_fin = make_aware(datetime.strptime(fecha_fin_str + ' 23:59:59', '%Y-%m-%d %H:%M:%S'))
+
+            if fecha_fin < fecha_inicio:
+                return Response(
+                    {'error': 'La fecha de fin no puede ser anterior a la fecha de inicio'},
+                    status=400
+                )
+            
+            # Filtro base para notas usando datetime
+            notas_filtro = Q(fecha_despacho__gte=fecha_inicio) & Q(fecha_despacho__lte=fecha_fin)
+            
+            # Estadísticas de notas
+            total_notas = Notas.objects.filter(notas_filtro).count()
+            
+            # Notas por estado_solicitud
+            notas_por_despacho = Notas.objects.filter(notas_filtro).values(
+                'despacho_retira'
+            ).annotate(
+                total=Count('id_nota')
+            ).order_by('-total')
+            
+            # Notas por día usando TruncDate para agrupar correctamente
+            notas_por_dia = Notas.objects.filter(
+                notas_filtro & Q(fecha_despacho__isnull=False)
+            ).annotate(
+                dia=Cast('fecha_despacho', DateField())
+            ).values('dia').annotate(
+                total=Count('id_nota')
+            ).order_by('dia')
+            
+            
+            # Notas por comuna
+            notas_por_comuna = Notas.objects.filter(notas_filtro).exclude(
+                comuna__isnull=True
+            ).values(
+                'comuna'
+            ).annotate(
+                total=Count('id_nota')
+            ).order_by('-total')
+
+            
+            # Preparar respuesta con manejo de valores None
+            response_data = {
+                'notas': {
+                    'total': total_notas,
+                    'por_estado': list(notas_por_despacho),
+                    'por_dia': [{
+                        'day': item['dia'].strftime('%Y-%m-%d') if item['dia'] else 'Fecha no disponible',
+                        'total': item['total']
+                    } for item in notas_por_dia],
+                },
+                'comunas': {
+                    'resumen': list(notas_por_comuna),
+}
+            }
+            
+            logger.debug(f"Datos del dashboard: {response_data}")
+            return Response(response_data)
+            
+        except ValueError as e:
+            logger.error(f"Error en formato de fecha: {str(e)}")
+            return Response(
+                {'error': 'Formato de fecha inválido. Use YYYY-MM-DD'},
+                status=400
+            )
+        except Exception as e:
+            logger.error(f"Error en dashboard/resumen: {str(e)}", exc_info=True)
+            return Response(
+                {'error': f'Error interno del servidor: {str(e)}'},
+                status=500
+            )

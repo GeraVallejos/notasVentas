@@ -1,10 +1,12 @@
 from django.urls import path, include
 from rest_framework import routers
-from .views import UsuarioView, NotasView
+from .views import UsuarioView, NotasView, ClientesView, DashboardViewSet
 
 router = routers.DefaultRouter()
 router.register(r'usuario', UsuarioView, 'usuario')
 router.register(r'nota', NotasView, 'nota')
+router.register(r'cliente', ClientesView, 'cliente')
+router.register(r'dashboard', DashboardViewSet, 'dashboard')
 
 # URLs para acciones personalizadas
 usuario_extra_routes = [

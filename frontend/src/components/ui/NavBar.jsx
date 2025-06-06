@@ -1,4 +1,4 @@
-import { AppBar, Toolbar, Typography, IconButton, Box } from '@mui/material';
+import { AppBar, Toolbar, Typography, IconButton, Box, Link } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
 import CloseIcon from '@mui/icons-material/Close';
 import { useTheme, useMediaQuery } from '@mui/material';
@@ -21,7 +21,7 @@ const Navbar = ({ mobileOpen, onMenuClick }) => {
         borderRadius: 0,
       }}
     >
-      <Toolbar  sx={{ display: 'flex', alignItems: 'center' }}>
+      <Toolbar sx={{ display: 'flex', alignItems: 'center' }}>
         {isMobile && (
           <IconButton
             edge="start"
@@ -33,9 +33,10 @@ const Navbar = ({ mobileOpen, onMenuClick }) => {
             {mobileOpen ? <CloseIcon /> : <MenuIcon />}
           </IconButton>
         )}
-        <Typography variant="h6" noWrap sx={{ color: 'white' }}>
+
+        <Link href='/' underline='none' variant="h6" noWrap sx={{ color: 'white' }}>
           Sistema de Pedidos
-        </Typography>
+        </Link>
         <Box sx={{ flexGrow: 1 }} />
         <ActionButton
           action={() => dispatch(logout()).unwrap()}

@@ -24,7 +24,6 @@ api.interceptors.response.use(
     ) {
       originalRequest._retry = true;
       try {
-        // Usar `api` para refresh
         await api.post('/token/refresh/');
         return api(originalRequest); // Reintenta la petición original
       } catch (refreshError) {
