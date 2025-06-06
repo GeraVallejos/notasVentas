@@ -151,6 +151,7 @@ const MapaDespachos = ({ dataDespachos, geoData }) => {
                 center={[-33.45, -70.66]} 
                 zoom={10} 
                 style={{ height: '100%', width: '100%' }}
+                scrollWheelZoom={false}
             >
                 <TileLayer
                     url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"

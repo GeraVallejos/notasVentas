@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import {
     Grid,
     Paper,
@@ -42,63 +42,55 @@ const Dashboard = () => {
         color: colores[index % 2],
     })) ?? [];
 
+    const fetchData = useCallback(async () => {
+    setLoading(true);
+    try {
+        const response = await api.get('/dashboard/resumen/', {
+            params: {
+                fecha_inicio: fechaInicio.format('YYYY-MM-DD'),
+                fecha_fin: fechaFin.format('YYYY-MM-DD')
+            }
+        });
 
+        setData(response.data);
+        setDataDespachos(
+            (response.data.comunas?.resumen || []).map(item => ({
+                comuna: normalizarNombre(item.comuna),
+                total: item.total
+            }))
+        );
 
-
-
-
-    const fetchData = async () => {
-        setLoading(true);
-        try {
-            const response = await api.get('/dashboard/resumen/', {
-                params: {
-                    fecha_inicio: fechaInicio.format('YYYY-MM-DD'),
-                    fecha_fin: fechaFin.format('YYYY-MM-DD')
+        const datosNotas = [];
+        if (response.data?.notas?.por_dia) {
+            response.data.notas.por_dia.forEach((item) => {
+                if (item?.day && typeof item.total === 'number') {
+                    datosNotas.push({
+                        fecha: dayjs(item.day, 'YYYY-MM-DD').format('DD/MM'),
+                        fechaRaw: item.day,
+                        total: item.total
+                    });
                 }
             });
-            setData(response.data);
-
-            setDataDespachos(
-                (response.data.comunas?.resumen || []).map(item => ({
-                    comuna: normalizarNombre(item.comuna),
-                    total: item.total
-                }))
-
-            );
-
-            setError(null);
-            const datosNotas = [];
-            if (response.data?.notas?.por_dia) {
-                response.data.notas.por_dia.forEach((item) => {
-
-                    if (item?.day && typeof item.total === 'number') {
-                        datosNotas.push({
-                            fecha: dayjs(item.day, 'YYY-MM-DD').format('DD/MM'),
-                            fechaRaw: item.day,
-                            total: item.total
-                        });
-                    }
-                });
-            }
-            setNotasPorDiaSemana(datosNotas);
-
-        } catch (err) {
-            let errorMessage = 'Error al cargar datos';
-            if (err.response?.data?.error) {
-                errorMessage = err.response.data.error;
-            } else if (err.response) {
-                errorMessage = `Error ${err.response.status}`;
-            }
-            setError(errorMessage);
-            console.error('Error detalles:', err);
-        } finally {
-            setLoading(false);
         }
-    };
+        setNotasPorDiaSemana(datosNotas);
+        setError(null);
+    } catch (err) {
+        let errorMessage = 'Error al cargar datos';
+        if (err.response?.data?.error) {
+            errorMessage = err.response.data.error;
+        } else if (err.response) {
+            errorMessage = `Error ${err.response.status}`;
+        }
+        setError(errorMessage);
+        console.error('Error detalles:', err);
+    } finally {
+        setLoading(false);
+    }
+}, [fechaInicio, fechaFin]);
 
     useEffect(() => {
         fetchData();
-    }, []);
+    }, [fetchData]);
 
 
     const handleFilterSubmit = (e) => {
