@@ -32,8 +32,8 @@ const schema = yup.object().shape({
   direccion: yup.string().required('Dirección requerida'),
   comuna: yup.string().required('Comuna requerida'),
   observacion: yup.string(),
-  horario_desde: yup.string(),
-  horario_hasta: yup.string(),
+  horario_desde: yup.string().nullable(),
+  horario_hasta: yup.string().nullable(),
   estado_solicitud: yup.string().oneOf(["Solicitado", "No Solicitado"]).required("El estado es obligatorio"),
   notas_usuario: yup.string(),
   password: yup.string().required('Contraseña requerida'),
@@ -67,7 +67,10 @@ const EditNotaModal = ({ open, onClose, nota, onSave }) => {
     try {
       const res = await api.post('/usuario/verify_password/', { password: data.password });
       if (res.data.valid) {
-        const payload = { ...data, telefono: `+56${data.telefono}` };
+        const payload = {
+          ...data, telefono: `+56${data.telefono}`, horario_desde: data.horario_desde || null,
+          horario_hasta: data.horario_hasta || null
+        };
         delete payload.password;
 
         await api.put(`/nota/${nota.id_nota}/`, payload);
@@ -120,18 +123,18 @@ const EditNotaModal = ({ open, onClose, nota, onSave }) => {
               />
               <TextField label="Dirección" {...register('direccion')} error={!!errors.direccion} helperText={errors.direccion?.message} fullWidth />
               <Controller
-                                                  name="comuna"
-                                                  control={control}
-                                                  render={({ field, fieldState }) => (
-                                                      <ComunaAutocomplete
-              
-                                                          value={field.value}
-                                                          onChange={field.onChange}
-                                                          error={!!fieldState.error}
-                                                          helperText={fieldState.error?.message}
-                                                      />
-                                                  )}
-                                              />
+                name="comuna"
+                control={control}
+                render={({ field, fieldState }) => (
+                  <ComunaAutocomplete
+
+                    value={field.value}
+                    onChange={field.onChange}
+                    error={!!fieldState.error}
+                    helperText={fieldState.error?.message}
+                  />
+                )}
+              />
               <TextField label="Observación" {...register('observacion')} fullWidth />
               <Controller
                 name="horario_desde"
@@ -208,6 +211,7 @@ const EditNotaModal = ({ open, onClose, nota, onSave }) => {
 
               <TextField
                 label="Contraseña"
+                autoComplete='current-password'
                 type="password"
                 {...register('password')}
                 error={!!errors.password}

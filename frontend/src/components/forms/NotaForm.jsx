@@ -95,6 +95,7 @@ export const NotaForm = () => {
             enqueueSnackbar(msg, { variant: 'error' });
         }
     };
+
     // Manejar cambio en el RUT para formatear
     const handleChangeRut = (e) => {
         const rawValue = e.target.value;
@@ -102,11 +103,10 @@ export const NotaForm = () => {
         form.setValue('rut_cliente', formattedValue, { shouldValidate: true });
     };
 
-    // 🔍 Buscar cliente por RUT al hacer blur (modificado)
+    // Buscar cliente por RUT al hacer blur
     const handleBlurRut = async (e) => {
         const rutFormateado = e.target.value;
-
-        
+ 
         if (!rutFormateado) return;
 
         try {

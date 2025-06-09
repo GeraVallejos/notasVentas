@@ -1,4 +1,5 @@
-import Dashboard from "../components/common/Dashboard"
+import Dashboard from "../components/dashboard/Dashboard"
+
 
 
 const HomePage = () => {

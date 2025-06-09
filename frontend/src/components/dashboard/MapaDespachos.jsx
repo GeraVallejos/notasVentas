@@ -11,6 +11,7 @@ const MapaDespachos = ({ dataDespachos, geoData }) => {
         nombresComunas[nombreNormalizado] = nombreOriginal;
     });
 
+
     // 2. Enriquecer dataDespachos con nombres originales
     const dataEnriquecida = dataDespachos.map(item => ({
         ...item,
@@ -75,19 +76,19 @@ const MapaDespachos = ({ dataDespachos, geoData }) => {
                 boxShadow: 3,
                 borderRadius: 1
             }}>
-                <Typography variant="subtitle1" sx={{ 
-                    fontWeight: 'bold', 
+                <Typography variant="subtitle1" sx={{
+                    fontWeight: 'bold',
                     mb: 1,
                     borderBottom: '1px solid #ddd',
                     pb: 1
                 }}>
                     Top 5 Comunas
                 </Typography>
-                
+
                 {topComunas.map((comuna, index) => (
-                    <Box key={index} sx={{ 
-                        display: 'flex', 
-                        alignItems: 'center', 
+                    <Box key={index} sx={{
+                        display: 'flex',
+                        alignItems: 'center',
                         mb: 1,
                         p: 0.5,
                         '&:hover': { backgroundColor: '#f5f5f5' }
@@ -105,18 +106,18 @@ const MapaDespachos = ({ dataDespachos, geoData }) => {
                         </Typography>
                     </Box>
                 ))}
-                
+
                 {/* Leyenda de colores */}
-                <Typography variant="subtitle1" sx={{ 
-                    fontWeight: 'bold', 
-                    mt: 2, 
+                <Typography variant="subtitle1" sx={{
+                    fontWeight: 'bold',
+                    mt: 2,
                     mb: 1,
                     borderTop: '1px solid #ddd',
                     pt: 1
                 }}>
                     Rangos de despachos
                 </Typography>
-                
+
                 {[
                     { label: '> 100', value: 101 },
                     { label: '51-100', value: 51 },
@@ -126,10 +127,10 @@ const MapaDespachos = ({ dataDespachos, geoData }) => {
                     { label: '1-5', value: 1 },
                     { label: '0', value: 0 }
                 ].map((item, index) => (
-                    <Box key={index} sx={{ 
-                        display: 'flex', 
-                        alignItems: 'center', 
-                        mb: 0.5 
+                    <Box key={index} sx={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        mb: 0.5
                     }}>
                         <Box sx={{
                             width: 12,
@@ -147,9 +148,9 @@ const MapaDespachos = ({ dataDespachos, geoData }) => {
             </Paper>
 
             {/* Mapa */}
-            <MapContainer 
-                center={[-33.45, -70.66]} 
-                zoom={10} 
+            <MapContainer
+                center={[-33.45, -70.66]}
+                zoom={10}
                 style={{ height: '100%', width: '100%' }}
                 scrollWheelZoom={false}
             >
@@ -158,6 +159,7 @@ const MapaDespachos = ({ dataDespachos, geoData }) => {
                     attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                 />
                 <GeoJSON
+                    key={JSON.stringify(dataDespachos)}
                     data={geoData}
                     style={style}
                     onEachFeature={onEachFeature}
