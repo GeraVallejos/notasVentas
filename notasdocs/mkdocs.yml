@@ -1,1 +1,34 @@
-site_name: Notas de ventas
+site_name: Notas de Ventas
+nav:
+    - Introducción: index.md
+    - Guía de Instalación: 
+        - Django: instalacion/instalacion_Django.md
+        - React: instalacion/instalacion_React.md
+    - Estructura Backend: 
+        - Proyecto Django (nota_ventas): 
+            - __pycache__.py: proyecto/backend/nota_ventas/pycache.md
+            - __init__.py: proyecto/backend/nota_ventas/init.md
+            - asgi.py: proyecto/backend/nota_ventas/asgi.md
+            - settings.py: proyecto/backend/nota_ventas/settings.md
+            - urls.py: proyecto/backend/nota_ventas/urls.md
+            - wsgi.py: proyecto/backend/nota_ventas/wsgi.md
+        - Aplicación (nota_app):
+            - migrations: compras/pedidosAPPmd/initial.md
+            - __init__.py: compras/pedidosAPPmd/initApp.md
+            - admin.py: compras/pedidosAPPmd/admin.md
+            - apps.py: compras/pedidosAPPmd/apps.md
+            - models.py: compras/pedidosAPPmd/models.md
+            - serializer.py : compras/pedidosAPPmd/serializer.md
+            - urls.py: compras/pedidosAPPmd/urlsApp.md
+            - views.py: compras/pedidosAPPmd/views.md
+    - Estructura Frontend:
+        - Auth:
+            - authSlice.js: compras/frontend/auth/authSlice.md
+    
+theme: material
+markdown_extensions:
+  - codehilite
+  - pymdownx.superfences
+  - pymdownx.highlight
+  - pymdownx.tabbed
+  - pymdownx.inlinehilite
