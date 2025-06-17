@@ -1,10 +1,10 @@
 # <font color=#ff5733>Guía de Instalación de Django</font>
 
-Este documento te guiará a través del proceso de instalación de un proyecto Django en tu máquina local. Asegúrate de seguir cada paso para configurar correctamente el entorno.
+Este documento es una guía para el proceso de instalación de un proyecto Django en la máquina local. es necesario seguir cada paso para configurar correctamente el entorno.
 
 ## Requisitos previos
 
-Antes de comenzar, asegúrate de tener los siguientes requisitos instalados en el sistema:
+Antes de comenzar, hay que tener los siguientes requisitos instalados en el sistema:
 
 - **Python 3.8+**
 - **Pip** 
@@ -12,15 +12,15 @@ Antes de comenzar, asegúrate de tener los siguientes requisitos instalados en e
 
 ## 1. Crear un entorno virtual
 
-Es recomendable utilizar un entorno virtual para evitar conflictos con otras librerías de Python que puedas tener instaladas globalmente. Para crear un entorno virtual, sigue estos pasos:
+Es recomendable utilizar un entorno virtual para evitar conflictos con otras librerías de Python que se pueda tener instaladas globalmente. Para crear un entorno virtual, estos son los pasos:
 
-### Navega a tu directorio de trabajo
+### Navegar al directorio de trabajo
 <font color="blue">cd /ruta/a/tu/proyecto</font>
 
-### Crea un entorno virtual 
+### Crear un entorno virtual 
 <font color="blue">python3 -m venv env</font>
 
-### Activa el entorno virtual
+### Activar el entorno virtual
 
 <font color="blue">venv\Scripts\activate</font>
 
@@ -28,12 +28,12 @@ Es recomendable utilizar un entorno virtual para evitar conflictos con otras lib
 
 - En la carpeta del proyecto crear el entorno virtual con virtualenv venv 
 - Para activar el entorno se hace en la carpeta Scripts y luego ./activate
-- Si esta correcto en la terminal se verá el nombre de la carpeta antes de la ruta
+- Si esta correcto, en la terminal se verá el nombre de la carpeta antes de la ruta
 
 
 ## 2. Instalar Django
 
-Una vez que tengas el entorno virtual activo, puedes instalar Django utilizando `pip`:
+Una vez que se tenga el entorno virtual activo, es posible instalar Django utilizando `pip`:
 
 <font color="blue">pip install django</font>
 
@@ -57,23 +57,20 @@ Una vez que tengas el entorno virtual activo, puedes instalar Django utilizando 
 
 <font color="blue">python manage.py runserver</font>
 
-Esto iniciará el servidor de desarrollo en http://127.0.0.1:8000/. Si ves la página predeterminada de Django, significa que la instalación fue exitosa.
+Esto iniciará el servidor de desarrollo en http://127.0.0.1:8000/. Si se visualiza la página predeterminada de Django, significa que la instalación fue exitosa.
 
 ## 5. Crear la Aplicación
 
 <font color="blue">python manage.py startapp nombre_de_app </font>
 
-Esto creará una nueva carpeta con la estructura básica de una aplicación Django. Ahora puedes empezar a desarrollar la funcionalidad de esa aplicación.
+Esto creará una nueva carpeta con la estructura básica de una aplicación Django. Ahora se puede empezar a desarrollar la funcionalidad de la aplicación.
 
 #### Tips
 - Es necesario conectar la aplicación con el proyecto de Django, en settings.py
 
-<pre>
-<code>
+```python
 INSTALLED_APPS = [
     'nombre.apps.NombreConfig',
 
 ]
-</code>
-</pre>
-
+```

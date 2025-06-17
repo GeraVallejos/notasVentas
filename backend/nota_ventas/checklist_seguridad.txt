@@ -1,0 +1,40 @@
+🔧 Checklist de Seguridad - Entorno de Desarrollo
+
+[✔] DEBUG = True (Solo en desarrollo)
+[✔] ALLOWED_HOSTS puede estar vacío o contener ["localhost", "127.0.0.1"]
+[✔] CORS_ALLOWED_ORIGINS puede incluir localhost:5173 (Vite) o similar
+[✔] CORS_ALLOW_CREDENTIALS = True
+[✔] CSRF_COOKIE_SECURE = False
+[✔] SESSION_COOKIE_SECURE = False
+[✔] AUTH_COOKIE_SECURE = False
+[✔] JWT con cookies HTTPOnly (opcional en desarrollo)
+[✔] Axes puede estar deshabilitado para facilitar desarrollo (AXES_ENABLED = False)
+[✔] No es necesario forzar HTTPS (SECURE_SSL_REDIRECT = False)
+[✔] Logs mínimos, no críticos
+
+🛡️ Checklist de Seguridad - Entorno de Producción
+
+[ ] DEBUG = False
+[ ] ALLOWED_HOSTS correctamente definidos (dominios válidos)
+[ ] SECRET_KEY segura y no expuesta
+[ ] CORS_ALLOWED_ORIGINS contiene solo URLs de frontend válidas
+[ ] CORS_ALLOW_CREDENTIALS = True
+[ ] CSRF_COOKIE_SECURE = True
+[ ] SESSION_COOKIE_SECURE = True
+[ ] AUTH_COOKIE_SECURE = True
+[ ] CSRF_COOKIE_HTTPONLY = True (si no se lee desde JS)
+[ ] SESSION_COOKIE_HTTPONLY = True
+[ ] SECURE_SSL_REDIRECT = True
+[ ] SECURE_HSTS_SECONDS = 31536000
+[ ] SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+[ ] SECURE_HSTS_PRELOAD = True
+[ ] SECURE_CONTENT_TYPE_NOSNIFF = True
+[ ] SECURE_BROWSER_XSS_FILTER = True
+[ ] X_FRAME_OPTIONS = 'DENY'
+[ ] Axes activado y configurado (AXES_ENABLED = True)
+[ ] DRF con Throttle ajustado (anon: 50/h, user: 1000/h o menos)
+[ ] Logging de seguridad habilitado (archivo o servicio externo)
+[ ] Protecciones contra DoS activadas (DATA_UPLOAD_MAX_MEMORY_SIZE)
+[ ] Deshabilitar métodos HTTP innecesarios
+[ ] Validación segura de archivos (si se permite upload)
+[ ] Admin protegido o deshabilitado en producción

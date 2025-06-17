@@ -10,12 +10,10 @@ from rest_framework.permissions import AllowAny
 from rest_framework import status
 from django.db.models import Count, Q
 from datetime import datetime
-from django.db.models.functions import TruncDate
 import logging
-from datetime import datetime
 from django.utils.timezone import make_aware
 from django.db.models import DateField
-from django.db.models.functions import Cast, Trunc
+from django.db.models.functions import Cast
 
 logger = logging.getLogger(__name__)
 
@@ -60,6 +58,7 @@ class UsuarioView(viewsets.ModelViewSet):
         response = Response({"message": "Logout exitoso"}, status=status.HTTP_200_OK)
         response.delete_cookie('access_token')
         response.delete_cookie('refresh_token')
+        response.delete_cookie('csrftoken')
         return response
         
 class NotasView(viewsets.ModelViewSet):

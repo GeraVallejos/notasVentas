@@ -3,12 +3,11 @@
 Este archivo se ubica en el directorio principal del proyecto Django. Su propósito es inicializar configuraciones necesarias para el correcto funcionamiento del entorno de Django, en este caso, establecer el uso de `pymysql` como reemplazo del conector `MySQLdb`.
 
 ## Contenido del Archivo
-<pre>
-<code>
+```python
 import pymysql
+
 pymysql.install_as_MySQLdb()
-</code>
-</pre>
+```
 
 ### Explicación
 import pymysql: Importa la biblioteca pymysql, un cliente MySQL escrito en Python puro que se puede usar como reemplazo del tradicional MySQLdb.
@@ -21,12 +20,9 @@ Django tiene compatibilidad nativa con MySQLdb, pero esta biblioteca no siempre 
 ### Requisitos
 Tener pymysql instalado en el entorno:
 
-<pre>
-<code>
+```python
 pip install pymysql
-</code>
-</pre>
-
+```
 Y en settings.py de Django, se puede seguir usando 'ENGINE': 'django.db.backends.mysql' sin cambiar nada más, gracias a esta línea en __init__.py.
 
 

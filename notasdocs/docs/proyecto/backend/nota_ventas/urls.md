@@ -4,8 +4,7 @@ Este archivo define la configuración principal de rutas (`URLs`) del proyecto D
 
 ## Contenido del archivo
 
-<pre>
-<code>
+```python
 from django.contrib import admin
 from django.urls import path, include
 
@@ -18,8 +17,7 @@ urlpatterns = [
     # Version de API
     path('api/v1/', include('nota_app.urls')),
 ]
-</code>
-</pre>
+```
 
 ### Explicación
 

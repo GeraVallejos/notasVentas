@@ -75,7 +75,7 @@ Si la ruta original era ./config/settings.py, .resolve() la convertirá en algo 
 3.- .parent
 
 - Devuelve el directorio padre de la ruta actual (equivalente a os.path.dirname()).
-- Cada vez que llamas a .parent, subes un nivel en la estructura de directorios.
+- Cada vez que llama a .parent, sube un nivel en la estructura de directorios.
 
 Primer .parent:
 Si la ruta era /home/usuario/mi_proyecto/config/settings.py,
@@ -88,7 +88,7 @@ Si aplicamos .parent nuevamente, subimos otro nivel:
 
 4.- Resultado final (BASE_DIR)
 
-- Después de dos .parent, obtenemos la ruta base del proyecto Django (donde está manage.py).
+- Después de dos .parent, se obtiene la ruta base del proyecto Django (donde está manage.py).
 - Esto es útil porque muchas configuraciones (como STATICFILES_DIRS, MEDIA_ROOT, etc.) usan BASE_DIR para construir rutas relativas.
 
 #### Beneficios
@@ -101,7 +101,7 @@ Si aplicamos .parent nuevamente, subimos otro nivel:
 
 La clave secreta utilizada en la producción para la seguridad de las sesiones y el manejo de cookies. Nunca se debe compartir esta clave.
 
-El SECRET_KEY es una cadena aleatoria crítica que Django utiliza para proporcionar seguridad criptográfica al proyecto. Es generada automáticamente cuando creas un nuevo proyecto Django con startproject.
+El SECRET_KEY es una cadena aleatoria crítica que Django utiliza para proporcionar seguridad criptográfica al proyecto. Es generada automáticamente cuando se crea un nuevo proyecto Django con startproject.
 
 Funciones principales:
 
@@ -112,7 +112,7 @@ Funciones principales:
 - Algunos backends de almacenamiento: Como signed_cookies
 
 ¿Cómo se utiliza?
-Django usa internamente el SECRET_KEY en múltiples componentes sin que necesariamente tengas que interactuar directamente con él.
+Django usa internamente el SECRET_KEY en múltiples componentes sin que necesariamente se tenga que interactuar directamente con él.
 
 #### Ejemplos:
 
@@ -131,8 +131,12 @@ messages.success(request, "Éxito!")  # El mensaje se firma
 - Rotación: Si se compromete, generar uno nuevo (pero afectará sesiones existentes)
 - Almacenamiento seguro: Usar variables de entorno en producción:  
 **settings.py (forma recomendada)**  
+
+```python
 import os  
-<font color='blue'>SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY')</font>
+
+SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY')
+```
 
 ### <font color=#ad39dc>DEBUG</font>
 
@@ -169,12 +173,12 @@ Cuando ocurre un error, Django muestra una página completa con:
 ##### ¿Qué ocurre cuando DEBUG=False?  
 - Los errores muestran mensajes genéricos (500, 404)
 - Se debe configurar ALLOWED_HOSTS
-- Django no sirve archivos estáticos (debes usar Whitenoise o servidor web)
+- Django no sirve archivos estáticos (se debe usar Whitenoise o servidor web)
 - Se activan optimizaciones de rendimiento
 
 ### <font color=#ad39dc>ALLOWED_HOSTS</font>
 
-Es una lista de strings que representa los nombres de host/dominios que tu sitio Django puede servir. Cuando DEBUG=False (en producción), Django solo responderá a requests que incluyan un header Host que coincida con uno de los valores en esta lista.
+Es una lista de strings que representa los nombres de host/dominios que el sitio Django puede servir. Cuando DEBUG=False (en producción), Django solo responderá a requests que incluyan un header Host que coincida con uno de los valores en esta lista.
 
 - Seguridad: Previene ataques de HTTP Host header poisoning.
 - Validación: Asegura que la aplicación solo responda a los dominios que se ha especificado.
@@ -188,7 +192,7 @@ Es una lista de strings que representa los nombres de host/dominios que tu sitio
 
 ### <font color=#ad39dc>INSTALLED_APPS</font>
 
-Es una lista/tupla que contiene los nombres de todas las aplicaciones Django que están activas en el proyecto. Incluye tanto aplicaciones integradas de Django como aplicaciones de terceros y las que desarrollan por el usuario.
+Es una lista/tupla que contiene los nombres de todas las aplicaciones Django que están activas en el proyecto. Incluye tanto aplicaciones integradas de Django como aplicaciones de terceros y las que se desarrollan por el usuario.
 
 1. Registra aplicaciones: Le dice a Django qué componentes de aplicación deben ser incluidos en el proyecto
 2. Habilita funcionalidades: Cada app registrada puede aportar:
@@ -214,7 +218,7 @@ Es una lista/tupla que contiene los nombres de todas las aplicaciones Django que
 
     - Apps de Django core primero
     - Apps de terceros después
-    - Tus apps locales al final
+    - Las apps locales al final
 
 2. Registrar las apps: Usar la configuración de la app (AppConfig) en lugar del nombre simple:  
 <font color='blue'>'miapp.apps.MiappConfig'</font>  
@@ -235,26 +239,24 @@ Cada middleware se ejecuta en el orden definido en settings.py y puede realizar 
 - Modificar o añadir datos al request/response (ej: user session, idioma, timezone)
 
 #### Estructura típica en settings.py
-<pre>
-<code>
+```python
 MIDDLEWARE = [
     
-<font color='blue'>'django.middleware.security.SecurityMiddleware'</font>: Seguridad básica (HTTPS, headers)
-<font color='blue'>'django.contrib.sessions.middleware.SessionMiddleware'</font>: Manejo de sesiones
-<font color='blue'>'django.middleware.common.CommonMiddleware'</font>: Procesamiento de URLs
-<font color='blue'>'django.middleware.csrf.CsrfViewMiddleware'</font>: Protección CSRF
-<font color='blue'>'django.contrib.auth.middleware.AuthenticationMiddleware'</font>: Autenticación de usuarios
-<font color='blue'>'django.contrib.messages.middleware.MessageMiddleware'</font>: Mensajes flash
-<font color='blue'>'django.middleware.clickjacking.XFrameOptionsMiddleware'</font>: Protección contra clickjacking
+    'django.middleware.security.SecurityMiddleware', # Seguridad básica (HTTPS, headers)
+    'django.contrib.sessions.middleware.SessionMiddleware', # Manejo de sesiones
+    'django.middleware.common.CommonMiddleware', # Procesamiento de URLs
+    'django.middleware.csrf.CsrfViewMiddleware', # Protección CSRF
+    'django.contrib.auth.middleware.AuthenticationMiddleware', # Autenticación de usuarios
+    'django.contrib.messages.middleware.MessageMiddleware', # Mensajes flash
+    'django.middleware.clickjacking.XFrameOptionsMiddleware', # Protección contra clickjacking
     
-Middleware de terceros (ej: CORS)  
-<font color='blue'>'corsheaders.middleware.CorsMiddleware'</font>
+    # Middleware de terceros (ej: CORS)  
+    'corsheaders.middleware.CorsMiddleware',
     
-Middleware personalizado (si lo tienes)  
-<font color='blue'>'miapp.middleware.CustomMiddleware'</font>  
+    #Middleware personalizado (si es que se crea alguno)  
+    'miapp.middleware.CustomMiddleware',
 ]
-</code>
-</pre>
+```
 
 #### Buenas prácticas
 - El orden importa: Algunos middleware dependen de otros (ej: SessionMiddleware debe ir antes que AuthenticationMiddleware)
@@ -275,34 +277,33 @@ Define cómo el sistema de plantillas (templates) debe cargar y procesar los arc
 - Configura ubicaciones de templates: Especifica dónde buscar archivos de plantillas (en apps, directorios globales, etc.)
 - Habilita funcionalidades adicionales: Como procesadores de contexto, autoescape (seguridad contra XSS), y opciones de depuración
 
-<pre>
-<code>
+```python
 TEMPLATES = [  
         {  
-        <font color='blue'>'BACKEND': 'django.template.backends.django.DjangoTemplates':</font> Motor de Django  
-        <font color='blue'>'DIRS': [os.path.join(BASE_DIR, 'templates')]</font> Directorios globales  
-        <font color='blue'>'APP_DIRS': True:</font> Busca templates dentro de cada app  
+        'BACKEND': 'django.template.backends.django.DjangoTemplates', # Motor de Django  
+        'DIRS': [os.path.join(BASE_DIR, 'templates')], # Directorios globales  
+        'APP_DIRS': True, # Busca templates dentro de cada app  
                 'OPTIONS': {  
-            <font color='blue'>'context_processors'</font>: [  
+            'context_processors': [  
                 # Procesadores de contexto (variables disponibles en todas las plantillas)  
-                <font color='blue'>'django.template.context_processors.debug',  
+                'django.template.context_processors.debug',  
                 'django.template.context_processors.request',  
                 'django.contrib.auth.context_processors.auth',  
-                'django.contrib.messages.context_processors.messages'</font>,  
+                'django.contrib.messages.context_processors.messages',  
             ],
         },
     },
 ]
-</code>
-</pre>
+```
+
 ### <font color=#ad39dc>WSGI_APPLICATION</font>
 
-Especifica qué aplicación WSGI (Web Server Gateway Interface) utilizará tu proyecto para servir la aplicación web. WSGI es el estándar de Python para comunicar servidores web con aplicaciones web.
+Especifica qué aplicación WSGI (Web Server Gateway Interface) utilizará el proyecto para servir la aplicación web. WSGI es el estándar de Python para comunicar servidores web con aplicaciones web.
 
-- Define la ruta hacia el objeto callable de WSGI que el servidor usará para iniciar tu aplicación Django.
-- Por defecto, Django crea un archivo wsgi.py en tu proyecto, que contiene este objeto callable (application).
+- Define la ruta hacia el objeto callable de WSGI que el servidor usará para iniciar la aplicación Django.
+- Por defecto, Django crea un archivo wsgi.py en el proyecto, que contiene este objeto callable (application).
 
-Valor por defecto: <font color='blue'>WSGI_APPLICATION = 'tu_proyecto.wsgi.application'</font>
+Valor por defecto: <font color='blue'>WSGI_APPLICATION = 'mi_proyecto.wsgi.application'</font>
 
 Si se desplega Django en un servidor de producción, se necesita WSGI para que el servidor web pueda ejecutar la aplicación correctamente. En desarrollo, Django usa su propio servidor (runserver), que no necesita WSGI.
 
@@ -314,8 +315,7 @@ Es un diccionario que contiene la configuración de conexión a la(s) base(s) de
 
 #### Ejemplo con MySQL
 
-<pre>
-<code>
+```python
 DATABASES = {  
     'default': {
         'ENGINE': 'django.db.backends.mysql',
@@ -326,15 +326,14 @@ DATABASES = {
         'PORT': '3306',
     }
 } 
-</code>
-</pre>
+```
 
 ##### Tips
 Hay que instalar los drivers necesarios para cada BD  
 
 ### <font color=#ad39dc>AUTH_USER_MODEL</font>
 
-Define el modelo de usuario personalizado que tu proyecto utilizará para manejar la autenticación, permisos y gestión de usuarios. Por defecto, Django usa su modelo User incorporado, pero puedes reemplazarlo con uno propio.
+Define el modelo de usuario personalizado que el proyecto utilizará para manejar la autenticación, permisos y gestión de usuarios. Por defecto, Django usa su modelo User incorporado, pero es posible reemplazarlo con uno propio.
 
 #### Reglas importantes
 
@@ -343,34 +342,27 @@ Define el modelo de usuario personalizado que tu proyecto utilizará para maneja
 - AbstractUser: Extiende el modelo por defecto (recomendado para personalizaciones simples).
 - AbstractBaseUser: Para control total (avanzado).
 
-##### 2.- Defínelo ANTES de la primera migración:
-Si ya has ejecutado migraciones, tendrás que borrar la base de datos y empezar de cero.
+##### 2.- Definirlo ANTES de la primera migración:
+Si ya se han ejecutado migraciones, se tendra que borrar la base de datos y empezar de cero.
 
 ##### 3.- Referencia en relaciones:
-En tus modelos, usa settings.AUTH_USER_MODEL (no User directamente):
+En los modelos, usar settings.AUTH_USER_MODEL (no User directamente):
 
-<pre>
-<code>
+```python
 from django.conf import settings
 
 class Pedido(models.Model):
     usuario = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-</code>
-</pre>
+```
 
-<pre>
-<code>
+```python
 AUTH_USER_MODEL = 'auth.User'  # Modelo User estándar de Django
-</code>
-</pre>
-
+```
 *Este proyecto tiene un modelo de usuario personalizado*
 
-<pre>
-<code>
+```python
 AUTH_USER_MODEL = os.getenv('USERDB')
-</code>
-</pre>
+```
 
 ### <font color=#ad39dc>AUTH_PASSWORD_VALIDATORS</font>
 
@@ -387,21 +379,18 @@ Define reglas de validación para asegurar que las contraseñas de los usuarios 
 
 Se pueden modificar sus parámetros o desactivarlos:
 
-<pre>
-<code>
+```python
 {
     'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
     'OPTIONS': {
         'min_length': 10,  # Ahora requiere al menos 10 caracteres
     }
 },
-</code>
-</pre>
+```
 
 Ajustar la similitud con atributos del usuario
 
-<pre>
-<code>
+```python
 {
     'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
     'OPTIONS': {
@@ -409,12 +398,11 @@ Ajustar la similitud con atributos del usuario
         'max_similarity': 0.5,  # Más estricto (por defecto: 0.7)
     }
 },
-</code>
-</pre>
+```
 
 ### <font color=#ad39dc>LANGUAGE_CODE</font>
 
-Define el idioma predeterminado de tu aplicación. Controla aspectos como:
+Define el idioma predeterminado de la aplicación. Controla aspectos como:
 
 - Traducciones de textos en templates, formularios y mensajes del sistema.
 - Formato de fechas, números y horas.
@@ -435,7 +423,7 @@ Define el idioma predeterminado de tu aplicación. Controla aspectos como:
     - Errores de formularios, mensajes del admin, etc., aparecerán en el idioma configurado.
 
 4. Middleware de internacionalización
-    - Si usas django.middleware.locale.LocaleMiddleware, permite cambiar el idioma dinámicamente basado en la preferencia del usuario.
+    - Si se usa django.middleware.locale.LocaleMiddleware, permite cambiar el idioma dinámicamente basado en la preferencia del usuario.
 
 ### <font color=#ad39dc>TIME_ZONE</font>
 
@@ -456,13 +444,11 @@ Habilita o deshabilita el sistema de internacionalización (i18n) del framework.
 
 #### Ejemplo
 
-<pre>
-<code>
+```python
 TIME_ZONE = "America/Santiago"  # Hora de Chile
-USE_TZ = True  # ¡Siempre activado!
+USE_TZ = True  # Siempre activado
 USE_I18N = True
-</code>
-</pre>
+```
 
 ### <font color=#ad39dc>STATIC_URL</font>
 
@@ -492,8 +478,7 @@ Esta configuración define el comportamiento global de Django REST Framework (DR
 - Incluye autenticación, permisos y throttling
 - Soporta múltiples formatos (JSON, XML, etc.)
 
-<pre>
-<code>
+```python
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework_simplejwt.authentication.JWTAuthentication',
@@ -514,20 +499,17 @@ REST_FRAMEWORK = {
         'user': '2000/hour'
     }
 }
-</code>
-</pre>
+```
 
 #### Autenticación (DEFAULT_AUTHENTICATION_CLASSES)
 Propósito: Define los métodos de autenticación que se usarán en todas las vistas de la API.
 Configuración:
 
-<pre>
-<code>
+```python
 'DEFAULT_AUTHENTICATION_CLASSES': [
     'rest_framework_simplejwt.authentication.JWTAuthentication',
 ],
-</code>
-</pre>
+```
 
 ##### Explicación:
 
@@ -543,13 +525,11 @@ Configuración:
 Propósito: Establece los permisos globales para acceder a los endpoints de la API.
 Configuración:
 
-<pre>
-<code>
+```python
 'DEFAULT_PERMISSION_CLASSES': [
     'rest_framework.permissions.IsAuthenticated', 
 ],
-</code>
-</pre>
+```
 
 ##### Explicación:
 
@@ -563,13 +543,11 @@ Configuración:
 Propósito: Gestiona diferentes versiones de la API para mantener compatibilidad.
 Configuración:
 
-<pre>
-<code>
+```python
 'DEFAULT_VERSIONING_CLASS': 'rest_framework.versioning.URLPathVersioning',
 'DEFAULT_VERSION': 'v1',
 'ALLOWED_VERSIONS': ['v1', 'v2'],
-</code>
-</pre>
+```
 
 ##### Explicación:
 
@@ -584,8 +562,7 @@ Configuración:
 Propósito: Limita el número de peticiones para evitar abuso o sobrecarga del servidor.
 Configuración:
 
-<pre>
-<code>
+```python
 'DEFAULT_THROTTLE_CLASSES': [
     'rest_framework.throttling.AnonRateThrottle',
     'rest_framework.throttling.UserRateThrottle'
@@ -594,9 +571,7 @@ Configuración:
     'anon': '200/hour',
     'user': '2000/hour'
 }
-</code>
-</pre>
-
+```
 ##### Explicación:
 
 - AnonRateThrottle: Limita peticiones de usuarios anónimos (ej: 200/hora).
@@ -604,23 +579,22 @@ Configuración:
 - Formato de tasas:
     - '100/day': 100 peticiones por día.
     - '10/minute': 10 peticiones por minuto.
-- Personalización: Puedes definir throttles específicos por vista.
+- Personalización: Se puede definir throttles específicos por vista.
 
 ##### Requisitos Adicionales
 - Instalar librerías necesarias:
-<pre>
-<code>
+
+```python
 pip install djangorestframework
-</code>
-</pre>
+```
+
 - Agregar rest_framework a INSTALLED_APPS en settings.py.
 
 ### <font color=#ad39dc>Json Web Token</font>
 
 Esta configuración controla el comportamiento de los JSON Web Tokens (JWT) en la API cuando se usa djangorestframework-simplejwt. Define cómo se generan, validan y manejan los tokens de acceso (access) y refresco (refresh), así como aspectos de seguridad relacionados con cookies y encabezados HTTP.
 
-<pre>
-<code>
+```python
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
@@ -638,8 +612,7 @@ SIMPLE_JWT = {
     'AUTH_COOKIE_PATH': '/',         # Ruta donde es válida la cookie
     'AUTH_COOKIE_DOMAIN': None,      # Dominio (None para localhost)
 }
-</code>
-</pre>
+```
 
 #### ACCESS_TOKEN_LIFETIME
 
@@ -755,50 +728,42 @@ CORS (Cross-Origin Resource Sharing) es un mecanismo de seguridad del navegador 
 #### Configurción de CORS
 1. Para habilitar CORS es necesario el paquete django-cors-headers:
 
-    <pre>
-    <code>
+```python
     pip install django-cors-headers
-    </code>
-    </pre>
+```
 
 2. Agregar a INSTALLED_APPS:
 
-    <pre>
-    <code>
+```python
     INSTALLED_APPS = [
         ...
         'corsheaders',
         ...
     ]
-    </code>
-    </pre>
+```
+
 3. Agregar el middleware (debe estar lo más arriba posible):
 
-   <pre>
-    <code>
+```python
     MIDDLEWARE = [
         'corsheaders.middleware.CorsMiddleware',  # ¡Debe estar antes de CommonMiddleware!
         ...
         'django.middleware.common.CommonMiddleware',
         ...
     ]
-    </code>
-    </pre>
+```
 
 *En este proyecto*
 
-<pre>
-<code>
+```python
 CORS_ALLOWED_ORIGINS = [
     os.getenv('CORS_KEYS'), 'http://localhost:5173' # Es el dominio por defecto de Vite
 ]
-</code>
-</pre>
+```
 
 ## <font color=#ad39dc>CONFIGURACIONES DE SEGURIDAD</font>
 
-<pre>
-<code>
+```python
 CORS_ALLOW_CREDENTIALS = True
 CORS_EXPOSE_HEADERS = ['Content-Type', 'X-CSRFToken']  # Necesario para CSRF
 
@@ -828,14 +793,13 @@ AXES_COOLOFF_TIME = 1  # 1 hora de bloqueo (puede ser timedelta(hours=1))
 AXES_LOCKOUT_PARAMETERS = ['ip_address', 'username']  # Bloquear por IP + usuario
 AXES_RESET_ON_SUCCESS = True  # Reiniciar contador tras login exitoso
 AXES_ENABLED = False
-</code>
-</pre>
+```
 
 ### <font color=#ad39dc>CORS_ALLOW_CREDENTIALS</font>
 
 - Propósito: Permite que las solicitudes entre dominios (cross-origin) incluyan credenciales como cookies o headers de autenticación.
 - Cuándo usarlo:
-    - Cuando tu frontend (ej: React/Vue) necesita enviar cookies/tokens JWT a un backend Django en otro dominio.
+    - Cuando el frontend (ej: React/Vue) necesita enviar cookies/tokens JWT a un backend Django en otro dominio.
     - Requiere que el frontend configure withCredentials: true en peticiones AJAX.
 - Advertencia: No habilitAR esto si LA API es pública sin autenticación
 
@@ -853,7 +817,7 @@ AXES_ENABLED = False
 ### <font color=#ad39dc>CSRF_COOKIE_HTTPONLY</font>
 
 - Propósito: Permite que JavaScript acceda a la cookie CSRF (necesario para frameworks como React).
-- Seguridad: En producción, considera True si no necesitas leerla desde JS.
+- Seguridad: En producción, considerar True si no es necesario leerla desde JS.
 
 
 ### <font color=#ad39dc>CSRF_COOKIE_SAMESITE</font>
@@ -891,7 +855,7 @@ AXES_ENABLED = False
 
 ### <font color=#ad39dc>X_FRAME_OPTIONS</font>
 
-- Propósito: Impide que tu sitio se embeda en un iframe (evita clickjacking).
+- Propósito: Impide que el sitio se embeda en un iframe (evita clickjacking).
 - 'DENY': Bloqueo total.
 - 'SAMEORIGIN': Permite iframes solo desde el mismo dominio.
 
@@ -901,14 +865,12 @@ Es una configuración de Django que define cómo se autentican los usuarios. Por
 
 Axes se debe instalar y colocar en las App Instaladas
 
-<pre>
-<code>
+```python
 AUTHENTICATION_BACKENDS = [
     'axes.backends.AxesStandaloneBackend',  
     'django.contrib.auth.backends.ModelBackend',
 ]
-</code>
-</pre>
+```
 
 #### axes.backends.AxesStandaloneBackend
 

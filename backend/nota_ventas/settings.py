@@ -158,8 +158,8 @@ REST_FRAMEWORK = {
         'rest_framework.throttling.UserRateThrottle'
     ],
     'DEFAULT_THROTTLE_RATES': {
-        'anon': '200/hour',
-        'user': '2000/hour'
+        'anon': '50/hour',
+        'user': '1000/hour'
     }
 }
 
@@ -174,7 +174,7 @@ SIMPLE_JWT = {
     'AUTH_HEADER_TYPES': ('Bearer',),
     'AUTH_HEADER_NAME': 'HTTP_AUTHORIZATION',
     'JTI_CLAIM': 'jti',
-    'AUTH_COOKIE': 'refresh_token',  # Nombre de la cookie
+    'AUTH_COOKIE': 'access_token',  # Nombre de la cookie
     'AUTH_COOKIE_HTTP_ONLY': True,   # Solo accesible por HTTP
     'AUTH_COOKIE_SECURE': True,      # Solo en HTTPS (True en producción)
     'AUTH_COOKIE_SAMESITE': 'Lax',   # Protección CSRF

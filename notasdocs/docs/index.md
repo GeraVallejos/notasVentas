@@ -23,3 +23,9 @@ Este proyecto es una aplicación web construida con Django, React y MySQL, dise�
 - Gestión de pedidos: visualización de pedidos históricos y no solicitados a través de un DataGrid de MUI, con funciones de búsqueda, filtrado y ordenamiento.
 
 Este sistema ofrece una solución eficiente para complementar un ERP ya existente, mejorando el flujo de trabajo en la gestión de pedidos y proporcionando herramientas visuales para su seguimiento.
+
+### Diagrama de Flujo Django
+
+![Middleware](images/DjangoDiagrama.jpg)
+
+---

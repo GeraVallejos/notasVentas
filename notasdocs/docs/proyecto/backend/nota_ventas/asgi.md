@@ -10,16 +10,14 @@ Este archivo es usado principalmente cuando se hace despliegue del proyecto usan
 
 ## Contenido del archivo
 
-<pre>
-<code>
+```python
 import os
 from django.core.asgi import get_asgi_application
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'pedidosMP.settings')
 
 application = get_asgi_application()
-</code>
-</pre>
+```
 
 ### Explicación línea por línea
 **import os**: Importa el módulo os para acceder a variables del entorno del sistema operativo.

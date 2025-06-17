@@ -4,26 +4,35 @@ nav:
     - Guía de Instalación: 
         - Django: instalacion/instalacion_Django.md
         - React: instalacion/instalacion_React.md
+    - Dependencias:
+        - Django:
+            - Django Rest Framework: dependencias/django/django_rest_framework.md
+            - Rest Framework SimpleJWT: dependencias/django/rest_framework_simplejwt.md
+            - Django Cors Headers: dependencias/django/corsheaders.md
+            - Django Axes: dependencias/django/axes.md
     - Estructura Backend: 
-        - Proyecto Django (nota_ventas): 
+        - Proyecto: 
             - __pycache__.py: proyecto/backend/nota_ventas/pycache.md
             - __init__.py: proyecto/backend/nota_ventas/init.md
             - asgi.py: proyecto/backend/nota_ventas/asgi.md
             - settings.py: proyecto/backend/nota_ventas/settings.md
             - urls.py: proyecto/backend/nota_ventas/urls.md
             - wsgi.py: proyecto/backend/nota_ventas/wsgi.md
-        - Aplicación (nota_app):
-            - migrations: compras/pedidosAPPmd/initial.md
-            - __init__.py: compras/pedidosAPPmd/initApp.md
-            - admin.py: compras/pedidosAPPmd/admin.md
-            - apps.py: compras/pedidosAPPmd/apps.md
-            - models.py: compras/pedidosAPPmd/models.md
-            - serializer.py : compras/pedidosAPPmd/serializer.md
-            - urls.py: compras/pedidosAPPmd/urlsApp.md
-            - views.py: compras/pedidosAPPmd/views.md
-    - Estructura Frontend:
-        - Auth:
-            - authSlice.js: compras/frontend/auth/authSlice.md
+        - Aplicación:
+            - migrations: proyecto/backend/nota_app/migrations.md
+            - __init__.py: proyecto/backend/nota_app/init_app.md
+            - admin.py: proyecto/backend/nota_app/admin.md
+            - apps.py: proyecto/backend/nota_app/apps.md
+            - auth_urls.py: proyecto/backend/nota_app/auth_urls.md
+            - forms.py: proyecto/backend/nota_app/forms.md
+            - middleware.py: proyecto/backend/nota_app/middleware.md
+            - models.py: proyecto/backend/nota_app/models.md
+            - serializer.py : proyecto/backend/nota_app/serializer.md
+            - urls.py: proyecto/backend/nota_app/urls_app.md
+            - views.py: proyecto/backend/nota_app/views.md
+    # - Estructura Frontend:
+    #     - Auth:
+    #         - authSlice.js: compras/frontend/auth/authSlice.md
     
 theme: material
 markdown_extensions:

@@ -13,12 +13,11 @@ En proyectos grandes con muchos módulos, recompilar constantemente el código s
 
 - Se crea una carpeta __pycache__ en cada directorio que contenga módulos Python importados.
 - Los archivos dentro tienen nombres como:
-<pre>
-<code>
+
+```python
 nombre_del_modulo.cpython-XX.pyc
-(donde XX es la versión de Python, ej. cpython-38 para Python 3.8)
-</code>
-</pre>
+# (donde XX es la versión de Python, ej. cpython-38 para Python 3.8)
+```
 
 - Django no necesita esta carpeta para funcionar, es solo una optimización de Python.
 - Puede ser eliminada manualmente sin problemas (Python la recreará cuando sea necesario)

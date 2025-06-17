@@ -8,8 +8,7 @@ Permite que Django se comunique con servidores WSGI (como Gunicorn, uWSGI o el s
 
 ## Contenido del archivo
 
-<pre>
-<code>
+```python
 import os
 
 from django.core.wsgi import get_wsgi_application
@@ -17,8 +16,7 @@ from django.core.wsgi import get_wsgi_application
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'nota_ventas.settings')
 
 application = get_wsgi_application()
-</code>
-</pre>
+```
 
 ### Explicación línea por línea
 
