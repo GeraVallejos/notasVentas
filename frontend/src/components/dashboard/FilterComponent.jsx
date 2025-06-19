@@ -31,7 +31,7 @@ const FilterComponent = ({
             label="Fecha inicio"
             value={fechaInicio}
             onChange={setFechaInicio}
-            format="DD/MM/YYYY"
+            format="dd/MM/yyyy"
             slotProps={{
               textField: {
                 size: 'small',
@@ -60,7 +60,7 @@ const FilterComponent = ({
             label="Fecha fin"
             value={fechaFin}
             onChange={setFechaFin}
-            format="DD/MM/YYYY"
+            format="dd/MM/yyyy"
             slotProps={{
               textField: {
                 size: 'small',

@@ -9,7 +9,8 @@ import { getRoutes } from './routes/Routes';
 import store from './store';
 import AppTheme from './theme/AppTheme';
 import { LocalizationProvider } from '@mui/x-date-pickers';
-import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
+
 
 const router = getRoutes();
 
@@ -21,7 +22,7 @@ createRoot(document.getElementById('root')).render(
         autoHideDuration={3000}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
       >
-        <LocalizationProvider dateAdapter={AdapterDayjs}>
+        <LocalizationProvider dateAdapter={AdapterDateFns}>
         <AppTheme>
           <RouterProvider router={router} />
         </AppTheme>

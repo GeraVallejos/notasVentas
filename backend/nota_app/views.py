@@ -18,12 +18,10 @@ from django.db.models.functions import Cast
 logger = logging.getLogger(__name__)
 
 
-# Create your views here.
-
 class UsuarioView(viewsets.ModelViewSet):
     serializer_class = UsuariosSerializer
     queryset = Usuarios.objects.all()
-    
+
     def get_permissions(self):
         if self.action in ['actual', 'verify_password', 'logout']:
             return [permissions.IsAuthenticated()]

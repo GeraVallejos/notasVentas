@@ -12,27 +12,23 @@ import {
     PieChart,
 } from '@mui/x-charts';
 import { api } from '../../utils/api';
-import dayjs from 'dayjs';
-import customParseFormat from 'dayjs/plugin/customParseFormat';
+import { format, addDays, subDays, parse } from 'date-fns';
 import FilterComponent from '../dashboard/FilterComponent';
 import MapaDespachos from '../dashboard/MapaDespachos';
-import rmGeoJson from '../../assets/rm_normalizado.json'
+import rmGeoJson from '../../assets/rm_normalizado.json';
 import normalizarNombre from '../../utils/normalizarNombre';
-
-dayjs.extend(customParseFormat);
 
 const Dashboard = () => {
     const [data, setData] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const theme = useTheme();
-    const [fechaInicio, setFechaInicio] = useState(dayjs().subtract(1, 'day'));
-    const [fechaFin, setFechaFin] = useState(dayjs().add(7, 'day'));
+    const [fechaInicio, setFechaInicio] = useState(subDays(new Date(), 1));
+    const [fechaFin, setFechaFin] = useState(addDays(new Date(), 7));
     const [notasPorDiaSemana, setNotasPorDiaSemana] = useState([]);
     const [dataDespachos, setDataDespachos] = useState([]);
 
-
-    const colores = ['#1976d2', '#d32f2f']; // Azul y Rojo
+    const colores = ['#1976d2', '#d32f2f'];
 
     const pieData = data?.notas?.por_estado?.map((item, index) => ({
         id: item.despacho_retira,
@@ -46,8 +42,8 @@ const Dashboard = () => {
         try {
             const response = await api.get('/dashboard/resumen/', {
                 params: {
-                    fecha_inicio: fechaInicio.format('YYYY-MM-DD'),
-                    fecha_fin: fechaFin.format('YYYY-MM-DD')
+                    fecha_inicio: format(fechaInicio, 'yyyy-MM-dd'),
+                    fecha_fin: format(fechaFin, 'yyyy-MM-dd')
                 }
             });
 
@@ -57,18 +53,16 @@ const Dashboard = () => {
                     comuna: normalizarNombre(item.comuna),
                     estado_solicitud: item.estado_solicitud,
                     total: item.total,
-
-                }))
-                // Muestra solo los que no han sido solicitados
-                .filter(item => item.estado_solicitud == 'No Solicitado')
-            );     
+                })).filter(item => item.estado_solicitud === 'No Solicitado')
+            );
 
             const datosNotas = [];
             if (response.data?.notas?.por_dia) {
                 response.data.notas.por_dia.forEach((item) => {
                     if (item?.day && typeof item.total === 'number') {
+                        const parsed = parse(item.day, 'yyyy-MM-dd', new Date());
                         datosNotas.push({
-                            fecha: dayjs(item.day, 'YYYY-MM-DD').format('DD/MM'),
+                            fecha: format(parsed, 'dd/MM'),
                             fechaRaw: item.day,
                             total: item.total
                         });
@@ -95,12 +89,10 @@ const Dashboard = () => {
         fetchData();
     }, [fetchData]);
 
-
     const handleFilterSubmit = (e) => {
         e.preventDefault();
         fetchData();
     };
-
 
     if (loading && !data) return (
         <Box display="flex" justifyContent="center" mt={20}>
@@ -116,15 +108,12 @@ const Dashboard = () => {
 
     return (
         <Box sx={{ flexGrow: 1, p: 3 }}>
-            {/* Fila superior con título y filtros */}
             <Grid container justifyContent='space-between' alignItems='top' sx={{ mb: 3 }}>
-                <Grid >
-                    <Typography variant="h5">
-                        Resumen General
-                    </Typography>
+                <Grid>
+                    <Typography variant="h5">Resumen General</Typography>
                 </Grid>
 
-                <Grid >
+                <Grid>
                     <FilterComponent
                         fechaInicio={fechaInicio}
                         setFechaInicio={setFechaInicio}
@@ -136,27 +125,20 @@ const Dashboard = () => {
                 </Grid>
             </Grid>
 
-            {/* Fila con las tarjetas combinadas */}
             <Grid container spacing={2} display='flex' justifyContent='center'>
-                {/* Tarjeta combinada (Total + PieChart) */}
-                <Grid  size={{ xs:12, sm:6, lg:4 }} >
+                <Grid size={{ xs: 12, sm: 6, lg: 4 }}>
                     <Paper sx={{ p: 2, height: 400, width: 300, display: 'flex', flexDirection: 'column' }}>
-                        {/* Sección superior: Total de Notas */}
                         <Box sx={{ mb: 2 }}>
-                            <Typography variant="h6" align='center'>
-                                Total de Notas
-                            </Typography>
+                            <Typography variant="h6" align='center'>Total de Notas</Typography>
                             <Typography variant="h4" sx={{ fontWeight: 'bold', textAlign: 'center' }}>
                                 {data?.notas?.total ?? 0}
                             </Typography>
                             <Typography variant="caption" display="block" sx={{ textAlign: 'center', color: 'text.secondary' }}>
-                                {fechaInicio.format('DD/MM/YYYY')} - {fechaFin.format('DD/MM/YYYY')}
+                                {format(fechaInicio, 'dd/MM/yyyy')} - {format(fechaFin, 'dd/MM/yyyy')}
                             </Typography>
                         </Box>
 
-                        {/* Sección inferior: Gráfico de pastel */}
                         <Box sx={{ flexGrow: 1 }}>
-
                             {loading ? (
                                 <Box display="flex" justifyContent="center" alignItems="center" height="100%">
                                     <CircularProgress />
@@ -180,15 +162,13 @@ const Dashboard = () => {
                                         itemGap: 10,
                                         labelStyle: { fontSize: 12 }
                                     }}
-
                                 />
                             )}
                         </Box>
                     </Paper>
                 </Grid>
 
-                {/* Tarjeta 2 - Gráfico de barras */}
-                <Grid size={{ xs:12, sm:6, lg:4 }}>
+                <Grid size={{ xs: 12, sm: 6, lg: 4 }}>
                     <Paper sx={{ p: 2, height: 400 }}>
                         <Typography variant="h6" gutterBottom>
                             Dias de Despacho por Notas de Ventas
@@ -218,7 +198,7 @@ const Dashboard = () => {
                                         faded: 'global',
                                     },
                                     itemStyle: (params) => {
-                                        const hoy = dayjs().format('DD/MM');
+                                        const hoy = format(new Date(), 'dd/MM');
                                         const isToday = notasPorDiaSemana[params.dataIndex].fecha === hoy;
                                         return {
                                             fill: isToday ? theme.palette.secondary.main : theme.palette.primary.main,
@@ -241,13 +221,11 @@ const Dashboard = () => {
                     </Paper>
                 </Grid>
 
-                {/* Tarjeta adicional (puedes poner otra información aquí) */}
-                <Grid size={{ xs:12, sm:6, lg:4 }} >
+                <Grid size={{ xs: 12, sm: 6, lg: 4 }}>
                     <Paper sx={{ p: 2, height: 400, width: 300 }}>
                         <Typography variant="h6" gutterBottom>
                             Otra métrica importante
                         </Typography>
-                        {/* Aquí puedes agregar otro gráfico o información */}
                         <Box display="flex" justifyContent="center" alignItems="center" height="100%">
                             <Typography color="text.secondary">
                                 Espacio disponible para otra visualización
@@ -257,9 +235,8 @@ const Dashboard = () => {
                 </Grid>
             </Grid>
 
-            {/* Mapa de Despachos por Comuna */}
             <Grid container spacing={2} sx={{ mt: 2, display: 'flex', justifyContent: 'center' }}>
-                <Grid size={{ xs:12}} sx={{ width: '100%' }}>
+                <Grid size={{ xs: 12 }} sx={{ width: '100%' }}>
                     <Paper sx={{ p: 2 }}>
                         <Typography variant="h6" gutterBottom>
                             Mapa de Despachos por Comuna (RM)
@@ -275,7 +252,6 @@ const Dashboard = () => {
             </Grid>
         </Box>
     );
-
 };
 
 export default Dashboard;

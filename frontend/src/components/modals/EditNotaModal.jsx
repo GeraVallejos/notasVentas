@@ -15,15 +15,15 @@ import { api } from '../../utils/api';
 import { useSnackbar } from 'notistack';
 import * as yup from 'yup';
 import { TimePicker } from '@mui/x-date-pickers/TimePicker';
-import dayjs from 'dayjs';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import { parse, format, isValid } from 'date-fns';
 import { ComunaAutocomplete } from '../common/ComunaAutocomplete';
-
 
 const schema = yup.object().shape({
   num_nota: yup.number().required('Número de nota requerido'),
   razon_social: yup.string().required('Nombre del cliente requerido'),
   rut_cliente: yup.string(),
-  fecha_despacho: yup.string().required('Fecha de despacho requerida'),
+  fecha_despacho: yup.date().required('Fecha de despacho requerida').typeError('Fecha inválida'),
   contacto: yup.string().required('Nombre de contacto requerido'),
   telefono: yup
     .string()
@@ -56,7 +56,9 @@ const EditNotaModal = ({ open, onClose, nota, onSave }) => {
       reset({
         ...nota,
         telefono: nota.telefono?.startsWith('+56') ? nota.telefono.slice(3) : nota.telefono,
-        fecha_despacho: nota.fecha_despacho?.slice(0, 10),
+        fecha_despacho: nota.fecha_despacho ? new Date(nota.fecha_despacho) : null,
+        horario_desde: nota.horario_desde || '',
+        horario_hasta: nota.horario_hasta || '',
         password: ''
       });
     }
@@ -68,8 +70,11 @@ const EditNotaModal = ({ open, onClose, nota, onSave }) => {
       const res = await api.post('/usuario/verify_password/', { password: data.password });
       if (res.data.valid) {
         const payload = {
-          ...data, telefono: `+56${data.telefono}`, horario_desde: data.horario_desde || null,
-          horario_hasta: data.horario_hasta || null
+          ...data,
+          telefono: `+56${data.telefono}`,
+          horario_desde: data.horario_desde || null,
+          horario_hasta: data.horario_hasta || null,
+          fecha_despacho: data.fecha_despacho?.toISOString(),
         };
         delete payload.password;
 
@@ -102,9 +107,28 @@ const EditNotaModal = ({ open, onClose, nota, onSave }) => {
           <DialogContent dividers>
             <Stack spacing={2} mt={1}>
               <TextField label="N° nota" {...register('num_nota')} error={!!errors.num_nota} helperText={errors.num_nota?.message} fullWidth />
-              <TextField label="Razon Social" {...register('razon_social')} error={!!errors.nombre_cliente} helperText={errors.nombre_cliente?.message} fullWidth />
+              <TextField label="Razon Social" {...register('razon_social')} error={!!errors.razon_social} helperText={errors.razon_social?.message} fullWidth />
               <TextField label="RUT Cliente" {...register('rut_cliente')} fullWidth />
-              <TextField label="Fecha Despacho" type="date" {...register('fecha_despacho')} InputLabelProps={{ shrink: true }} error={!!errors.fecha_despacho} helperText={errors.fecha_despacho?.message} fullWidth />
+              <Controller
+                name="fecha_despacho"
+                control={control}
+                render={({ field }) => (
+                  <DatePicker
+                    label="Fecha Despacho"
+                    value={field.value}
+                    onChange={(date) => field.onChange(date)}
+                    format="dd/MM/yyyy"
+                    slotProps={{
+                      textField: {
+                        fullWidth: true,
+                        size: 'small',
+                        error: !!errors.fecha_despacho,
+                        helperText: errors.fecha_despacho?.message,
+                      },
+                    }}
+                  />
+                )}
+              />
               <TextField label="Contacto" {...register('contacto')} error={!!errors.contacto} helperText={errors.contacto?.message} fullWidth />
               <TextField
                 label="Teléfono"
@@ -127,7 +151,6 @@ const EditNotaModal = ({ open, onClose, nota, onSave }) => {
                 control={control}
                 render={({ field, fieldState }) => (
                   <ComunaAutocomplete
-
                     value={field.value}
                     onChange={field.onChange}
                     error={!!fieldState.error}
@@ -143,10 +166,10 @@ const EditNotaModal = ({ open, onClose, nota, onSave }) => {
                   <TimePicker
                     label="Horario Desde"
                     ampm={false}
-                    value={field.value ? dayjs(field.value, 'HH:mm') : null}
+                    value={field.value ? parse(field.value, 'HH:mm', new Date()) : null}
                     onChange={(time) => {
-                      if (time && time.isValid()) {
-                        field.onChange(time.format('HH:mm'));
+                      if (time && isValid(time)) {
+                        field.onChange(format(time, 'HH:mm'));
                       } else {
                         field.onChange('');
                       }
@@ -162,7 +185,6 @@ const EditNotaModal = ({ open, onClose, nota, onSave }) => {
                   />
                 )}
               />
-
               <Controller
                 name="horario_hasta"
                 control={control}
@@ -170,10 +192,10 @@ const EditNotaModal = ({ open, onClose, nota, onSave }) => {
                   <TimePicker
                     label="Horario Hasta"
                     ampm={false}
-                    value={field.value ? dayjs(field.value, 'HH:mm') : null}
+                    value={field.value ? parse(field.value, 'HH:mm', new Date()) : null}
                     onChange={(time) => {
-                      if (time && time.isValid()) {
-                        field.onChange(time.format('HH:mm'));
+                      if (time && isValid(time)) {
+                        field.onChange(format(time, 'HH:mm'));
                       } else {
                         field.onChange('');
                       }
@@ -189,7 +211,6 @@ const EditNotaModal = ({ open, onClose, nota, onSave }) => {
                   />
                 )}
               />
-
               <Controller
                 name="estado_solicitud"
                 control={control}
@@ -208,7 +229,6 @@ const EditNotaModal = ({ open, onClose, nota, onSave }) => {
                   </FormControl>
                 )}
               />
-
               <TextField
                 label="Contraseña"
                 autoComplete='current-password'

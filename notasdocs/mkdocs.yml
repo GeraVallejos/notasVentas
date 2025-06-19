@@ -10,6 +10,11 @@ nav:
             - Rest Framework SimpleJWT: dependencias/django/rest_framework_simplejwt.md
             - Django Cors Headers: dependencias/django/corsheaders.md
             - Django Axes: dependencias/django/axes.md
+        - React:
+            - React Dom: dependencias/react/reactdom.md
+            - React Router: dependencias/react/reactRouter.md
+            - Axios: dependencias/react/axios.md
+            - Date fns: dependencias/react/date-fns.md
     - Estructura Backend: 
         - Proyecto: 
             - __pycache__.py: proyecto/backend/nota_ventas/pycache.md
@@ -34,10 +39,18 @@ nav:
     #     - Auth:
     #         - authSlice.js: compras/frontend/auth/authSlice.md
     
-theme: material
+theme:
+  name: material
+  palette:
+    scheme: default
+  features:
+    - content.code.annotate
+
 markdown_extensions:
-  - codehilite
   - pymdownx.superfences
-  - pymdownx.highlight
+  - pymdownx.highlight:
+      use_pygments: true
+      linenums: true
+      pygments_style: monokai
   - pymdownx.tabbed
   - pymdownx.inlinehilite
