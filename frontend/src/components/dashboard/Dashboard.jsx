@@ -17,6 +17,7 @@ import FilterComponent from '../dashboard/FilterComponent';
 import MapaDespachos from '../dashboard/MapaDespachos';
 import rmGeoJson from '../../assets/rm_normalizado.json';
 import normalizarNombre from '../../utils/normalizarNombre';
+import { useSnackbar } from 'notistack';
 
 const Dashboard = () => {
     const [data, setData] = useState(null);
@@ -27,6 +28,7 @@ const Dashboard = () => {
     const [fechaFin, setFechaFin] = useState(addDays(new Date(), 7));
     const [notasPorDiaSemana, setNotasPorDiaSemana] = useState([]);
     const [dataDespachos, setDataDespachos] = useState([]);
+    const { enqueueSnackbar } = useSnackbar();
 
     const colores = ['#1976d2', '#d32f2f'];
 
@@ -37,13 +39,13 @@ const Dashboard = () => {
         color: colores[index % 2],
     })) ?? [];
 
-    const fetchData = useCallback(async () => {
+    const fetchData = useCallback(async (inicio = fechaInicio, fin = fechaFin) => {
         setLoading(true);
         try {
             const response = await api.get('/dashboard/resumen/', {
                 params: {
-                    fecha_inicio: format(fechaInicio, 'yyyy-MM-dd'),
-                    fecha_fin: format(fechaFin, 'yyyy-MM-dd')
+                    fecha_inicio: format(inicio, 'yyyy-MM-dd'),
+                    fecha_fin: format(fin, 'yyyy-MM-dd')
                 }
             });
 
@@ -77,6 +79,8 @@ const Dashboard = () => {
                 errorMessage = err.response.data.error;
             } else if (err.response) {
                 errorMessage = `Error ${err.response.status}`;
+            } else if (err.message) {
+                errorMessage = err.message;
             }
             setError(errorMessage);
             console.error('Error detalles:', err);
@@ -89,10 +93,18 @@ const Dashboard = () => {
         fetchData();
     }, [fetchData]);
 
-    const handleFilterSubmit = (e) => {
+    const handleFilterSubmit = useCallback((e, nuevaFechaInicio, nuevaFechaFin) => {
         e.preventDefault();
-        fetchData();
-    };
+        if (nuevaFechaFin < nuevaFechaInicio) {
+            enqueueSnackbar('La fecha de fin no puede ser anterior a la fecha de inicio.', {
+                variant: 'warning',
+            });
+            return;
+        }
+        setFechaInicio(nuevaFechaInicio);
+        setFechaFin(nuevaFechaFin);
+        fetchData(nuevaFechaInicio, nuevaFechaFin);
+    }, [fetchData, enqueueSnackbar]);
 
     if (loading && !data) return (
         <Box display="flex" justifyContent="center" mt={20}>
@@ -137,11 +149,16 @@ const Dashboard = () => {
                                 {format(fechaInicio, 'dd/MM/yyyy')} - {format(fechaFin, 'dd/MM/yyyy')}
                             </Typography>
                         </Box>
-
                         <Box sx={{ flexGrow: 1 }}>
                             {loading ? (
                                 <Box display="flex" justifyContent="center" alignItems="center" height="100%">
                                     <CircularProgress />
+                                </Box>
+                            ) : pieData.length === 0 ? (
+                                <Box display="flex" justifyContent="center" alignItems="center" height="100%">
+                                    <Typography variant="body2" color="text.secondary">
+                                        No hay datos de notas para este período.
+                                    </Typography>
                                 </Box>
                             ) : (
                                 <PieChart
@@ -171,11 +188,18 @@ const Dashboard = () => {
                 <Grid size={{ xs: 12, sm: 6, lg: 4 }}>
                     <Paper sx={{ p: 2, height: 400 }}>
                         <Typography variant="h6" gutterBottom>
-                            Dias de Despacho por Notas de Ventas
+                            Días de Despacho por Notas de Ventas
                         </Typography>
+
                         {loading ? (
                             <Box display="flex" justifyContent="center" alignItems="center" height="100%">
                                 <CircularProgress />
+                            </Box>
+                        ) : notasPorDiaSemana.length === 0 ? (
+                            <Box display="flex" justifyContent="center" alignItems="center" height="100%">
+                                <Typography variant="body2" color="text.secondary">
+                                    No hay datos de notas en este período.
+                                </Typography>
                             </Box>
                         ) : (
                             <BarChart

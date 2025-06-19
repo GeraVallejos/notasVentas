@@ -32,6 +32,7 @@ const schema = yup.object().shape({
   direccion: yup.string().required('Dirección requerida'),
   comuna: yup.string().required('Comuna requerida'),
   observacion: yup.string(),
+  despacho_retira: yup.string().required('Debe elegir entre despacho o retira'),
   horario_desde: yup.string().nullable(),
   horario_hasta: yup.string().nullable(),
   estado_solicitud: yup.string().oneOf(["Solicitado", "No Solicitado"]).required("El estado es obligatorio"),
@@ -158,6 +159,16 @@ const EditNotaModal = ({ open, onClose, nota, onSave }) => {
                   />
                 )}
               />
+              <Controller name="despacho_retira" control={control} defaultValue='' render={({ field, fieldState }) => (
+                <FormControl fullWidth error={!!fieldState.error} size='small'>
+                  <InputLabel id="despacho-label">Despacho</InputLabel>
+                  <Select {...field} labelId="despacho-label" label="Tipo Despacho">
+                    <MenuItem value="">Seleccione una opción</MenuItem>
+                    <MenuItem value="Despacho">Despacho</MenuItem>
+                    <MenuItem value="Retira">Retira</MenuItem>
+                  </Select>
+                  <FormHelperText>{fieldState.error?.message}</FormHelperText>
+                </FormControl>)} />
               <TextField label="Observación" {...register('observacion')} fullWidth />
               <Controller
                 name="horario_desde"

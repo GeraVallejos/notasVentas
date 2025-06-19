@@ -17,7 +17,7 @@ const schema = yup.object().shape({
   .matches(/^[1-9]\d{8}$/, 'Teléfono debe tener 9 dígitos')
   .required('Teléfono requerido'),
   observacion: yup.string(),
-  despacho_retira: yup.string(),
+  despacho_retira: yup.string().required('Debe elegir entre despacho o retira'),
   horario_desde: yup.string(),
   horario_hasta: yup.string(),
 });

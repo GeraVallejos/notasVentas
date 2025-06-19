@@ -3,6 +3,7 @@ import 'leaflet/dist/leaflet.css';
 import { Box, Typography, Paper } from '@mui/material';
 
 const MapaDespachos = ({ dataDespachos, geoData }) => {
+
     // 1. Crear un mapa de nombres normalizados a originales
     const nombresComunas = {};
     geoData.features.forEach(feature => {

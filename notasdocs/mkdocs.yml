@@ -1,4 +1,5 @@
 site_name: Notas de Ventas
+dev_addr: 'localhost:9000'
 nav:
     - Introducción: index.md
     - Guía de Instalación: 
