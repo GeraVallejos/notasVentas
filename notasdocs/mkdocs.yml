@@ -16,6 +16,9 @@ nav:
             - React Router: dependencias/react/reactRouter.md
             - Axios: dependencias/react/axios.md
             - Date fns: dependencias/react/date-fns.md
+            - Excel JS: dependencias/react/exceljs.md
+            - Notistack: dependencias/react/notistack.md
+            - React Hook Form: dependencias/react/react-hook-form.md
     - Estructura Backend: 
         - Proyecto: 
             - __pycache__.py: proyecto/backend/nota_ventas/pycache.md
