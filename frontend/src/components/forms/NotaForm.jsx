@@ -113,9 +113,9 @@ export const NotaForm = () => {
   };
 
   return (
-    <Box sx={{ width: '100%', maxWidth: 700, mx: 'auto', mt: 2, px: 4, py: 2, bgcolor: '#f0faff', borderRadius: 3, boxShadow: '0 4px 20px rgba(0,0,0,0.1)' }}>
-      <Typography variant="h5" sx={{ textAlign: 'center', mb: 2, background: 'linear-gradient(to right, #00BFFF, #1E90FF)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-        Crear Pedido
+    <Box sx={{ width: '100%', maxWidth: 700, mx: 'auto', mt: 2, px: 4, py: 2, boxShadow: '0 4px 20px rgba(0,0,0,0.1)' }}>
+      <Typography variant="h5" sx={{ textAlign: 'center', mb: 2, background: ' #00BFFF', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+        FORMULARIO PEDIDOS
       </Typography>
 
       <FormProvider {...form}>
@@ -158,8 +158,8 @@ export const NotaForm = () => {
             </Grid>
 
             <Grid size={{ xs: 12, md: 12 }}>
-              <Button type="submit" variant="contained" fullWidth disabled={form.formState.isSubmitting} sx={{ mt: 2, background: 'linear-gradient(to right, #00BFFF, #1E90FF)', color: 'white', fontSize: '1.25rem', borderRadius: 2, '&:hover': { background: 'linear-gradient(to right, #00B2EE, #1C86EE)' }, opacity: form.formState.isSubmitting ? 0.7 : 1 }}>
-                {form.formState.isSubmitting ? 'Guardando...' : 'Crear Pedido'}
+              <Button type="submit" variant="contained" fullWidth disabled={form.formState.isSubmitting} sx={{ mt: 2, background: ' #00BFFF', color: 'white', fontSize: '1rem', '&:hover': { background: '#1C86EE' } }}>
+                {form.formState.isSubmitting ? 'Guardando...' : 'CREAR PEDIDO'}
               </Button>
             </Grid>
           </Grid>

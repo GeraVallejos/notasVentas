@@ -55,8 +55,8 @@ export const LoginForm = () => {
         mt: 0,
         px: 4,
         py: 5,
-        bgcolor: '#f0faff',
-        borderRadius: 3,
+        bgcolor: '#FFFFFF',
+        borderRadius: 0,
         boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
         textAlign: 'center',
       }}
@@ -64,16 +64,17 @@ export const LoginForm = () => {
       <Typography
         variant="h4"
         sx={{
-          background: 'linear-gradient(to right, #00BFFF, #1E90FF)',
+          background: ' #00BFFF',
           WebkitBackgroundClip: 'text',
           WebkitTextFillColor: 'transparent',
+          fontWeight: '500',
           my: 1,
         }}
       >
         PEDIDOS AIS
       </Typography>
 
-      <Typography variant="subtitle2" color="text.secondary" mb={4}>
+      <Typography variant="subtitle2" color="#929191" mb={4}>
         Ingresa para gestionar los pedidos de Comercializadora AIS
       </Typography>
 
@@ -85,7 +86,7 @@ export const LoginForm = () => {
               type="text"
               spellCheck={false}
               autoCorrect="off"
-              autoComplete="username"
+              autoComplete="off"
               {...form.register('username')}
               error={!!form.formState.errors.username}
               helperText={form.formState.errors.username?.message}
@@ -139,7 +140,7 @@ export const LoginForm = () => {
                     }
                   }}
                   sx={{
-                    color: '#1E90FF',
+                    color: '#929191',
                     '&.Mui-checked': {
                       color: '#1E90FF',
                     },
@@ -147,7 +148,7 @@ export const LoginForm = () => {
                 />
               }
               label="Recordarme"
-              sx={{ justifyContent: 'flex-start', ml: 1 }}
+              sx={{ justifyContent: 'flex-start', ml: 1, color: '#929191' }}
             />
 
             <Button
@@ -157,18 +158,17 @@ export const LoginForm = () => {
               disabled={form.formState.isSubmitting}
               sx={{
                 mt: 1,
-                borderRadius: 1.5,
-                background: 'linear-gradient(to right, #00BFFF, #1E90FF)',
+                background: '#00BFFF',
                 color: 'white',
                 textTransform: 'uppercase',
                 '&:hover': {
-                  background: 'linear-gradient(to right, #00B2EE, #1C86EE)',
+                  background: '#1C86EE',
                   color: 'white',
                 },
-                opacity: form.formState.isSubmitting ? 0.6 : 1,
                 '&.Mui-disabled': {
-                  color: 'white', // fuerza texto blanco
-                },
+                    background: '#00BFFF',
+                    color: 'white',
+                  },
               }}
             >
               {form.formState.isSubmitting ? 'Cargando...' : 'INGRESAR'}

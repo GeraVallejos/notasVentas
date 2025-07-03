@@ -1,7 +1,7 @@
 import { Autocomplete, TextField } from '@mui/material';
 import { useEffect, useState, useMemo } from 'react';
 import debounce from 'lodash.debounce';
-import comunasData from '../../assets/comunas.json';
+import comunasData from '../../assets/mapas/comunas.json';
 
 export const ComunaAutocomplete = ({ value, onChange, error, helperText }) => {
   const [filteredOptions, setFilteredOptions] = useState([]);

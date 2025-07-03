@@ -4,12 +4,12 @@ import { RouterProvider } from 'react-router-dom';
 import { Provider } from 'react-redux';
 import { SnackbarProvider } from 'notistack';
 import './index.css';
-
 import { getRoutes } from './routes/Routes';
 import store from './store';
 import AppTheme from './theme/AppTheme';
 import { LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
+import CSRFLoader from './components/common/CSRFLoader';
 
 
 const router = getRoutes();
@@ -24,6 +24,7 @@ createRoot(document.getElementById('root')).render(
       >
         <LocalizationProvider dateAdapter={AdapterDateFns}>
         <AppTheme>
+          <CSRFLoader />
           <RouterProvider router={router} />
         </AppTheme>
         </LocalizationProvider>

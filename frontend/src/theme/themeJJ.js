@@ -17,8 +17,8 @@ const themeJJ = createTheme({
       contrastText: '#ffffff',
     },
     background: {
-      default: '#f0faff', // Fondo general suave azul
-      paper: '#ffffff',   // Fondo de tarjetas y componentes
+      default: '#FFFFFF', // Fondo general blanco
+      paper: '#fcfcfc',   // Fondo de tarjetas y componentes
     },
     text: {
       primary: '#0A0A0A',
@@ -57,14 +57,14 @@ const themeJJ = createTheme({
     },
   },
   shape: {
-    borderRadius: 10,
+    borderRadius: 0,
   },
   components: {
     MuiButton: {
       styleOverrides: {
         root: {
           padding: '10px 20px',
-          borderRadius: 999,
+          borderRadius: 0,
         },
       },
     },
@@ -85,7 +85,7 @@ const themeJJ = createTheme({
     MuiPaper: {
       styleOverrides: {
         root: {
-          borderRadius: 10,
+          borderRadius: 0,
         },
       },
     },

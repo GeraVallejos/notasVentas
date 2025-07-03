@@ -2,7 +2,8 @@ import { useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { clearStore } from '../auth/authSlice';
 import { LoginForm } from '../components/forms/LoginForm';
-import { Grid, Box, Typography } from '@mui/material';
+import { Grid, Box} from '@mui/material';
+import jj_baner from '../assets/imagenes/jj_baner.jpg'
 
 const LoginPage = () => {
   const dispatch = useDispatch();
@@ -27,33 +28,6 @@ const LoginPage = () => {
           p: 2,
         }}
       >
-        <Box
-          sx={{
-            position: 'absolute',
-            top: 16,
-            left: 16,
-            display: 'flex',
-            alignItems: 'center',
-            gap: 1,
-            zIndex: 1,
-          }}
-        >
-          <img
-            src="Logo_JJ.png"
-            alt="Icono"
-            style={{ width: '60px', height: '60px' }}
-          />
-          <Typography
-            variant="h6"
-            sx={{
-              background: 'linear-gradient(to right, #00BFFF, #1E90FF)',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-            }}
-          >
-            JJ DETERGENTES
-          </Typography>
-        </Box>
         <LoginForm />
       </Grid>
 
@@ -69,10 +43,12 @@ const LoginPage = () => {
           sx={{
             width: '50vw',
             height: '100vh',
-            backgroundImage: 'url("/paintJJ.jpg")', // asegúrate que esté en public/
+            backgroundImage: `url(${jj_baner})`, 
             backgroundSize: 'cover',
             backgroundPosition: 'center',
             backgroundRepeat: 'no-repeat',
+            opacity: 0.8,
+            
           }}
         />
       </Grid>

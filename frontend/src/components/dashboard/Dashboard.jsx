@@ -15,7 +15,7 @@ import { api } from '../../utils/api';
 import { format, addDays, subDays, parse } from 'date-fns';
 import FilterComponent from '../dashboard/FilterComponent';
 import MapaDespachos from '../dashboard/MapaDespachos';
-import rmGeoJson from '../../assets/rm_normalizado.json';
+import rmGeoJson from '../../assets/mapas/rm_normalizado.json';
 import normalizarNombre from '../../utils/normalizarNombre';
 import { useSnackbar } from 'notistack';
 
@@ -139,7 +139,7 @@ const Dashboard = () => {
 
             <Grid container spacing={2} display='flex' justifyContent='center'>
                 <Grid size={{ xs: 12, sm: 6, lg: 4 }}>
-                    <Paper sx={{ p: 2, height: 400, width: 300, display: 'flex', flexDirection: 'column' }}>
+                    <Paper sx={{ p: 2, height: 400, display: 'flex', flexDirection: 'column' }}>
                         <Box sx={{ mb: 2 }}>
                             <Typography variant="h6" align='center'>Total de Notas</Typography>
                             <Typography variant="h4" sx={{ fontWeight: 'bold', textAlign: 'center' }}>
@@ -246,7 +246,7 @@ const Dashboard = () => {
                 </Grid>
 
                 <Grid size={{ xs: 12, sm: 6, lg: 4 }}>
-                    <Paper sx={{ p: 2, height: 400, width: 300 }}>
+                    <Paper sx={{ p: 2, height: 400 }}>
                         <Typography variant="h6" gutterBottom>
                             Otra métrica importante
                         </Typography>

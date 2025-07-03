@@ -6,25 +6,35 @@ import {
   ListItemText,
   useTheme,
   useMediaQuery,
+  Box,
+  Typography,
 } from '@mui/material';
-import NoteIcon from '@mui/icons-material/Note';
-import ListAltIcon from '@mui/icons-material/ListAlt';
 import { NavLink } from 'react-router-dom';
+import { getYear } from 'date-fns';
+import archivo_carpeta from '../../assets/iconos/archivo_carpeta.png';
+import lista_notas from '../../assets/iconos/lista_notas.png';
+import bloc from '../../assets/iconos/bloc.png';
 
-const drawerWidth = 240;
+const drawerWidth = 180;
 
 const SidebarContent = ({ onClick }) => (
-  <List sx={{mt:10}}>
+  <List sx={{ mt: 10 }}>
     <ListItemButton component={NavLink} to="/lista-notas" onClick={onClick}>
-      <ListItemIcon><ListAltIcon /></ListItemIcon>
+      <ListItemIcon sx={{ minWidth: 32 }}>
+        <img src={lista_notas} alt="Lista de Notas" style={{ width: 24, height: 24 }} />
+      </ListItemIcon>
       <ListItemText primary="Lista de Notas" />
     </ListItemButton>
     <ListItemButton component={NavLink} to="/notas" onClick={onClick}>
-      <ListItemIcon><NoteIcon /></ListItemIcon>
+      <ListItemIcon sx={{ minWidth: 32 }}>
+        <img src={bloc} alt="Nueva Nota" style={{ width: 24, height: 24 }} />
+      </ListItemIcon>
       <ListItemText primary="Nueva Nota" />
     </ListItemButton>
     <ListItemButton component={NavLink} to="/lista-historico" onClick={onClick}>
-      <ListItemIcon><NoteIcon /></ListItemIcon>
+      <ListItemIcon sx={{ minWidth: 32 }}>
+        <img src={archivo_carpeta} alt="Histórico" style={{ width: 24, height: 24 }} />
+      </ListItemIcon>
       <ListItemText primary="Histórico" />
     </ListItemButton>
   </List>
@@ -46,7 +56,6 @@ const Sidebar = ({ mobileOpen, onClose }) => {
           sx={{
             [`& .MuiDrawer-paper`]: {
               width: drawerWidth,
-              backgroundColor: '#f0faff',
             },
           }}
         >
@@ -54,7 +63,7 @@ const Sidebar = ({ mobileOpen, onClose }) => {
         </Drawer>
       )}
 
-      {/* Drawer permanente para pantallas grandes */}
+      {/* Drawer permanente con footer solo en pantallas grandes */}
       {!isMobile && (
         <Drawer
           variant="permanent"
@@ -65,11 +74,23 @@ const Sidebar = ({ mobileOpen, onClose }) => {
             [`& .MuiDrawer-paper`]: {
               width: drawerWidth,
               boxSizing: 'border-box',
-              backgroundColor: '#f0faff',
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'space-between',
             },
           }}
         >
-          <SidebarContent />
+          {/* Contenido arriba */}
+          <Box>
+            <SidebarContent />
+          </Box>
+
+          {/* Footer abajo */}
+          <Box sx={{ p: 2 }}>
+            <Typography variant="caption" color="text.secondary" align='center' >
+              © {getYear(new Date())} Gerardo Vallejos <br /> <span style={{fontSize: 10}}>Todos los derechos reservados</span>
+            </Typography>
+          </Box>
         </Drawer>
       )}
     </>

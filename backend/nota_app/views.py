@@ -5,6 +5,7 @@ from rest_framework import permissions
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from django.contrib.auth.hashers import check_password
+from django.utils.decorators import method_decorator
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from rest_framework.permissions import AllowAny
 from rest_framework import status
@@ -14,6 +15,9 @@ import logging
 from django.utils.timezone import make_aware
 from django.db.models import DateField
 from django.db.models.functions import Cast
+from rest_framework.views import APIView
+from django.views.decorators.csrf import ensure_csrf_cookie
+from django.http import JsonResponse
 
 logger = logging.getLogger(__name__)
 
@@ -156,6 +160,14 @@ class CookieTokenRefreshView(TokenRefreshView):
 
         response.data = {"message": "Token refrescado exitosamente"}
         return response
+
+# Vista para generar el csrf Token
+class CSRFTokenView(APIView):
+    permission_classes = [permissions.AllowAny]
+
+    @method_decorator(ensure_csrf_cookie)
+    def get(self, request):
+        return JsonResponse({'message': 'CSRF token set'})
 
 
 class DashboardViewSet(viewsets.ViewSet):

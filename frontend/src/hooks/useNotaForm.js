@@ -7,9 +7,10 @@ const schema = yup.object().shape({
     String(originalValue).trim() === '' ? undefined : value
   ).required('Número de nota requerido'),
   razon_social: yup.string().required('Nombre del cliente requerido'),
+  rut_cliente: yup.string().required('Rut del cliente requerido'),
   fecha_despacho: yup.date().required('Fecha de despacho requerida'),
   contacto: yup.string().required('Nombre de contacto requerido'),
-  correo: yup.string().email('Correo inválido'),
+  correo: yup.string().email('Correo inválido').required('Correo requerido'),
   direccion: yup.string().required('Dirección requerida'),
   comuna: yup.string().required('Comuna requerida'),
   telefono: yup

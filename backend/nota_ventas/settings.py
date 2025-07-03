@@ -183,9 +183,7 @@ SIMPLE_JWT = {
 }
 
 # Configuracion CORS
-CORS_ALLOWED_ORIGINS = [
-    os.getenv('CORS_KEYS')
-]
+CORS_ALLOWED_ORIGINS = os.getenv('CORS_KEYS', '').split(',')
 
 CORS_ALLOW_CREDENTIALS = True
 CORS_EXPOSE_HEADERS = ['Content-Type', 'X-CSRFToken']  # Necesario para CSRF
@@ -196,9 +194,7 @@ CSRF_COOKIE_HTTPONLY = False
 CSRF_COOKIE_SAMESITE = 'Lax'
 CSRF_USE_SESSIONS = False
 CSRF_COOKIE_HTTPONLY = False  # React debe leer el token
-CSRF_TRUSTED_ORIGINS = [
-    os.getenv('CORS_KEYS')
-]
+CSRF_TRUSTED_ORIGINS = [origin.replace('http://', 'http://').replace('https://', 'https://') for origin in os.getenv('CORS_KEYS', '').split(',')]
 
 # Cookies de sesión
 SESSION_COOKIE_SECURE = False

@@ -161,7 +161,7 @@ const NotasDataGrid = ({ estado, nombre, exportNombre, userGroups }) => {
   const columns = esVentas ? baseColumns : [...baseColumns, deleteColumn];
 
   return (
-    <Box sx={{ height: '80vh', width: '78.5vw', marginLeft: 2 }}>
+    <Box sx={{ height: '80vh', width: '83.5vw', marginLeft: 2 }}>
       <Typography variant="h5" gutterBottom>
         {nombre}
       </Typography>
@@ -177,6 +177,9 @@ const NotasDataGrid = ({ estado, nombre, exportNombre, userGroups }) => {
         showToolbar
         slotProps={{ toolbar: { onExport } }}
         localeText={dataGridEs}
+        sx={{
+          userSelect: 'none',
+        }}
         initialState={{
           sorting: {
             sortModel: [{ field: 'fecha_despacho', sort: 'asc' }],

@@ -8,6 +8,25 @@ export const api = axios.create({
   },
 });
 
+// Función para leer el CSRF token desde las cookies
+function getCookie(name) {
+  const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
+  return match ? match[2] : null;
+}
+
+// Agrega automáticamente el token CSRF en los métodos peligrosos
+api.interceptors.request.use((config) => {
+  const csrfToken = getCookie('csrftoken');
+  if (
+    csrfToken &&
+    ['post', 'put', 'patch', 'delete'].includes(config.method?.toLowerCase())
+  ) {
+    config.headers['X-CSRFToken'] = csrfToken;
+  }
+  return config;
+});
+
+// Interceptor para intentar refresh automático de token
 api.interceptors.response.use(
   response => response,
   async error => {

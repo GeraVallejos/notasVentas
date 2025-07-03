@@ -1,6 +1,6 @@
 from django.urls import path, include
 from rest_framework import routers
-from .views import UsuarioView, NotasView, ClientesView, DashboardViewSet
+from .views import UsuarioView, NotasView, ClientesView, DashboardViewSet, CSRFTokenView
 
 router = routers.DefaultRouter()
 router.register(r'usuario', UsuarioView, 'usuario')
@@ -16,6 +16,7 @@ usuario_extra_routes = [
 ]
 
 urlpatterns = [
+    path('csrf/', CSRFTokenView.as_view(), name='csrf'),
     path('', include(router.urls)),
     *usuario_extra_routes,
 ]
