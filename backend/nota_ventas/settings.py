@@ -16,7 +16,8 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
-
+# variable para produccion
+IS_PRODUCTION = os.getenv('IS_PRODUCTION', 'False') == 'True'
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -29,9 +30,11 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.getenv('SECRET_KEY_DJANGO')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.getenv('DEBUG')
+DEBUG = os.getenv('DEBUG', 'False') == 'True'
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1']
+
+
+ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "").split(",")
 
 
 # Application definition
@@ -132,8 +135,9 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
-
-STATIC_URL = 'static/'
+# Para collectsatic neecsario en Railway
+STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
@@ -183,21 +187,27 @@ SIMPLE_JWT = {
 }
 
 # Configuracion CORS
+
+
 CORS_ALLOWED_ORIGINS = os.getenv('CORS_KEYS', '').split(',')
 
 CORS_ALLOW_CREDENTIALS = True
 CORS_EXPOSE_HEADERS = ['Content-Type', 'X-CSRFToken']  # Necesario para CSRF
 
 # CSRF
-CSRF_COOKIE_SECURE = False
+# variable para produccion
+IS_PRODUCTION = os.getenv('IS_PRODUCTION', 'False') == 'True'
+
+CSRF_COOKIE_SECURE = IS_PRODUCTION
 CSRF_COOKIE_HTTPONLY = False
 CSRF_COOKIE_SAMESITE = 'Lax'
 CSRF_USE_SESSIONS = False
-CSRF_COOKIE_HTTPONLY = False  # React debe leer el token
-CSRF_TRUSTED_ORIGINS = [origin.replace('http://', 'http://').replace('https://', 'https://') for origin in os.getenv('CORS_KEYS', '').split(',')]
+CSRF_TRUSTED_ORIGINS = [
+    origin for origin in os.getenv('CORS_KEYS', '').split(',') if origin.startswith('https://')
+    ]
 
 # Cookies de sesión
-SESSION_COOKIE_SECURE = False
+SESSION_COOKIE_SECURE = IS_PRODUCTION
 SESSION_COOKIE_SAMESITE = 'Lax'
 
 # Headers de seguridad
