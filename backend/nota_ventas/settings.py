@@ -28,6 +28,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.getenv('SECRET_KEY_DJANGO')
+if IS_PRODUCTION and not SECRET_KEY:
+    raise ValueError("SECRET_KEY_DJANGO debe estar definido en producción!")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv('DEBUG', 'False') == 'True'
@@ -56,7 +58,8 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
     'nota_app.middleware.JWTTokenFromCookieMiddleware',
-    'django.middleware.security.SecurityMiddleware',    
+    'django.middleware.security.SecurityMiddleware', 
+    'whitenoise.middleware.WhiteNoiseMiddleware',   
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -92,6 +95,10 @@ WSGI_APPLICATION = 'nota_ventas.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
+        'OPTIONS': { 
+            'ssl_mode': 'REQUIRED',
+            'charset': 'utf8mb4', 
+        },
         'NAME': os.getenv('DB_NAME'),
         'USER': os.getenv('DB_USER'),
         'PASSWORD': os.getenv('DB_PASSWORD'),
@@ -100,7 +107,7 @@ DATABASES = {
     }
 }
 
-AUTH_USER_MODEL = os.getenv('USERDB')
+AUTH_USER_MODEL = 'nota_app.Usuarios'
 
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
@@ -138,6 +145,8 @@ USE_TZ = True
 # Para collectsatic neecsario en Railway
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+WHITENOISE_MAX_AGE = 604800 if IS_PRODUCTION else 0
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
@@ -187,17 +196,12 @@ SIMPLE_JWT = {
 }
 
 # Configuracion CORS
-
-
-CORS_ALLOWED_ORIGINS = os.getenv('CORS_KEYS', '').split(',')
+CORS_ALLOWED_ORIGINS = os.getenv('CORS_KEYS', '').split(',') if os.getenv('CORS_KEYS') else []
 
 CORS_ALLOW_CREDENTIALS = True
 CORS_EXPOSE_HEADERS = ['Content-Type', 'X-CSRFToken']  # Necesario para CSRF
 
 # CSRF
-# variable para produccion
-IS_PRODUCTION = os.getenv('IS_PRODUCTION', 'False') == 'True'
-
 CSRF_COOKIE_SECURE = IS_PRODUCTION
 CSRF_COOKIE_HTTPONLY = False
 CSRF_COOKIE_SAMESITE = 'Lax'
@@ -225,4 +229,27 @@ AXES_FAILURE_LIMIT = 10  # Número de intentos fallidos antes de bloquear
 AXES_COOLOFF_TIME = 1  # 1 hora de bloqueo (puede ser timedelta(hours=1))
 AXES_LOCKOUT_PARAMETERS = ['ip_address', 'username']  # Bloquear por IP + usuario
 AXES_RESET_ON_SUCCESS = True  # Reiniciar contador tras login exitoso
-AXES_ENABLED = False
+AXES_ENABLED = IS_PRODUCTION
+
+SECURE_SSL_REDIRECT = IS_PRODUCTION
+
+# Configuracion del logger
+if IS_PRODUCTION:
+    LOGGING = {
+        'version': 1,
+        'disable_existing_loggers': False,
+        'handlers': {
+            'file': {
+                'level': 'WARNING',
+                'class': 'logging.FileHandler',
+                'filename': os.path.join(BASE_DIR, 'django.log'),
+            },
+        },
+        'loggers': {
+            'django': {
+                'handlers': ['file'],
+                'level': 'WARNING',
+                'propagate': True,
+            },
+        },
+    }
