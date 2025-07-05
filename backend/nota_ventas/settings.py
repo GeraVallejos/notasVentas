@@ -92,13 +92,17 @@ WSGI_APPLICATION = 'nota_ventas.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
+# Esto solo es necesario en produccion, en local no funiona con SSL
+db_options = {
+    'charset': 'utf8mb4',
+}
+
+if IS_PRODUCTION:
+    db_options['ssl_mode'] = 'REQUIRED'
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'OPTIONS': { 
-            'ssl_mode': 'REQUIRED',
-            'charset': 'utf8mb4', 
-        },
         'NAME': os.getenv('DB_NAME'),
         'USER': os.getenv('DB_USER'),
         'PASSWORD': os.getenv('DB_PASSWORD'),
