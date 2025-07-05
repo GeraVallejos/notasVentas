@@ -102,12 +102,13 @@ if IS_PRODUCTION:
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': os.getenv('DB_NAME'),
-        'USER': os.getenv('DB_USER'),
-        'PASSWORD': os.getenv('DB_PASSWORD'),
-        'HOST': os.getenv('DB_HOST'),
-        'PORT': os.getenv('DB_PORT'),
+       'ENGINE': 'django.db.backends.mysql',
+        'NAME': os.getenv('MYSQLDATABASE') or os.getenv('DB_NAME'),
+        'USER': os.getenv('MYSQLUSER') or os.getenv('DB_USER'),
+        'PASSWORD': os.getenv('MYSQLPASSWORD') or os.getenv('DB_PASSWORD'),
+        'HOST': os.getenv('MYSQLHOST') or os.getenv('DB_HOST'),
+        'PORT': os.getenv('MYSQLPORT') or os.getenv('DB_PORT'),
+        'OPTIONS': db_options,
     }
 }
 
