@@ -237,6 +237,7 @@ AXES_RESET_ON_SUCCESS = True  # Reiniciar contador tras login exitoso
 AXES_ENABLED = IS_PRODUCTION
 
 SECURE_SSL_REDIRECT = IS_PRODUCTION
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 # Configuracion del logger
 if IS_PRODUCTION:
