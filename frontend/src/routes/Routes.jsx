@@ -4,7 +4,7 @@ import NotasPage from "../pages/NotasPage";
 import HomePage from "../pages/HomePage";
 import Loginpage from "../pages/LoginPage";
 import AuthLayout from "../layouts/AuthLayout";
-import AppLayout from "../layouts/Applayout";
+import AppLayout from "../layouts/AppLayout";
 import NotasDataPage from "../pages/NotasDataPage";
 import HistoricoNotasPage from "../pages/HistoricoNotasPage";
 
