@@ -98,7 +98,7 @@ db_options = {
 }
 
 if IS_PRODUCTION:
-    db_options['ssl_mode'] = 'REQUIRED'
+    db_options['ssl'] = {'ssl_mode': 'REQUIRED'}
 
 DATABASES = {
     'default': {
