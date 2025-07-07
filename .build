@@ -1,3 +1,10 @@
-cd backend
-python manage.py migrate --noinput
-python manage.py collectstatic --noinput
+set -e  # Detiene el script si hay errores
+
+# Instala dependencias
+cd backend && pip install -r requirements.txt
+
+# Ejecuta collectstatic y migrate SOLO en producción
+if [ "$IS_PRODUCTION" = "True" ]; then
+    python manage.py collectstatic --noinput
+    python manage.py migrate --noinput
+fi
