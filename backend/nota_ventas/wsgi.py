@@ -15,6 +15,5 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'nota_ventas.settings')
 
 application = get_wsgi_application()
 
-# Ruta ABSOLUTA para staticfiles (Railway usa /app como raíz del contenedor)
-STATIC_ROOT = '/app/backend/staticfiles' if os.getenv('IS_PRODUCTION') == 'True' else os.path.join(os.path.dirname(__file__), '..', 'staticfiles')
+STATIC_ROOT = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'staticfiles')
 application = WhiteNoise(application, root=STATIC_ROOT)
