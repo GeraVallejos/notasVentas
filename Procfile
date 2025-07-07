@@ -1,1 +1,1 @@
-web: cd backend && gunicorn nota_ventas.wsgi --bind 0.0.0.0:$PORT
+web: gunicorn backend.nota_ventas.wsgi --bind 0.0.0.0:$PORT
