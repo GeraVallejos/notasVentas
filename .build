@@ -1,3 +1,4 @@
+#!/bin/bash
 set -e  # Detiene el script si hay errores
 
 # Instala dependencias
