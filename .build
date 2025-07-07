@@ -2,3 +2,6 @@
 cd backend
 python manage.py migrate --noinput
 python manage.py collectstatic --noinput
+
+echo "Archivos copiados a staticfiles:"
+ls -l staticfiles | wc -l
