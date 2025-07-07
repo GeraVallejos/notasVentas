@@ -15,9 +15,6 @@ from pathlib import Path
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'nota_ventas.settings')
 
 application = get_wsgi_application()
-
-BASE_DIR = Path(__file__).resolve().parent.parent
-
-application = WhiteNoise(application, root=os.path.join(BASE_DIR, 'staticfiles'))
+application = WhiteNoise(application, root=os.path.join(os.path.dirname(__file__), '..', '..', 'staticfiles'))
 
 
