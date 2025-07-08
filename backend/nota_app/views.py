@@ -118,7 +118,7 @@ class CookieTokenObtainPairView(TokenObtainPairView):
             value=access,
             httponly=True,
             secure=True,
-            samesite='Lax',
+            samesite='None',
             max_age=60 * 60,  # 1 hora
         )
         response.set_cookie(
@@ -126,7 +126,7 @@ class CookieTokenObtainPairView(TokenObtainPairView):
             value=refresh,
             httponly=True,
             secure=True,
-            samesite='Lax',
+            samesite='None',
             max_age=7 * 24 * 60 * 60,  # 7 días
         )
         response.set_cookie(
@@ -134,7 +134,7 @@ class CookieTokenObtainPairView(TokenObtainPairView):
             value=get_token(request),
             httponly=False,
             secure=True,
-            samesite='Lax',
+            samesite='None',
             max_age=60 * 60,
         )
 
@@ -163,7 +163,7 @@ class CookieTokenRefreshView(TokenRefreshView):
             value=access,
             httponly=True,
             secure=True,
-            samesite='Lax',
+            samesite='None',
             max_age=60 * 60,  # 1 hora
         )
 

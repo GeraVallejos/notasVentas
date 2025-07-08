@@ -110,7 +110,7 @@ export const LoginForm = () => {
               helperText={form.formState.errors.password?.message}
               fullWidth
               variant="outlined"
-              autoComplete="new-password"
+              autoComplete="off"
               autoCorrect="off"
               InputProps={{
                 startAdornment: (
