@@ -195,7 +195,7 @@ SIMPLE_JWT = {
     'AUTH_COOKIE': 'access_token',  # Nombre de la cookie
     'AUTH_COOKIE_HTTP_ONLY': True,   # Solo accesible por HTTP
     'AUTH_COOKIE_SECURE': True,      # Solo en HTTPS (True en producción)
-    'AUTH_COOKIE_SAMESITE': 'Lax',   # Protección CSRF
+    'AUTH_COOKIE_SAMESITE': 'None',   # Protección CSRF
     'AUTH_COOKIE_PATH': '/',         # Ruta donde es válida la cookie
     'AUTH_COOKIE_DOMAIN': None,      # Dominio (None para localhost)
 }
@@ -209,7 +209,7 @@ CORS_EXPOSE_HEADERS = ['Content-Type', 'X-CSRFToken']  # Necesario para CSRF
 # CSRF
 CSRF_COOKIE_SECURE = IS_PRODUCTION
 CSRF_COOKIE_HTTPONLY = False
-CSRF_COOKIE_SAMESITE = 'Lax'
+CSRF_COOKIE_SAMESITE = 'None'
 CSRF_USE_SESSIONS = False
 CSRF_TRUSTED_ORIGINS = [
     origin for origin in os.getenv('CORS_KEYS', '').split(',') if origin.startswith('https://')
