@@ -18,6 +18,7 @@ from django.db.models.functions import Cast
 from rest_framework.views import APIView
 from django.views.decorators.csrf import ensure_csrf_cookie
 from django.http import JsonResponse
+from django.middleware.csrf import get_token
 
 logger = logging.getLogger(__name__)
 
@@ -127,6 +128,14 @@ class CookieTokenObtainPairView(TokenObtainPairView):
             secure=True,
             samesite='Lax',
             max_age=7 * 24 * 60 * 60,  # 7 días
+        )
+        response.set_cookie(
+            key="csrftoken",
+            value=get_token(request),
+            httponly=False,
+            secure=True,
+            samesite='Lax',
+            max_age=60 * 60,
         )
 
         response.data = {"message": "Login exitoso"}
