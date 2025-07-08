@@ -1,8 +1,8 @@
-import { AppBar, Toolbar, Typography, IconButton, Box, Link } from '@mui/material';
+import { AppBar, Toolbar, IconButton, Box, Link, Avatar, Tooltip, Typography } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
 import CloseIcon from '@mui/icons-material/Close';
 import { useTheme, useMediaQuery } from '@mui/material';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { logout } from "../../auth/authThunk";
 import ActionButton from '../common/ActionButton';
 import LogoutIcon from '@mui/icons-material/Logout';
@@ -11,6 +11,16 @@ const Navbar = ({ mobileOpen, onMenuClick }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const dispatch = useDispatch();
+  const user = useSelector(state => state.auth.user);
+  console.log('Usuario actual:', user)
+
+  const getInitials = (nombre, apellido) => {
+    if (!nombre) return '?';
+    const primeraLetraNombre = nombre.substring(0, 1).toUpperCase();
+    const primeraLetraApellido = apellido ? apellido.substring(0, 1).toUpperCase() : '';
+    return `${primeraLetraNombre}${primeraLetraApellido}`;
+  };
+
 
   return (
     <AppBar
@@ -38,6 +48,30 @@ const Navbar = ({ mobileOpen, onMenuClick }) => {
           Sistema de Pedidos
         </Link>
         <Box sx={{ flexGrow: 1 }} />
+        {user?.nombre && (
+          <Tooltip title={
+            <Box sx={{ p: 0 }}>
+              <Typography variant="body3" fontWeight="bold">
+                {user.nombre} {user.apellido}
+              </Typography>
+            </Box>
+          }>
+            <Avatar
+              sx={{
+                bgcolor: 'white',
+                color: '#1E90FF',
+                width: 34,
+                height: 34,
+                fontSize: '1rem',
+                fontWeight: 600,
+                mr: 2
+              }}
+
+            >
+              {getInitials(user.nombre, user.apellido)}
+            </Avatar>
+          </Tooltip>
+        )}
         <ActionButton
           action={() => dispatch(logout()).unwrap()}
           label="Cerrar sesión"

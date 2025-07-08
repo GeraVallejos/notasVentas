@@ -9,6 +9,8 @@ import {
   Stack,
   TextField,
   Typography,
+  useMediaQuery,
+  useTheme,
 } from '@mui/material';
 import { Visibility, VisibilityOff, Person, Lock } from '@mui/icons-material';
 import { FormProvider } from 'react-hook-form';
@@ -20,6 +22,8 @@ export const LoginForm = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
   const { enqueueSnackbar } = useSnackbar();
+  const theme = useTheme();
+  const isSmallScreen = useMediaQuery(theme.breakpoints.down('sm'));
 
   const form = useLoginForm(async (data) => {
     try {
@@ -50,7 +54,7 @@ export const LoginForm = () => {
   return (
     <Box
       sx={{
-        width: 360,
+        width: isSmallScreen ? '90%' : '55%',
         mx: 'auto',
         mt: 0,
         px: 4,
