@@ -12,7 +12,6 @@ const Navbar = ({ mobileOpen, onMenuClick }) => {
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const dispatch = useDispatch();
   const user = useSelector(state => state.auth.user);
-  console.log('Usuario actual:', user)
 
   const getInitials = (nombre, apellido) => {
     if (!nombre) return '?';

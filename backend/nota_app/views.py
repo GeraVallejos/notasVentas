@@ -232,7 +232,7 @@ class DashboardViewSet(viewsets.ViewSet):
             notas_por_comuna = Notas.objects.filter(notas_filtro).exclude(
                 comuna__isnull=True
             ).values(
-                'comuna', 'estado_solicitud'
+                'comuna', 'despacho_retira'
             ).annotate(
                 total=Count('id_nota')
             ).order_by('-total')

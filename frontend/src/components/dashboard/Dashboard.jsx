@@ -53,9 +53,9 @@ const Dashboard = () => {
             setDataDespachos(
                 (response.data.comunas?.resumen || []).map(item => ({
                     comuna: normalizarNombre(item.comuna),
-                    estado_solicitud: item.estado_solicitud,
+                    despacho_retira: item.despacho_retira,
                     total: item.total,
-                })).filter(item => item.estado_solicitud === 'No Solicitado')
+                })).filter(item => item.despacho_retira === 'Despacho')
             );
 
             const datosNotas = [];
