@@ -32,6 +32,17 @@ export const NotaForm = () => {
   const [openDialog, setOpenDialog] = useState(false);
   const [clienteNuevo, setClienteNuevo] = useState(null);
 
+  // Funcion para dejar los strigs de la data en mayus, con exepciones
+  const transformMayus = (obj, excluir = []) => {
+  const nuevoObj = { ...obj };
+  for (const key in nuevoObj) {
+    if (typeof nuevoObj[key] === 'string' && !excluir.includes(key)) {
+      nuevoObj[key] = nuevoObj[key].toUpperCase();
+    }
+  }
+  return nuevoObj;
+};
+
   const form = useNotaForm(async (data) => {
     try {
       const { data: res } = await api.get('/nota/validar-numero/', {
@@ -69,7 +80,7 @@ export const NotaForm = () => {
   const crearNota = async (data, guardarCliente = false) => {
     try {
       const payload = {
-        ...data,
+        ...transformMayus(data, ['correo']),
         rut_cliente: data.rut_cliente,
         guardar_cliente: guardarCliente || false
       };
