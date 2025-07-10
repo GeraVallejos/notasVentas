@@ -37,6 +37,7 @@ const NotasDataGrid = ({ estado, nombre, exportNombre, userGroups }) => {
       valueFormatter: (params) => format(new Date(params), 'dd/MM/yyyy')
     },
     { field: 'contacto', headerName: 'Contacto', width: 150 },
+    { field: 'correo', headerName: 'Correo', width: 150 },
     { field: 'telefono', headerName: 'Teléfono', width: 110 },
     { field: 'direccion', headerName: 'Dirección', width: 120 },
     { field: 'comuna', headerName: 'Comuna', width: 120 },
@@ -47,22 +48,32 @@ const NotasDataGrid = ({ estado, nombre, exportNombre, userGroups }) => {
     { field: 'horario_desde', headerName: 'Horario Desde', width: 120 },
     { field: 'horario_hasta', headerName: 'Horario hasta', width: 120 },
     {
-      field: 'fecha_creacion',
-      headerName: 'Fecha Creacion',
-      width: 120,
-      editable: true,
-      valueFormatter: (params) => format(new Date(params), 'dd/MM/yyyy')
-    },
+    field: 'fecha_creacion_date',
+    headerName: 'Fecha Creación',
+    width: 120,
+    valueFormatter: (params) => format(new Date(params), 'dd/MM/yyyy')
+  },
+  {
+    field: 'fecha_creacion_time',
+    headerName: 'Hora Creación',
+    width: 100,
+    valueFormatter: (params) => format(new Date(params), 'HH:mm')
+  },
     { field: 'estado_solicitud', headerName: 'Estado', width: 115 },
     { field: 'usuario_creador', headerName: 'Usuario Creación', width: 115 },
     { field: 'usuario_modificador', headerName: 'Usuario Modificación', width: 115 },
     {
-      field: 'fecha_modificacion',
-      headerName: 'Fecha Modificación',
-      width: 120,
-      editable: true,
-      valueFormatter: (params) => format(new Date(params), 'dd/MM/yyyy')
-    },
+    field: 'fecha_modificacion_date',
+    headerName: 'Fecha Modif.',
+    width: 120,
+    valueFormatter: (params) => format(new Date(params), 'dd/MM/yyyy')
+  },
+  {
+    field: 'fecha_modificacion_time',
+    headerName: 'Hora Modif.',
+    width: 100,
+    valueFormatter: (params) => format(new Date(params), 'HH:mm')
+  },
   ];
 
   const handleRowClick = (params) => {
@@ -108,7 +119,14 @@ const NotasDataGrid = ({ estado, nombre, exportNombre, userGroups }) => {
     const fetchNotas = async () => {
       try {
         const res = await api.get('/nota/');
-        const dataFilter = res.data.filter(res => res.estado_solicitud === estado);
+        const dataFilter = res.data.filter(res => res.estado_solicitud === estado)
+        .map(nota => ({
+          ...nota,
+          fecha_creacion_date: nota.fecha_creacion, // Para fecha
+          fecha_creacion_time: nota.fecha_creacion, // Para hora
+          fecha_modificacion_date: nota.fecha_modificacion, // Si también quieres separar modificación
+          fecha_modificacion_time: nota.fecha_modificacion
+        }));
         setNotas(dataFilter);
       } catch (error) {
         console.error('Error al obtener las notas:', error);
@@ -189,7 +207,8 @@ const NotasDataGrid = ({ estado, nombre, exportNombre, userGroups }) => {
               rut_cliente: false,
               usuario_creador: false,
               usuario_modificador: false,
-              fecha_modificacion: false,
+              fecha_modificacion_date: false,
+              fecha_modificacion_time: false,
               ciudad: false,
               region: false,
             },
