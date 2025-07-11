@@ -189,7 +189,7 @@ const NotasDataGrid = ({ estado, nombre, exportNombre, userGroups }) => {
       <ConfirmDialog
         open={confirmOpen}
         title="Esta acción no se puede deshacer"
-        content={`¿Estás seguro que quieres borrar la nota n° ${notaToDelete?.nota}?`}
+        content={`¿Seguro que quieres borrar la nota n° ${notaToDelete?.nota}?`}
         onClose={() => setConfirmOpen(false)}
         onConfirm={handleConfirmDelete}
       />
