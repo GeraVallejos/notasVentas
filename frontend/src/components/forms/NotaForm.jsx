@@ -17,7 +17,7 @@ import {
   DialogActions
 } from '@mui/material';
 import { Controller, FormProvider } from 'react-hook-form';
-import useNotaForm from '../../hooks/useNotaForm';
+import { useNotaForm } from '../../hooks/useNotaForm';
 import { api } from '../../utils/api';
 import { useSnackbar } from 'notistack';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';

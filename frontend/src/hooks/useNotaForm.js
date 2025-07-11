@@ -1,93 +1,59 @@
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
-import { notaSchema } from '../utils/notaShema'
-import { api } from '../utils/api';
-import { format } from 'date-fns';
+import * as yup from 'yup';
 
-const formatTime = (time) => {
-  if (!time) return null;
-  if (typeof time === 'string' && time.match(/^\d{2}:\d{2}$/)) return time;
-  if (time instanceof Date) return format(time, 'HH:mm');
-  return null;
-};
+const schema = yup.object().shape({
+  num_nota: yup.number().transform((value, originalValue) =>
+    String(originalValue).trim() === '' ? undefined : value
+  ).required('Número de nota requerido'),
+  razon_social: yup.string().required('Nombre del cliente requerido'),
+  rut_cliente: yup.string().required('Rut del cliente requerido'),
+  fecha_despacho: yup.date().required('Fecha de despacho requerida'),
+  contacto: yup.string().required('Nombre de contacto requerido'),
+  correo: yup.string().email('Correo inválido').required('Correo requerido'),
+  direccion: yup.string().required('Dirección requerida'),
+  comuna: yup.string().required('Comuna requerida'),
+  telefono: yup
+  .string()
+  .matches(/^[1-9]\d{8}$/, 'Teléfono debe tener 9 dígitos')
+  .required('Teléfono requerido'),
+  observacion: yup.string(),
+  despacho_retira: yup.string().required('Debe elegir entre despacho o retira'),
+  horario_desde: yup.string(),
+  horario_hasta: yup.string(),
+});
 
-const useNotaForm = ({ nota, onClose, onSave, enqueueSnackbar }) => {
+export const useNotaForm = (onSubmit) => {
   const methods = useForm({
-    resolver: yupResolver(notaSchema),
+    resolver: yupResolver(schema),
     mode: 'onTouched',
-    defaultValues: {
+    defaultValues: {  
       num_nota: '',
-      razon_social: '',
       rut_cliente: '',
-      correo: '',
-      fecha_despacho: null,
-      contacto: '',
-      telefono: '',
+      razon_social: '',
       direccion: '',
-      comuna: '',
+      comuna: '',    
+      telefono: '',
+      correo: '',
+      contacto: '',
       observacion: '',
-      despacho_retira: '',
+      fecha_despacho: null,
       horario_desde: '',
       horario_hasta: '',
-      estado_solicitud: '',
-      password: ''
-    },
+      despacho_retira: ''
+    }
   });
 
-  const { reset, setValue, handleSubmit, ...rest } = methods;
-
-  const onSubmit = async (data) => {
-    try {
-      const res = await api.post('/usuario/verify_password/', { password: data.password });
-      if (!res.data.valid) {
-        enqueueSnackbar('Contraseña incorrecta', { variant: 'error' });
-        return;
-      }
-
-      const payload = {
-        ...data,
-        telefono: `+56${data.telefono}`,
-        horario_desde: formatTime(data.horario_desde),
-        horario_hasta: formatTime(data.horario_hasta),
-        fecha_despacho: data.fecha_despacho?.toISOString(),
-      };
-      delete payload.password;
-
-      await api.put(`/nota/${nota.id_nota}/`, payload);
-      enqueueSnackbar('Pedido actualizado', { variant: 'success' });
-      onSave();
-      onClose();
-    } catch (error) {
-      console.error(error);
-      enqueueSnackbar('Error al actualizar el pedido', { variant: 'error' });
-    } finally {
-      setValue('password', '');
-    }
-  };
-
-  const handleClose = () => {
-    setValue('password', '');
-    onClose();
-  };
-
-  // Populate form when nota cambia
-  if (nota) {
-    reset({
-      ...nota,
-      telefono: nota.telefono?.startsWith('+56') ? nota.telefono.slice(3) : nota.telefono,
-      fecha_despacho: nota.fecha_despacho ? new Date(nota.fecha_despacho) : null,
-      horario_desde: typeof nota.horario_desde === 'string' ? nota.horario_desde : '',
-      horario_hasta: typeof nota.horario_hasta === 'string' ? nota.horario_hasta : '',
-      password: '',
-    });
-  }
+  const handleSubmit = methods.handleSubmit((data) => {
+    const dataConPrefijo = {
+      ...data,
+      telefono: `+56${data.telefono}`,
+    };
+    onSubmit(dataConPrefijo);
+  });
 
   return {
-    methods: { ...rest, handleSubmit, reset, setValue },
-    onSubmit: handleSubmit(onSubmit),
-    handleClose,
-    loading: rest.formState.isSubmitting,
+    ...methods,
+    onSubmit: handleSubmit,
   };
 };
-
-export default useNotaForm;
