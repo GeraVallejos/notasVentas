@@ -20,7 +20,7 @@
     "@mui/x-charts": "^8.5.0",
     "@mui/x-data-grid": "^8.6.0",
     "@mui/x-date-pickers": "^8.6.0",
-    "@reduxjs/toolkit": "^2.8.1",
+    "@reduxjs/toolkit": "^2.8.2",
     "axios": "^1.9.0",
     "date-fns": "^4.1.0",
     "exceljs": "^4.4.0",
