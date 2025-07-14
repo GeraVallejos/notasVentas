@@ -34,14 +34,14 @@ export const NotaForm = () => {
 
   // Funcion para dejar los strigs de la data en mayus, con exepciones
   const transformMayus = (obj, excluir = []) => {
-  const nuevoObj = { ...obj };
-  for (const key in nuevoObj) {
-    if (typeof nuevoObj[key] === 'string' && !excluir.includes(key)) {
-      nuevoObj[key] = nuevoObj[key].toUpperCase();
+    const nuevoObj = { ...obj };
+    for (const key in nuevoObj) {
+      if (typeof nuevoObj[key] === 'string' && !excluir.includes(key)) {
+        nuevoObj[key] = nuevoObj[key].toUpperCase();
+      }
     }
-  }
-  return nuevoObj;
-};
+    return nuevoObj;
+  };
 
   const form = useNotaForm(async (data) => {
     try {
@@ -149,17 +149,25 @@ export const NotaForm = () => {
                 <Controller name="comuna" control={form.control} render={({ field, fieldState }) => <ComunaAutocomplete value={field.value} onChange={field.onChange} error={!!fieldState.error} helperText={fieldState.error?.message} />} />
                 <DatePicker label="Fecha de Despacho" value={form.watch('fecha_despacho') ? parseISO(form.watch('fecha_despacho')) : null} onChange={(date) => form.setValue('fecha_despacho', isValid(date) ? date.toISOString() : '')} format="dd/MM/yyyy" slotProps={{ textField: { fullWidth: true, size: 'small', error: !!form.formState.errors.fecha_despacho, helperText: form.formState.errors.fecha_despacho?.message } }} />
                 <Controller name="telefono" control={form.control} render={({ field, fieldState }) => <TextField {...field} label="Teléfono" fullWidth onChange={(e) => { let value = e.target.value.replace(/\D/g, ''); if (value.length <= 9) field.onChange(value); }} InputProps={{ startAdornment: <InputAdornment position="start">+56</InputAdornment>, inputMode: 'numeric' }} inputProps={{ maxLength: 9, pattern: '[0-9]*' }} error={!!fieldState.error} helperText={fieldState.error?.message} />} />
-                <Controller name="despacho_retira" control={form.control} defaultValue='' render={({ field, fieldState }) => (
-                  <FormControl fullWidth error={!!fieldState.error} size='small'>
-                    <InputLabel id="despacho-label">Despacho</InputLabel>
-                    <Select {...field} labelId="despacho-label" label="Tipo Despacho">
+                <Controller
+                  name="despacho_retira"
+                  control={form.control}
+                  render={({ field, fieldState }) => (
+                    <TextField
+                      {...field}
+                      select
+                      label="Despacho"
+                      fullWidth
+                      size="small"
+                      error={!!fieldState.error}
+                      helperText={fieldState.error?.message}
+                    >
                       <MenuItem value="">Seleccione una opción</MenuItem>
                       <MenuItem value="Despacho">Despacho</MenuItem>
                       <MenuItem value="Retira">Retira</MenuItem>
-                    </Select>
-                    <FormHelperText>{fieldState.error?.message}</FormHelperText>
-                  </FormControl>
-                )} />
+                    </TextField>
+                  )}
+                />
                 <TimePicker label="Horario Hasta" ampm={false} value={form.watch('horario_hasta') ? parse(form.watch('horario_hasta'), 'HH:mm', new Date()) : null} onChange={(time) => form.setValue('horario_hasta', isValid(time) ? format(time, 'HH:mm') : '')} slotProps={{ textField: { fullWidth: true, size: 'small', error: !!form.formState.errors.horario_hasta, helperText: form.formState.errors.horario_hasta?.message } }} />
               </Stack>
             </Grid>

@@ -176,7 +176,7 @@ const EditNotaModal = ({ open, onClose, nota, onSave }) => {
                   </Select>
                   <FormHelperText>{fieldState.error?.message}</FormHelperText>
                 </FormControl>)} />
-              <TextField label="Observación" {...register('observacion')} fullWidth />
+              <TextField label="Observación" {...register('observacion')} multiline fullWidth rows={1} />
               <Controller
                 name="horario_desde"
                 control={control}
