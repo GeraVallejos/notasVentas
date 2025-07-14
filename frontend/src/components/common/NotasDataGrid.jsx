@@ -9,17 +9,24 @@ import dataGridEs from '../../utils/dataGridEs';
 import { exportExcel } from '../../utils/exportExcel';
 import EditNotaModal from '../modals/EditNotaModal';
 import ConfirmDialog from './ConfirmDialog';
+import { format, parseISO } from 'date-fns';
 
 // 🔁 Función para transformar una nota en formato listo para el grid
 const formatearNota = (nota) => ({
   ...nota,
-  fecha_creacion_date: nota.fecha_creacion,
-  fecha_creacion_time: nota.fecha_creacion,
+  fecha_creacion_date: nota.fecha_creacion
+    ? format(parseISO(nota.fecha_creacion), 'dd/MM/yyyy')
+    : '',
+  fecha_creacion_time: nota.fecha_creacion
+    ? format(parseISO(nota.fecha_creacion), 'HH:mm')
+    : '',
   fecha_modificacion_date: nota.fecha_modificacion,
   fecha_modificacion_time: nota.fecha_modificacion,
   horario_desde: typeof nota.horario_desde === 'string' ? nota.horario_desde : '',
   horario_hasta: typeof nota.horario_hasta === 'string' ? nota.horario_hasta : '',
 });
+
+
 
 const NotasDataGrid = ({ estado, nombre, exportNombre, userGroups }) => {
   const [notas, setNotas] = useState([]);
@@ -103,14 +110,21 @@ const NotasDataGrid = ({ estado, nombre, exportNombre, userGroups }) => {
     { field: 'observacion', headerName: 'Observación', width: 120 },
     { field: 'horario_desde', headerName: 'Horario Desde', width: 120 },
     { field: 'horario_hasta', headerName: 'Horario Hasta', width: 120 },
-    { field: 'fecha_creacion_date', headerName: 'Fecha Creación', width: 120 },
-    { field: 'fecha_creacion_time', headerName: 'Hora Creación', width: 100 },
+    {
+      field: 'fecha_creacion_date',
+      headerName: 'Fecha Creación',
+      width: 120
+    },
+    {
+      field: 'fecha_creacion_time', headerName: 'Hora Creación', width: 100,
+    },
     { field: 'estado_solicitud', headerName: 'Estado', width: 115 },
     { field: 'usuario_creador', headerName: 'Usuario Creación', width: 115 },
     { field: 'usuario_modificador', headerName: 'Usuario Modificación', width: 115 },
     { field: 'fecha_modificacion_date', headerName: 'Fecha Modif.', width: 120 },
     { field: 'fecha_modificacion_time', headerName: 'Hora Modif.', width: 100 },
   ];
+
 
   const deleteColumn = {
     field: 'delete',
