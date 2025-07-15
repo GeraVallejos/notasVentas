@@ -144,7 +144,7 @@ const EditNotaModal = ({ open, onClose, nota, onSave }) => {
                 error={!!errors.telefono}
                 helperText={errors.telefono?.message}
                 InputProps={{
-                  startAdornment: <InputAdornment position="start">+56</InputAdornment>,
+                  startAdornment: <InputAdornment position="start" sx={{mt:'1px'}}>+56</InputAdornment>,
                   inputMode: 'numeric',
                 }}
                 inputProps={{
