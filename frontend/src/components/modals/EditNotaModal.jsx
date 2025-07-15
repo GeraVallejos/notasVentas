@@ -171,8 +171,8 @@ const EditNotaModal = ({ open, onClose, nota, onSave }) => {
                   <InputLabel id="despacho-label">Despacho</InputLabel>
                   <Select {...field} labelId="despacho-label" label="Tipo Despacho">
                     <MenuItem value="">Seleccione una opción</MenuItem>
-                    <MenuItem value="Despacho">Despacho</MenuItem>
-                    <MenuItem value="Retira">Retira</MenuItem>
+                    <MenuItem value="DESPACHO">Despacho</MenuItem>
+                    <MenuItem value="RETIRA">Retira</MenuItem>
                   </Select>
                   <FormHelperText>{fieldState.error?.message}</FormHelperText>
                 </FormControl>)} />

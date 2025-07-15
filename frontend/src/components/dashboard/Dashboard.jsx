@@ -52,10 +52,10 @@ const Dashboard = () => {
             setData(response.data);
             setDataDespachos(
                 (response.data.comunas?.resumen || []).map(item => ({
-                    comuna: normalizarNombre(item.comuna),
+                    comuna: normalizarNombre(item.cliente__comuna),
                     despacho_retira: item.despacho_retira,
                     total: item.total,
-                })).filter(item => item.despacho_retira === 'Despacho')
+                })).filter(item => item.despacho_retira === 'DESPACHO')
             );
 
             const datosNotas = [];

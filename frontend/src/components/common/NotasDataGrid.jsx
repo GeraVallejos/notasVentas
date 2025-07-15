@@ -14,6 +14,10 @@ import { format, parseISO } from 'date-fns';
 // 🔁 Función para transformar una nota en formato listo para el grid
 const formatearNota = (nota) => ({
   ...nota,
+  fecha_despacho_original: nota.fecha_despacho,
+  fecha_despacho: nota.fecha_despacho
+    ? format(parseISO(nota.fecha_despacho), 'dd/MM/yyyy')
+    : '',
   fecha_creacion_date: nota.fecha_creacion
     ? format(parseISO(nota.fecha_creacion), 'dd/MM/yyyy')
     : '',
@@ -39,6 +43,7 @@ const NotasDataGrid = ({ estado, nombre, exportNombre, userGroups }) => {
   const { enqueueSnackbar } = useSnackbar();
   const esVentas = userGroups?.includes('Ventas');
 
+
   const fetchNotas = useCallback(async () => {
     try {
       const res = await api.get('/nota/');
@@ -58,6 +63,8 @@ const NotasDataGrid = ({ estado, nombre, exportNombre, userGroups }) => {
     fetchNotas();
   }, [fetchNotas]);
 
+
+
   const handleGuardar = async () => {
     try {
       await fetchNotas();
@@ -68,7 +75,25 @@ const NotasDataGrid = ({ estado, nombre, exportNombre, userGroups }) => {
   };
 
   const handleRowClick = (params) => {
-    setNotaSeleccionada(params.row);
+    const nota = params.row;
+
+
+    setNotaSeleccionada({
+      ...nota,
+      razon_social: nota.razon_social_cliente,
+      rut_cliente: nota.rut_cliente_cliente,
+      direccion: nota.direccion_cliente,
+      comuna: nota.comuna_cliente,
+      ciudad: nota.ciudad,
+      region: nota.region,
+      despacho_retira: nota.despacho_retira,
+      telefono: nota.telefono_cliente?.startsWith('+56')
+        ? nota.telefono_cliente.slice(3)
+        : nota.telefono_cliente || '',
+      correo: nota.correo_cliente,
+      contacto: nota.contacto_cliente,
+      fecha_despacho: nota.fecha_despacho_original,
+    });
     setModalOpen(true);
   };
 
@@ -96,14 +121,14 @@ const NotasDataGrid = ({ estado, nombre, exportNombre, userGroups }) => {
 
   const baseColumns = [
     { field: 'num_nota', headerName: 'N° nota', width: 80 },
-    { field: 'razon_social', headerName: 'Razón Social', width: 200 },
+    { field: 'razon_social_cliente', headerName: 'Razón Social', width: 200 },
     { field: 'rut_cliente', headerName: 'Rut Cliente', width: 200 },
     { field: 'fecha_despacho', headerName: 'Fecha Despacho', width: 165 },
-    { field: 'contacto', headerName: 'Contacto', width: 150 },
-    { field: 'correo', headerName: 'Correo', width: 150 },
-    { field: 'telefono', headerName: 'Teléfono', width: 110 },
-    { field: 'direccion', headerName: 'Dirección', width: 120 },
-    { field: 'comuna', headerName: 'Comuna', width: 120 },
+    { field: 'contacto_cliente', headerName: 'Contacto', width: 150 },
+    { field: 'correo_cliente', headerName: 'Correo', width: 150 },
+    { field: 'telefono_cliente', headerName: 'Teléfono', width: 110 },
+    { field: 'direccion_cliente', headerName: 'Dirección', width: 120 },
+    { field: 'comuna_cliente', headerName: 'Comuna', width: 120 },
     { field: 'ciudad', headerName: 'Ciudad', width: 120 },
     { field: 'region', headerName: 'Region', width: 120 },
     { field: 'despacho_retira', headerName: 'Tipo Despacho', width: 120 },

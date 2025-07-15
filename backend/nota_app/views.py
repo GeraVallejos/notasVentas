@@ -84,13 +84,24 @@ class ClientesView(viewsets.ModelViewSet):
     queryset = Clientes.objects.all()
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
-    @action(detail=False, methods=['get'], url_path='por-rut')
+    @action(detail=False, methods=['get', 'put', 'patch'], url_path='por-rut')
     def obtener_por_rut(self, request):
         rut = request.query_params.get('rut')
         if not rut:
             return Response({'error': 'RUT es requerido'}, status=status.HTTP_400_BAD_REQUEST)
+        
         try:
             cliente = Clientes.objects.get(rut_cliente=rut)
+            
+            # Manejo de métodos PUT/PATCH
+            if request.method in ['PUT', 'PATCH']:
+                partial = request.method == 'PATCH'  # True para PATCH, False para PUT
+                serializer = self.get_serializer(cliente, data=request.data, partial=partial)
+                serializer.is_valid(raise_exception=True)
+                serializer.save()
+                return Response(serializer.data)
+            
+            # Manejo del GET
             data = {
                 'direccion': cliente.direccion,
                 'comuna': cliente.comuna,
@@ -100,8 +111,11 @@ class ClientesView(viewsets.ModelViewSet):
                 'razon_social': cliente.razon_social,
             }
             return Response(data)
+            
         except Clientes.DoesNotExist:
             return Response({'error': 'Cliente no encontrado'}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class CookieTokenObtainPairView(TokenObtainPairView):
@@ -230,9 +244,9 @@ class DashboardViewSet(viewsets.ViewSet):
             
             # Notas por comuna
             notas_por_comuna = Notas.objects.filter(notas_filtro).exclude(
-                comuna__isnull=True
+                cliente__comuna__isnull=True
             ).values(
-                'comuna', 'despacho_retira'
+                'cliente__comuna', 'despacho_retira'
             ).annotate(
                 total=Count('id_nota')
             ).order_by('-total')

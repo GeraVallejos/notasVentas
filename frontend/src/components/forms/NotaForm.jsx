@@ -1,12 +1,8 @@
 import {
   Box,
   Button,
-  FormControl,
-  FormHelperText,
   Grid,
-  InputLabel,
   MenuItem,
-  Select,
   Stack,
   TextField,
   Typography,
@@ -24,13 +20,17 @@ import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { TimePicker } from '@mui/x-date-pickers/TimePicker';
 import { parse, parseISO, format, isValid } from 'date-fns';
 import { ComunaAutocomplete } from '../common/ComunaAutocomplete';
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { formatearRut } from '../../utils/formatearRut';
 
 export const NotaForm = () => {
   const { enqueueSnackbar } = useSnackbar();
   const [openDialog, setOpenDialog] = useState(false);
+  const [openEditDialog, setOpenEditDialog] = useState(false);
   const [clienteNuevo, setClienteNuevo] = useState(null);
+  const [clienteOriginal, setClienteOriginal] = useState(null);
+
+
 
   // Funcion para dejar los strigs de la data en mayus, con exepciones
   const transformMayus = (obj, excluir = []) => {
@@ -80,12 +80,17 @@ export const NotaForm = () => {
   const crearNota = async (data, guardarCliente = false) => {
     try {
       const payload = {
-        ...transformMayus(data, ['correo']),
-        rut_cliente: data.rut_cliente,
-        guardar_cliente: guardarCliente || false
+      num_nota: data.num_nota,
+      rut_cliente: data.rut_cliente,
+      fecha_despacho: data.fecha_despacho,
+      observacion: data.observacion,
+      despacho_retira: data.despacho_retira,
+      horario_desde: data.horario_desde,
+      horario_hasta: data.horario_hasta,
+      guardar_cliente: guardarCliente,
       };
 
-      await api.post('/nota/', payload);
+      await api.post('/nota/', transformMayus(payload, ['correo']));
       enqueueSnackbar('Nota creada exitosamente', { variant: 'success' });
       form.reset({ num_nota: '', rut_cliente: '', observacion: '' });
       setOpenDialog(false);
@@ -111,10 +116,22 @@ export const NotaForm = () => {
         params: { rut: rutFormateado },
       });
 
+      const telefonoSinPrefijo = data.telefono?.replace(/\D/g, '').slice(-9) || '';
+
+      // Guardar los datos originales del cliente para comparar después
+      setClienteOriginal({
+        razon_social: data.razon_social || '',
+        direccion: data.direccion || '',
+        comuna: data.comuna || '',
+        telefono: telefonoSinPrefijo || '',
+        correo: data.correo || '',
+        contacto: data.contacto || '',
+      });
+
       form.setValue('razon_social', data.razon_social || '');
       form.setValue('direccion', data.direccion || '');
       form.setValue('comuna', data.comuna || '');
-      form.setValue('telefono', data.telefono || '');
+      form.setValue('telefono', telefonoSinPrefijo || '');
       form.setValue('correo', data.correo || '');
       form.setValue('contacto', data.contacto || '');
     } catch (error) {
@@ -123,6 +140,67 @@ export const NotaForm = () => {
     }
   };
 
+  const {
+    razon_social,
+    direccion,
+    comuna,
+    telefono,
+    correo,
+    contacto
+  } = form.watch();
+
+  const camposEditados = useMemo(() => {
+    if (!clienteOriginal) return [];
+
+    const camposCliente = ['razon_social', 'direccion', 'comuna', 'telefono', 'correo', 'contacto'];
+    const valoresActuales = { razon_social, direccion, comuna, telefono, correo, contacto };
+
+    return camposCliente.filter(campo => {
+      return valoresActuales[campo] !== clienteOriginal[campo];
+    });
+  }, [razon_social, direccion, comuna, telefono, correo, contacto, clienteOriginal]);
+
+
+  const handleSubmitNota = async (e) => {
+    e.preventDefault();
+
+    // Primero verifica si hay campos de cliente editados
+    if (camposEditados.length > 0 && clienteOriginal) {
+      setOpenEditDialog(true);
+      return;
+    }
+
+    // Si no hay campos editados, procede con el submit normal
+    form.handleSubmit(form.onSubmit)(e);
+  };
+
+  const actualizarCliente = async () => {
+    try {
+      const data = form.getValues();
+      const payload = {
+        ...transformMayus(data, ['correo']),
+        telefono: `+56${data.telefono}`,
+      };
+
+      await api.patch('/cliente/por-rut/', payload, {
+        params: {
+          rut: data.rut_cliente
+        }
+      });
+
+      enqueueSnackbar('Cliente actualizado exitosamente', { variant: 'success' });
+      setOpenEditDialog(false);
+
+      // Continuar con el envío de la nota
+      await form.onSubmit();
+    } catch (error) {
+      console.error(error);
+      const msg = error.response?.data?.detail || 'Error al actualizar el cliente';
+      enqueueSnackbar(msg, { variant: 'error' });
+    }
+  };
+
+
   return (
     <Box sx={{ width: '100%', maxWidth: 700, mx: 'auto', mt: 2, px: 4, py: 2, boxShadow: '0 4px 20px rgba(0,0,0,0.1)' }}>
       <Typography variant="h5" sx={{ textAlign: 'center', mb: 2, background: ' #00BFFF', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
@@ -130,7 +208,7 @@ export const NotaForm = () => {
       </Typography>
 
       <FormProvider {...form}>
-        <form onSubmit={form.handleSubmit(form.onSubmit)} noValidate>
+        <form onSubmit={handleSubmitNota} noValidate>
           <Grid container spacing={2}>
             <Grid size={{ xs: 12, md: 6 }}>
               <Stack spacing={2}>
@@ -196,6 +274,21 @@ export const NotaForm = () => {
         <DialogActions>
           <Button onClick={() => { setOpenDialog(false); crearNota(clienteNuevo, false); }}>No, solo crear nota</Button>
           <Button onClick={() => crearNota(clienteNuevo, true)} color="primary" variant="contained">Sí, guardar cliente</Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Diálogo para editar cliente */}
+      <Dialog open={openEditDialog} onClose={() => setOpenEditDialog(false)}>
+        <DialogTitle>Actualizar datos del cliente</DialogTitle>
+        <DialogContent>
+          <Typography variant="body1">
+            Has modificado los siguientes campos del cliente: {camposEditados.join(', ')}.
+            ¿Deseas actualizar los datos del cliente en la base de datos?
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => { setOpenEditDialog(false); form.handleSubmit(form.onSubmit)(); }}>No, mantener datos originales</Button>
+          <Button onClick={actualizarCliente} color="primary" variant="contained">Sí, actualizar cliente</Button>
         </DialogActions>
       </Dialog>
     </Box>

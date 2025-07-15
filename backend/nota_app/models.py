@@ -20,18 +20,10 @@ class Usuarios(AbstractUser):
 class Notas(models.Model):
     id_nota = models.AutoField(primary_key=True)
     num_nota = models.IntegerField(null=False)
-    razon_social = models.CharField(max_length=300)
-    rut_cliente = models.CharField(max_length=30, blank=True, null=True) 
+    cliente = models.ForeignKey('Clientes', on_delete=models.PROTECT, related_name='notas')
     fecha_creacion = models.DateTimeField(auto_now_add=True)
     fecha_modificacion = models.DateTimeField(auto_now=True)
     fecha_despacho = models.DateTimeField(blank=False, null=False)
-    contacto = models.CharField(max_length=200, blank=False, null=False)
-    correo = models.CharField(max_length=50, blank=True, null=True)
-    direccion = models.CharField(max_length=200, blank=False, null=False)
-    comuna = models.CharField(max_length=50, blank=False, null=False)
-    ciudad = models.CharField(max_length=50, blank=True, null=True)
-    region = models.CharField(max_length=50, blank=True, null=True)
-    telefono = models.CharField(max_length=20, blank=False, null=False)
     estado_solicitud = models.CharField(max_length=30, default='No Solicitado')
     observacion = models.CharField(max_length=1000, blank=True, null=True)
     despacho_retira = models.CharField(max_length=50, blank=True, null=True)
@@ -39,10 +31,11 @@ class Notas(models.Model):
     horario_hasta = models.CharField(max_length=50, blank=True, null=True)
     id_usuario = models.ForeignKey('Usuarios', models.DO_NOTHING, db_column='id_usuario', related_name='notas_creadas')
     id_usuario_modificacion = models.ForeignKey('Usuarios', models.DO_NOTHING, db_column='id_usuario_modificacion', related_name='notas_modificadas', null=True, blank=True)
-    
+
     class Meta:
         managed = True
         db_table = 'notas'
+
 
 class Clientes(models.Model):
     id_cliente = models.AutoField(primary_key=True)
