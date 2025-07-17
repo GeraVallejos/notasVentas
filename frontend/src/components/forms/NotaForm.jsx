@@ -25,9 +25,7 @@ import { formatearRut } from '../../utils/formatearRut';
 
 export const NotaForm = () => {
   const { enqueueSnackbar } = useSnackbar();
-  const [openDialog, setOpenDialog] = useState(false);
   const [openEditDialog, setOpenEditDialog] = useState(false);
-  const [clienteNuevo, setClienteNuevo] = useState(null);
   const [clienteOriginal, setClienteOriginal] = useState(null);
 
 
@@ -61,15 +59,26 @@ export const NotaForm = () => {
         await api.get('/cliente/por-rut/', {
           params: { rut: data.rut_cliente },
         });
-        await crearNota(data);
+
       } catch (error) {
         if (error.response?.status === 404) {
-          setClienteNuevo(data);
-          setOpenDialog(true);
-          return;
+          // Si no existe el cliente, lo creamos automáticamente
+          const clientePayload = {
+            rut_cliente: data.rut_cliente,
+            razon_social: data.razon_social,
+            direccion: data.direccion,
+            comuna: data.comuna,
+            telefono: `+56${data.telefono}`,
+            correo: data.correo,
+            contacto: data.contacto,
+          };
+
+          await api.post('/cliente/', transformMayus(clientePayload, ['correo']));
+        } else {
+          throw error;
         }
-        throw error;
       }
+      await crearNota(data);
     } catch (error) {
       console.error(error);
       const msg = error.response?.data?.detail || 'Error al crear la nota';
@@ -77,23 +86,21 @@ export const NotaForm = () => {
     }
   });
 
-  const crearNota = async (data, guardarCliente = false) => {
+  const crearNota = async (data) => {
     try {
       const payload = {
-      num_nota: data.num_nota,
-      rut_cliente: data.rut_cliente,
-      fecha_despacho: data.fecha_despacho,
-      observacion: data.observacion,
-      despacho_retira: data.despacho_retira,
-      horario_desde: data.horario_desde,
-      horario_hasta: data.horario_hasta,
-      guardar_cliente: guardarCliente,
+        num_nota: data.num_nota,
+        rut_cliente: data.rut_cliente,
+        fecha_despacho: data.fecha_despacho,
+        observacion: data.observacion,
+        despacho_retira: data.despacho_retira,
+        horario_desde: data.horario_desde,
+        horario_hasta: data.horario_hasta,
       };
 
       await api.post('/nota/', transformMayus(payload, ['correo']));
       enqueueSnackbar('Nota creada exitosamente', { variant: 'success' });
       form.reset({ num_nota: '', rut_cliente: '', observacion: '' });
-      setOpenDialog(false);
     } catch (error) {
       console.error(error);
       const msg = error.response?.data?.detail || 'Error al crear la nota';
@@ -212,21 +219,57 @@ export const NotaForm = () => {
           <Grid container spacing={2}>
             <Grid size={{ xs: 12, md: 6 }}>
               <Stack spacing={2}>
-                <TextField label="Número de Nota" autoComplete="off" type="number" {...form.register('num_nota')} error={!!form.formState.errors.num_nota} helperText={form.formState.errors.num_nota?.message} />
-                <TextField label="Rut Cliente" autoComplete="off" {...form.register('rut_cliente')} onChange={handleChangeRut} onBlur={handleBlurRut} error={!!form.formState.errors.rut_cliente} helperText={form.formState.errors.rut_cliente?.message} />
-                <Controller name="razon_social" autoComplete="off" control={form.control} render={({ field, fieldState }) => <TextField {...field} label="Razón Social" fullWidth error={!!fieldState.error} helperText={fieldState.error?.message} />} />
-                <Controller name="contacto" autoComplete="off" control={form.control} render={({ field, fieldState }) => <TextField {...field} label="Contacto" fullWidth error={!!fieldState.error} helperText={fieldState.error?.message} />} />
-                <Controller name="correo" autoComplete="off" control={form.control} render={({ field, fieldState }) => <TextField {...field} label="Correo" type="email" fullWidth error={!!fieldState.error} helperText={fieldState.error?.message} />} />
+                <Controller
+                  name="num_nota"
+                  control={form.control}
+                  render={({ field, fieldState }) => (
+                    <TextField
+                      {...field}
+                      label="Número de Nota"
+                      type="number"
+                      autoCorrect="off"
+                      autoComplete="off"
+                      error={!!fieldState.error}
+                      helperText={fieldState.error?.message}
+                      InputLabelProps={{
+                        shrink: !!field.value
+                      }}
+                    />
+                  )}
+                />
+
+                <Controller
+                  name="rut_cliente"
+                  control={form.control}
+                  render={({ field, fieldState }) => (
+                    <TextField
+                      {...field}
+                      label="Rut Cliente"
+                      autoCorrect="off"
+                      autoComplete="off"
+                      onChange={handleChangeRut}
+                      onBlur={handleBlurRut}
+                      error={!!fieldState.error}
+                      helperText={fieldState.error?.message}
+                      InputLabelProps={{
+                        shrink: !!field.value
+                      }}
+                    />
+                  )}
+                />
+                <Controller name="razon_social" autoCorrect="off" autoComplete="off" control={form.control} render={({ field, fieldState }) => <TextField {...field} label="Razón Social" fullWidth error={!!fieldState.error} helperText={fieldState.error?.message} />} />
+                <Controller name="contacto" autoCorrect="off" autoComplete="off" control={form.control} render={({ field, fieldState }) => <TextField {...field} label="Contacto" fullWidth error={!!fieldState.error} helperText={fieldState.error?.message} />} />
+                <Controller name="correo" autoCorrect="off" autoComplete="off" control={form.control} render={({ field, fieldState }) => <TextField {...field} label="Correo" type="email" fullWidth error={!!fieldState.error} helperText={fieldState.error?.message} />} />
                 <TimePicker label="Horario Desde" autoComplete="off" ampm={false} value={form.watch('horario_desde') ? parse(form.watch('horario_desde'), 'HH:mm', new Date()) : null} onChange={(time) => form.setValue('horario_desde', isValid(time) ? format(time, 'HH:mm') : '')} slotProps={{ textField: { fullWidth: true, size: 'small', error: !!form.formState.errors.horario_desde, helperText: form.formState.errors.horario_desde?.message } }} />
               </Stack>
             </Grid>
 
             <Grid size={{ xs: 12, md: 6 }}>
               <Stack spacing={2}>
-                <Controller name="direccion" autoComplete="off" control={form.control} render={({ field, fieldState }) => <TextField {...field} label="Dirección" fullWidth error={!!fieldState.error} helperText={fieldState.error?.message} />} />
+                <Controller name="direccion" autoCorrect="off" autoComplete="off" control={form.control} render={({ field, fieldState }) => <TextField {...field} label="Dirección" fullWidth error={!!fieldState.error} helperText={fieldState.error?.message} />} />
                 <Controller name="comuna" control={form.control} render={({ field, fieldState }) => <ComunaAutocomplete value={field.value} onChange={field.onChange} error={!!fieldState.error} helperText={fieldState.error?.message} />} />
-                <DatePicker label="Fecha de Despacho" autoComplete="off" value={form.watch('fecha_despacho') ? parseISO(form.watch('fecha_despacho')) : null} onChange={(date) => form.setValue('fecha_despacho', isValid(date) ? date.toISOString() : '')} format="dd/MM/yyyy" slotProps={{ textField: { fullWidth: true, size: 'small', error: !!form.formState.errors.fecha_despacho, helperText: form.formState.errors.fecha_despacho?.message } }} />
-                <Controller name="telefono" autoComplete="off" control={form.control} render={({ field, fieldState }) => <TextField {...field} label="Teléfono" fullWidth onChange={(e) => { let value = e.target.value.replace(/\D/g, ''); if (value.length <= 9) field.onChange(value); }} InputProps={{ startAdornment: <InputAdornment position="start" sx={{mt:'1px'}}>+56</InputAdornment>, inputMode: 'numeric' }} inputProps={{ maxLength: 9, pattern: '[0-9]*' }} error={!!fieldState.error} helperText={fieldState.error?.message} />} />
+                <DatePicker label="Fecha de Despacho" autoCorrect="off" autoComplete="off" value={form.watch('fecha_despacho') ? parseISO(form.watch('fecha_despacho')) : null} onChange={(date) => form.setValue('fecha_despacho', isValid(date) ? date.toISOString() : '')} format="dd/MM/yyyy" slotProps={{ textField: { fullWidth: true, size: 'small', error: !!form.formState.errors.fecha_despacho, helperText: form.formState.errors.fecha_despacho?.message } }} />
+                <Controller name="telefono" autoCorrect="off" autoComplete="off" control={form.control} render={({ field, fieldState }) => <TextField {...field} label="Teléfono" fullWidth onChange={(e) => { let value = e.target.value.replace(/\D/g, ''); if (value.length <= 9) field.onChange(value); }} InputProps={{ startAdornment: <InputAdornment position="start" sx={{ mt: '1px' }}>+56</InputAdornment>, inputMode: 'numeric' }} inputProps={{ maxLength: 9, pattern: '[0-9]*' }} error={!!fieldState.error} helperText={fieldState.error?.message} />} />
                 <Controller
                   name="despacho_retira"
                   control={form.control}
@@ -262,20 +305,6 @@ export const NotaForm = () => {
           </Grid>
         </form>
       </FormProvider>
-
-      <Dialog open={openDialog} onClose={() => setOpenDialog(false)}>
-        <DialogTitle>Cliente no encontrado</DialogTitle>
-        <DialogContent>
-          <Typography variant="body1">
-            El cliente con RUT {clienteNuevo?.rut_cliente} no existe en la base de datos.
-            ¿Desea guardar este cliente para futuras notas?
-          </Typography>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => { setOpenDialog(false); crearNota(clienteNuevo, false); }}>No, solo crear nota</Button>
-          <Button onClick={() => crearNota(clienteNuevo, true)} color="primary" variant="contained">Sí, guardar cliente</Button>
-        </DialogActions>
-      </Dialog>
 
       {/* Diálogo para editar cliente */}
       <Dialog open={openEditDialog} onClose={() => setOpenEditDialog(false)}>
