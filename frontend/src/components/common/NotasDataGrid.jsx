@@ -202,6 +202,7 @@ const NotasDataGrid = ({ estado, nombre, exportNombre, userGroups }) => {
         onRowDoubleClick={handleRowClick}
         slots={{ toolbar: CustomToolBar }}
         slotProps={{ toolbar: { onExport } }}
+        showToolbar
         localeText={dataGridEs}
         sx={{ userSelect: 'none' }}
         initialState={{
