@@ -24,8 +24,12 @@ const formatearNota = (nota) => ({
   fecha_creacion_time: nota.fecha_creacion
     ? format(parseISO(nota.fecha_creacion), 'HH:mm')
     : '',
-  fecha_modificacion_date: nota.fecha_modificacion,
-  fecha_modificacion_time: nota.fecha_modificacion,
+  fecha_modificacion_date: nota.fecha_modificacion
+   ? format(parseISO(nota.fecha_modificacion), 'dd/MM/yyyy')
+    : '',
+  fecha_modificacion_time: nota.fecha_modificacion
+  ? format(parseISO(nota.fecha_modificacion), 'HH:mm')
+    : '',
   horario_desde: typeof nota.horario_desde === 'string' ? nota.horario_desde : '',
   horario_hasta: typeof nota.horario_hasta === 'string' ? nota.horario_hasta : '',
 });

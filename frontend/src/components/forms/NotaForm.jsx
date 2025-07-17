@@ -27,6 +27,7 @@ export const NotaForm = () => {
   const { enqueueSnackbar } = useSnackbar();
   const [openEditDialog, setOpenEditDialog] = useState(false);
   const [clienteOriginal, setClienteOriginal] = useState(null);
+  
 
 
 
@@ -68,7 +69,7 @@ export const NotaForm = () => {
             razon_social: data.razon_social,
             direccion: data.direccion,
             comuna: data.comuna,
-            telefono: `+56${data.telefono}`,
+            telefono: data.telefono,
             correo: data.correo,
             contacto: data.contacto,
           };
@@ -186,7 +187,7 @@ export const NotaForm = () => {
       const data = form.getValues();
       const payload = {
         ...transformMayus(data, ['correo']),
-        telefono: `+56${data.telefono}`,
+        telefono: `+56${data.telefono}`
       };
 
       await api.patch('/cliente/por-rut/', payload, {
@@ -206,6 +207,8 @@ export const NotaForm = () => {
       enqueueSnackbar(msg, { variant: 'error' });
     }
   };
+
+
 
 
   return (
@@ -269,7 +272,7 @@ export const NotaForm = () => {
                 <Controller name="direccion"  control={form.control} render={({ field, fieldState }) => <TextField {...field} label="Dirección" fullWidth autoCorrect="off" autoComplete="off" error={!!fieldState.error} helperText={fieldState.error?.message} />} />
                 <Controller name="comuna" control={form.control} render={({ field, fieldState }) => <ComunaAutocomplete value={field.value} onChange={field.onChange} error={!!fieldState.error} helperText={fieldState.error?.message} />} />
                 <DatePicker label="Fecha de Despacho"  value={form.watch('fecha_despacho') ? parseISO(form.watch('fecha_despacho')) : null} onChange={(date) => form.setValue('fecha_despacho', isValid(date) ? date.toISOString() : '')} format="dd/MM/yyyy" slotProps={{ textField: { fullWidth: true, size: 'small', error: !!form.formState.errors.fecha_despacho, helperText: form.formState.errors.fecha_despacho?.message } }} />
-                <Controller name="telefono"  control={form.control} render={({ field, fieldState }) => <TextField {...field} label="Teléfono" fullWidth autoCorrect="off" autoComplete="off" onChange={(e) => { let value = e.target.value.replace(/\D/g, ''); if (value.length <= 9) field.onChange(value); }} InputProps={{ startAdornment: <InputAdornment position="start" sx={{ mt: '1px' }}>+56</InputAdornment>, inputMode: 'numeric' }} inputProps={{ maxLength: 9, pattern: '[0-9]*' }} error={!!fieldState.error} helperText={fieldState.error?.message} />} />
+                <Controller name="telefono"  control={form.control} render={({ field, fieldState }) => <TextField {...field} label="Teléfono" fullWidth autoComplete="off" onChange={(e) => { let value = e.target.value.replace(/\D/g, ''); if (value.length <= 9) field.onChange(value); }} InputProps={{ startAdornment: <InputAdornment position="start" sx={{ mt: '1px' }}>+56</InputAdornment>, inputMode: 'numeric' }} inputProps={{ maxLength: 9, pattern: '[0-9]*' }} error={!!fieldState.error} helperText={fieldState.error?.message} />} />
                 <Controller
                   name="despacho_retira"
                   control={form.control}
@@ -311,7 +314,7 @@ export const NotaForm = () => {
         <DialogTitle>Actualizar datos del cliente</DialogTitle>
         <DialogContent>
           <Typography variant="body1">
-            Has modificado los siguientes campos del cliente: {camposEditados.join(', ')}.
+            Has modificado los siguientes campos del cliente: <span color='red'>{camposEditados.join(', ')}.</span>
             ¿Deseas actualizar los datos del cliente en la base de datos?
           </Typography>
         </DialogContent>
