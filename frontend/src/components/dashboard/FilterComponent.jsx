@@ -73,7 +73,7 @@ const FilterComponent = memo(({
   return (
     <Paper sx={paperStyles}>
       <form onSubmit={handleSubmit}>
-        <Stack direction="row" spacing={1.5} alignItems="center">
+        <Stack direction="row" display='flex' justifyContent='space-evenly' spacing={1.5} alignItems="center">
           <DatePicker
             label="Fecha inicio"
             value={tempFechaInicio}

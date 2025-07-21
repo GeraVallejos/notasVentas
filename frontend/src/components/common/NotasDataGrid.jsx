@@ -126,7 +126,7 @@ const NotasDataGrid = ({ estado, nombre, exportNombre, userGroups }) => {
   const baseColumns = [
     { field: 'num_nota', headerName: 'N° nota', width: 80 },
     { field: 'razon_social_cliente', headerName: 'Razón Social', width: 200 },
-    { field: 'rut_cliente', headerName: 'Rut Cliente', width: 200 },
+    { field: 'rut_cliente_cliente', headerName: 'Rut Cliente', width: 200 },
     { field: 'fecha_despacho', headerName: 'Fecha Despacho', width: 165 },
     { field: 'contacto_cliente', headerName: 'Contacto', width: 150 },
     { field: 'correo_cliente', headerName: 'Correo', width: 150 },
