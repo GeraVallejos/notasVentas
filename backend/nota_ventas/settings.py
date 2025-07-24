@@ -92,11 +92,11 @@ WSGI_APPLICATION = 'nota_ventas.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
-# Esto solo es necesario en produccion, en local no funiona con SSL
+# define configuraciones avanzadas para la conexión a la base de datos
 db_options = {
     'charset': 'utf8mb4',
 }
-
+# Esto solo es necesario en produccion, en local no funiona con SSL
 if IS_PRODUCTION:
     db_options['ssl'] = {'ssl_mode': 'REQUIRED'}
 
@@ -147,7 +147,7 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
-# Para collectsatic neecsario en Railway
+# Para collectsatic necesario en Railway
 STATIC_URL = '/static/'
 STATIC_ROOT = '/app/backend/staticfiles' if os.getenv('IS_PRODUCTION') == 'True' else os.path.join(BASE_DIR, 'staticfiles')
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
@@ -209,7 +209,7 @@ CORS_EXPOSE_HEADERS = ['Content-Type', 'X-CSRFToken']  # Necesario para CSRF
 # CSRF
 CSRF_COOKIE_SECURE = IS_PRODUCTION
 CSRF_COOKIE_HTTPONLY = False
-CSRF_COOKIE_SAMESITE = 'None'
+CSRF_COOKIE_SAMESITE = 'None' # backend y frontend en dominios diferentes
 CSRF_USE_SESSIONS = False
 CSRF_TRUSTED_ORIGINS = [
     origin for origin in os.getenv('CORS_KEYS', '').split(',') if origin.startswith('https://')
@@ -236,6 +236,7 @@ AXES_LOCKOUT_PARAMETERS = ['ip_address', 'username']  # Bloquear por IP + usuari
 AXES_RESET_ON_SUCCESS = True  # Reiniciar contador tras login exitoso
 AXES_ENABLED = IS_PRODUCTION
 
+# HTTPS en produccion
 SECURE_SSL_REDIRECT = IS_PRODUCTION
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
