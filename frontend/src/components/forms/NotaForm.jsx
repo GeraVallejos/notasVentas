@@ -261,7 +261,7 @@ export const NotaForm = () => {
                   )}
                 />
                 <Controller name="razon_social"  control={form.control} render={({ field, fieldState }) => <TextField {...field} label="Razón Social" autoCorrect="off" autoComplete="off" fullWidth error={!!fieldState.error} helperText={fieldState.error?.message} />} />
-                <Controller name="contacto"  control={form.control} render={({ field, fieldState }) => <TextField {...field} label="Contacto" fullWidth autoCorrect="off" autoComplete="off" error={!!fieldState.error} helperText={fieldState.error?.message} />} />
+                <Controller name="contacto"  control={form.control} render={({ field, fieldState }) => <TextField {...field} label="Nombre Contacto" fullWidth autoCorrect="off" autoComplete="off" error={!!fieldState.error} helperText={fieldState.error?.message} />} />
                 <Controller name="correo"  control={form.control} render={({ field, fieldState }) => <TextField {...field} label="Correo" type="email" fullWidth autoCorrect="off" autoComplete="off" error={!!fieldState.error} helperText={fieldState.error?.message} />} />
                 <TimePicker label="Horario Desde" ampm={false} value={form.watch('horario_desde') ? parse(form.watch('horario_desde'), 'HH:mm', new Date()) : null} onChange={(time) => form.setValue('horario_desde', isValid(time) ? format(time, 'HH:mm') : '')} slotProps={{ textField: { fullWidth: true, size: 'small', error: !!form.formState.errors.horario_desde, helperText: form.formState.errors.horario_desde?.message } }} />
               </Stack>
