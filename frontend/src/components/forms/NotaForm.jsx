@@ -63,7 +63,7 @@ export const NotaForm = () => {
 
       } catch (error) {
         if (error.response?.status === 404) {
-          // Si no existe el cliente, lo creamos automáticamente
+          // Si no existe el cliente, se crea automáticamente
           const clientePayload = {
             rut_cliente: data.rut_cliente,
             razon_social: data.razon_social,
@@ -87,7 +87,9 @@ export const NotaForm = () => {
     }
   });
 
+
   const crearNota = async (data) => {
+    
     try {
       const payload = {
         num_nota: data.num_nota,
@@ -314,7 +316,10 @@ export const NotaForm = () => {
         <DialogTitle>Actualizar datos del cliente</DialogTitle>
         <DialogContent>
           <Typography variant="body1">
-            Has modificado los siguientes campos del cliente: <span color='red'>{camposEditados.join(', ')}.</span>
+            Has modificado los siguientes campos del cliente:{' '}
+            <Box component="span" sx={{ color: 'red' }}>
+              {camposEditados.join(', ')}.{' '}
+            </Box>
             ¿Deseas actualizar los datos del cliente en la base de datos?
           </Typography>
         </DialogContent>
