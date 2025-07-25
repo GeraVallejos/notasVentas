@@ -50,10 +50,12 @@ Estas son rutas adicionales para acciones específicas que no son CRUD estándar
 
 ```python
 urlpatterns = [
+    path('csrf/', CSRFTokenView.as_view(), name='csrf'),
     path('', include(router.urls)),
     *usuario_extra_routes,
 ]
 ```
 
+- Llama a una vista basada en clase llamada CSRFTokenView, para entregar el token CSRF al frontend
 - include(router.urls): Incluye todas las URLs generadas por el router.
 - *usuario_extra_routes: Desempaqueta las rutas personalizadas en la lista.
