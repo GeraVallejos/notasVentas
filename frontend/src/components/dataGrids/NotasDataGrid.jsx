@@ -164,6 +164,7 @@ const NotasDataGrid = ({ estado, nombre, exportNombre, userGroups }) => {
     width: 80,
     sortable: false,
     filterable: false,
+    disableExport: true,
     renderCell: (params) => (
       <Box display="flex" justifyContent="center" alignItems="center" width="100%" height="100%">
         <Tooltip title="Borrar nota">
@@ -185,7 +186,10 @@ const NotasDataGrid = ({ estado, nombre, exportNombre, userGroups }) => {
 
   const columns = esVentas ? baseColumns : [...baseColumns, deleteColumn];
 
-  const onExport = () => exportExcel(columns, notas, exportNombre);
+  const onExport = () => {
+  const columnsToExport = columns.filter(column => !column.disableExport);
+  exportExcel(columnsToExport, notas, exportNombre);
+};
 
   if (loading) {
     return (
