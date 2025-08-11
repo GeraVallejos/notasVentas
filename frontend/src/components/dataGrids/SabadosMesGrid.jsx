@@ -91,50 +91,35 @@ const SabadosMesGrid = ({ exportNombre }) => {
     };
 
     const handleSaveChanges = async () => {
-        try {
-            setLoading(true);
+    try {
+        setLoading(true);
 
-            // Agrupar cambios por persona
-            const changesByPerson = {};
-            personal.forEach(person => {
-                originalData.forEach(originalPerson => {
-                    if (person.id_personal === originalPerson.id_personal) {
-                        const changedDates = saturdays.filter(date =>
-                            person[date] !== originalPerson[date]
-                        );
-
-                        if (changedDates.length > 0) {
-                            changesByPerson[person.id_personal] =
-                                changedDates.filter(date => person[date]);
-                        }
-                    }
+        // Preparar datos para enviar al servidor
+        await Promise.all(
+            personal.map(async (person) => {
+                // Obtener todos los sábados marcados (tanto existentes como nuevos)
+                const sabadosMarcados = saturdays.filter(date => person[date]);
+                
+                // Enviar la lista completa de sábados marcados para esta persona
+                await api.post(`/personal/${person.id_personal}/asignar-sabados/`, {
+                    sabados: sabadosMarcados
                 });
-            });
+            })
+        );
 
-            // Enviar cambios al servidor
-            await Promise.all(
-                Object.entries(changesByPerson).map(async ([id, dates]) => {
-                    await api.post(`/personal/${id}/asignar-sabados/`, {
-                        sabados: dates
-                    });
-                })
-            );
-
-            // Actualizar datos
-            await fetchData();
-            enqueueSnackbar('Cambios guardados exitosamente', { variant: 'success' });
-        } catch (error) {
-            console.error('Error al guardar cambios:', error);
-
-            const errorMessage = error.response?.data?.error ||
-                'Error al guardar cambios en el servidor';
-
-            enqueueSnackbar(errorMessage, { variant: 'error' });
-            setPersonal([...originalData]); // Revertir cambios locales
-        } finally {
-            setLoading(false);
-        }
-    };
+        // Actualizar datos
+        await fetchData();
+        enqueueSnackbar('Cambios guardados exitosamente', { variant: 'success' });
+    } catch (error) {
+        console.error('Error al guardar cambios:', error);
+        const errorMessage = error.response?.data?.error ||
+            'Error al guardar cambios en el servidor';
+        enqueueSnackbar(errorMessage, { variant: 'error' });
+        setPersonal([...originalData]); // Revertir cambios locales
+    } finally {
+        setLoading(false);
+    }
+};
 
     const columns = [
     { 
