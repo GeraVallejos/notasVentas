@@ -8,6 +8,8 @@ import CustomToolBar from '../common/CustomToolbar';
 import { exportExcel } from '../../utils/exportExcel';
 import { api } from '../../utils/api';
 import { useSnackbar } from 'notistack';
+import { Link } from 'react-router-dom';
+import HistoryIcon from '@mui/icons-material/History';
 
 function getSaturdaysOfMonth(date) {
     const days = eachDayOfInterval({
@@ -80,7 +82,7 @@ const SabadosMesGrid = ({ exportNombre }) => {
 
     useEffect(() => {
         fetchData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     const handleCheckboxChange = (id, date, checked) => {
@@ -91,59 +93,59 @@ const SabadosMesGrid = ({ exportNombre }) => {
     };
 
     const handleSaveChanges = async () => {
-    try {
-        setLoading(true);
+        try {
+            setLoading(true);
 
-        // Preparar datos para enviar al servidor
-        await Promise.all(
-            personal.map(async (person) => {
-                // Obtener todos los sábados marcados (tanto existentes como nuevos)
-                const sabadosMarcados = saturdays.filter(date => person[date]);
-                
-                // Enviar la lista completa de sábados marcados para esta persona
-                await api.post(`/personal/${person.id_personal}/asignar-sabados/`, {
-                    sabados: sabadosMarcados
-                });
-            })
-        );
+            // Preparar datos para enviar al servidor
+            await Promise.all(
+                personal.map(async (person) => {
+                    // Obtener todos los sábados marcados (tanto existentes como nuevos)
+                    const sabadosMarcados = saturdays.filter(date => person[date]);
 
-        // Actualizar datos
-        await fetchData();
-        enqueueSnackbar('Cambios guardados exitosamente', { variant: 'success' });
-    } catch (error) {
-        console.error('Error al guardar cambios:', error);
-        const errorMessage = error.response?.data?.error ||
-            'Error al guardar cambios en el servidor';
-        enqueueSnackbar(errorMessage, { variant: 'error' });
-        setPersonal([...originalData]); // Revertir cambios locales
-    } finally {
-        setLoading(false);
-    }
-};
+                    // Enviar la lista completa de sábados marcados para esta persona
+                    await api.post(`/personal/${person.id_personal}/asignar-sabados/`, {
+                        sabados: sabadosMarcados
+                    });
+                })
+            );
+
+            // Actualizar datos
+            await fetchData();
+            enqueueSnackbar('Cambios guardados exitosamente', { variant: 'success' });
+        } catch (error) {
+            console.error('Error al guardar cambios:', error);
+            const errorMessage = error.response?.data?.error ||
+                'Error al guardar cambios en el servidor';
+            enqueueSnackbar(errorMessage, { variant: 'error' });
+            setPersonal([...originalData]); // Revertir cambios locales
+        } finally {
+            setLoading(false);
+        }
+    };
 
     const columns = [
-    { 
-        field: 'nombre_completo', 
-        headerName: 'Nombre', 
-        width: 300,        
-    },
-    ...saturdays.map(date => ({
-        field: date,
-        headerName: format(parseISO(date), 'dd MMM', { locale: es }),
-        flex: 1,  // Esto hace que la columna se expanda para ocupar el espacio disponible
-        minWidth: 100,  // Ancho mínimo para evitar que se hagan demasiado estrechas
-        headerAlign: 'center',
-        align: 'center',
-        renderCell: (params) => (
-            <Box display="flex" justifyContent="center" width="100%">
-                <Checkbox
-                    checked={!!params.row[date]}
-                    onChange={(e) => handleCheckboxChange(params.id, date, e.target.checked)}
-                />
-            </Box>
-        )
-    })),
-];
+        {
+            field: 'nombre_completo',
+            headerName: 'Nombre',
+            width: 300,
+        },
+        ...saturdays.map(date => ({
+            field: date,
+            headerName: format(parseISO(date), 'dd MMM', { locale: es }),
+            flex: 1,  // Esto hace que la columna se expanda para ocupar el espacio disponible
+            minWidth: 100,  // Ancho mínimo para evitar que se hagan demasiado estrechas
+            headerAlign: 'center',
+            align: 'center',
+            renderCell: (params) => (
+                <Box display="flex" justifyContent="center" width="100%">
+                    <Checkbox
+                        checked={!!params.row[date]}
+                        onChange={(e) => handleCheckboxChange(params.id, date, e.target.checked)}
+                    />
+                </Box>
+            )
+        })),
+    ];
 
     const onExport = () => {
         const exportRows = personal.map(p => ({
@@ -163,7 +165,7 @@ const SabadosMesGrid = ({ exportNombre }) => {
 
     return (
         <Box sx={{ height: '75vh', width: '82.5vw', marginLeft: 2 }}>
-            
+
             <DataGrid
                 rows={personal}
                 columns={columns}
@@ -176,7 +178,15 @@ const SabadosMesGrid = ({ exportNombre }) => {
                 showToolbar
                 localeText={dataGridEs}
             />
-            <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 2 }}>
+                <Button
+                variant="outlined"
+                component={Link}
+                to="/historico-sabados"
+                startIcon={<HistoryIcon />}
+            >
+                Ver Histórico
+            </Button>
                 <Button
                     variant="contained"
                     color="primary"

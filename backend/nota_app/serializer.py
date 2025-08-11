@@ -178,3 +178,19 @@ class SabadoSerializer(serializers.ModelSerializer):
     class Meta:
         model = Sabado
         fields = ['id_sabado', 'fecha']
+
+
+class HistoricoSabadosSerializer(serializers.Serializer):
+    mes = serializers.CharField(help_text="Mes en formato YYYY-MM")
+    id_personal = serializers.IntegerField(help_text="ID del personal")
+    nombre = serializers.CharField(help_text="Nombre del empleado")
+    apellido = serializers.CharField(help_text="Apellido del empleado")
+    sabados = serializers.ListField(
+        child=serializers.CharField(),
+        help_text="Lista de fechas de sábados trabajados en formato DD-MM-YYYY"
+    )
+    total_sabados = serializers.IntegerField(help_text="Cantidad de sábados trabajados")
+
+    class Meta:
+        model = Personal
+        fields = '__all__'

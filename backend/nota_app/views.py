@@ -1,6 +1,6 @@
 from rest_framework import viewsets
 from django.db import transaction
-from .serializer import UsuariosSerializer, NotasSerializer, ClientesSerializer, ProductosSerializer, ProveedoresSerializer, PersonalSerializer
+from .serializer import UsuariosSerializer, NotasSerializer, ClientesSerializer, ProductosSerializer, ProveedoresSerializer, PersonalSerializer, HistoricoSabadosSerializer
 from .models import Usuarios, Notas, Clientes, Productos, Proveedores, Personal, Sabado, SabadoTrabajado
 from rest_framework import permissions
 from rest_framework.decorators import action
@@ -14,12 +14,17 @@ from django.db.models import Count, Q
 from datetime import datetime
 import logging
 from django.utils.timezone import make_aware
-from django.db.models import DateField
-from django.db.models.functions import Cast
+from django.db.models import DateField, CharField
+from django.db.models.functions import Cast, Concat, ExtractMonth, ExtractYear
 from rest_framework.views import APIView
 from django.views.decorators.csrf import ensure_csrf_cookie
 from django.http import JsonResponse
 from django.middleware.csrf import get_token
+from django.db.models.functions import ExtractMonth, ExtractYear
+from django.db.models import F, Func, Value
+from datetime import timedelta
+from django.utils import timezone
+from collections import defaultdict
 
 logger = logging.getLogger(__name__)
 
@@ -345,9 +350,47 @@ class PersonalView(viewsets.ModelViewSet):
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
+
     @action(detail=True, methods=['get'], url_path='sabados-trabajados')
     def obtener_sabados_trabajados(self, request, pk=None):
         personal = self.get_object()
         sabados = personal.sabados_trabajados.all().select_related('sabado')
         fechas = [s.sabado.fecha.strftime("%Y-%m-%d") for s in sabados]
         return Response({'sabados': fechas}, status=status.HTTP_200_OK)
+    
+    @action(detail=False, methods=['get'], url_path='historico-sabados')
+    def historico_sabados(self, request):
+        """
+        Obtiene el histórico de sábados trabajados agrupados por mes y persona
+        """
+        # Obtener los últimos 6 meses de datos
+        sabados_trabajados = (
+            SabadoTrabajado.objects
+            .filter(sabado__fecha__gte=timezone.now()-timedelta(days=180))
+            .select_related('personal', 'sabado')
+            .order_by('sabado__fecha', 'personal__nombre')
+        )
+
+        # Procesamiento para agrupar por mes y persona
+        historico = defaultdict(lambda: defaultdict(list))
+        
+        for st in sabados_trabajados:
+            mes = st.sabado.fecha.strftime('%Y-%m')  # Formato: AAAA-MM
+            historico[mes][st.personal].append(st.sabado.fecha.strftime('%d-%m-%Y'))
+
+        # Preparar respuesta estructurada
+        response_data = []
+        for mes, personal_data in sorted(historico.items(), reverse=True):
+            for personal, sabados in sorted(personal_data.items(), key=lambda x: (x[0].apellido, x[0].nombre)):
+                response_data.append({
+                    'mes': mes,
+                    'id_personal': personal.id_personal,
+                    'nombre': personal.nombre,
+                    'apellido': personal.apellido,
+                    'sabados': sabados,
+                    'total_sabados': len(sabados)
+                })
+
+        # Validar y serializar la respuesta
+        serializer = HistoricoSabadosSerializer(response_data, many=True)
+        return Response(serializer.data)
