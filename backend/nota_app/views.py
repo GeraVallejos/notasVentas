@@ -1,6 +1,7 @@
 from rest_framework import viewsets
-from .serializer import UsuariosSerializer, NotasSerializer, ClientesSerializer
-from .models import Usuarios, Notas, Clientes
+from django.db import transaction
+from .serializer import UsuariosSerializer, NotasSerializer, ClientesSerializer, ProductosSerializer, ProveedoresSerializer, PersonalSerializer
+from .models import Usuarios, Notas, Clientes, Productos, Proveedores, Personal, Sabado, SabadoTrabajado
 from rest_framework import permissions
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -282,3 +283,71 @@ class DashboardViewSet(viewsets.ViewSet):
                 {'error': f'Error interno del servidor: {str(e)}'},
                 status=500
             )
+        
+class ProductosView(viewsets.ModelViewSet):
+    serializer_class = ProductosSerializer
+    queryset = Productos.objects.all()
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+
+
+class ProveedoresView(viewsets.ModelViewSet):
+    serializer_class = ProveedoresSerializer
+    queryset = Proveedores.objects.all()
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+
+
+class PersonalView(viewsets.ModelViewSet):
+    serializer_class = PersonalSerializer
+    queryset = Personal.objects.all()
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+
+    @action(detail=True, methods=['post'], url_path='asignar-sabados')
+    def asignar_sabados(self, request, pk=None):
+        personal = self.get_object()
+        fechas = request.data.get('sabados', [])
+
+        if not isinstance(fechas, list):
+            return Response(
+                {'error': 'El campo "sabados" debe ser una lista de fechas.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        try:
+            with transaction.atomic():
+                # Crear o obtener sábados
+                sabados_objs = []
+                for fecha_str in fechas:
+                    sabado, _ = Sabado.objects.get_or_create(fecha=fecha_str)
+                    sabados_objs.append(sabado)
+
+                # Obtener IDs de sábados existentes
+                sabados_existentes = personal.sabados_trabajados.all()
+                sabados_existentes_ids = set(sabados_existentes.values_list('sabado__id_sabado', flat=True))
+                
+                # Eliminar relaciones que ya no están
+                personal.sabados_trabajados.exclude(sabado__in=sabados_objs).delete()
+                
+                # Crear nuevas relaciones
+                nuevos_sabados = [
+                    SabadoTrabajado(personal=personal, sabado=sabado)
+                    for sabado in sabados_objs 
+                    if sabado.id_sabado not in sabados_existentes_ids
+                ]
+                SabadoTrabajado.objects.bulk_create(nuevos_sabados)
+
+                return Response({
+                    'message': f'Sábados actualizados. {len(nuevos_sabados)} nuevos.'
+                }, status=status.HTTP_200_OK)
+
+        except Exception as e:
+            return Response(
+                {'error': f'Error al actualizar sábados: {str(e)}'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+    @action(detail=True, methods=['get'], url_path='sabados-trabajados')
+    def obtener_sabados_trabajados(self, request, pk=None):
+        personal = self.get_object()
+        sabados = personal.sabados_trabajados.all().select_related('sabado')
+        fechas = [s.sabado.fecha.strftime("%Y-%m-%d") for s in sabados]
+        return Response({'sabados': fechas}, status=status.HTTP_200_OK)

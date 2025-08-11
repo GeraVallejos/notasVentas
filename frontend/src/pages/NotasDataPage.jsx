@@ -1,6 +1,7 @@
-import NotasDataGrid from '../components/common/NotasDataGrid'
+
 import { useSelector } from 'react-redux';
 import { format } from 'date-fns';
+import NotasDataGrid from '../components/dataGrids/NotasDataGrid';
 
 
 

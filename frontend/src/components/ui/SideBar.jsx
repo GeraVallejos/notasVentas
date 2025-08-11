@@ -14,10 +14,21 @@ import { getYear } from 'date-fns';
 import archivo_carpeta from '../../assets/iconos/archivo_carpeta.png';
 import lista_notas from '../../assets/iconos/lista_notas.png';
 import bloc from '../../assets/iconos/bloc.png';
+import sabado from '../../assets/iconos/sabado.png';
+import materias from '../../assets/iconos/materias-primas.png';
+import { useSelector } from 'react-redux';
 
 const drawerWidth = 180;
 
-const SidebarContent = ({ onClick }) => (
+
+
+const SidebarContent = ({ onClick }) => {
+
+  const grupo = useSelector(state => state.auth.user?.groups || [] )
+
+  const adminGroup = grupo.some((g) => g.includes('Admin'))   
+
+  return (
   <List sx={{ mt: 10 }}>
     <ListItemButton component={NavLink} to="/lista-notas" onClick={onClick}>
       <ListItemIcon sx={{ minWidth: 32 }}>
@@ -37,8 +48,23 @@ const SidebarContent = ({ onClick }) => (
       </ListItemIcon>
       <ListItemText primary="Histórico" />
     </ListItemButton>
+    { adminGroup &&  <>
+    <ListItemButton component={NavLink} to="/sabados" onClick={onClick}>
+      <ListItemIcon sx={{ minWidth: 32 }}>
+        <img src={sabado} alt="Sábados" style={{ width: 24, height: 24 }} />
+      </ListItemIcon>
+      <ListItemText primary="Sábados" />
+    </ListItemButton>
+    <ListItemButton component={NavLink} to="/materias-primas" onClick={onClick}>
+      <ListItemIcon sx={{ minWidth: 32 }}>
+        <img src={materias} alt="Materias Primas" style={{ width: 24, height: 24 }} />
+      </ListItemIcon>
+      <ListItemText primary="M. Primas" />
+    </ListItemButton>
+    </>}
   </List>
-);
+  )}
+;
 
 const Sidebar = ({ mobileOpen, onClose }) => {
   const theme = useTheme();

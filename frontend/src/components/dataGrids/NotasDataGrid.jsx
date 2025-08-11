@@ -4,12 +4,14 @@ import { Box, CircularProgress, Typography, IconButton, Tooltip } from '@mui/mat
 import DeleteIcon from '@mui/icons-material/Delete';
 import { useSnackbar } from 'notistack';
 import { api } from '../../utils/api';
-import CustomToolBar from './CustomToolbar';
+
 import dataGridEs from '../../utils/dataGridEs';
 import { exportExcel } from '../../utils/exportExcel';
 import EditNotaModal from '../modals/EditNotaModal';
-import ConfirmDialog from './ConfirmDialog';
+
 import { format, parseISO } from 'date-fns';
+import CustomToolBar from '../common/CustomToolbar';
+import ConfirmDialog from '../common/ConfirmDialog';
 
 // 🔁 Función para transformar una nota en formato listo para el grid
 const formatearNota = (nota) => ({

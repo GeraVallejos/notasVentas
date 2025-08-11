@@ -23,6 +23,7 @@ import { ComunaAutocomplete } from '../common/ComunaAutocomplete';
 import { useState, useMemo } from 'react';
 import { formatearRut } from '../../utils/formatearRut';
 
+
 export const NotaForm = () => {
   const { enqueueSnackbar } = useSnackbar();
   const [openEditDialog, setOpenEditDialog] = useState(false);
@@ -209,6 +210,8 @@ export const NotaForm = () => {
       enqueueSnackbar(msg, { variant: 'error' });
     }
   };
+
+
 
 
 

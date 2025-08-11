@@ -7,6 +7,10 @@ import AuthLayout from "../layouts/AuthLayout";
 import AppLayout from "../layouts/AppLayout";
 import NotasDataPage from "../pages/NotasDataPage";
 import HistoricoNotasPage from "../pages/HistoricoNotasPage";
+import GroupsRouter from "./GroupsRouter";
+import MateriasPrimasPage from "../pages/MateriasPrimasPage";
+import SabadosPage from "../pages/SabadosPage";
+
 
 export const getRoutes = () => createBrowserRouter([
     {
@@ -16,7 +20,7 @@ export const getRoutes = () => createBrowserRouter([
             {
                 index: true,
                 element: <HomePage />,
-                
+
             },
             {
                 path: "notas",
@@ -28,7 +32,24 @@ export const getRoutes = () => createBrowserRouter([
             },
             {
                 path: "lista-historico",
-                element: <HistoricoNotasPage />,
+                element: (
+                    <GroupsRouter group="Admin">
+                        <HistoricoNotasPage />
+                    </GroupsRouter>),
+            },
+            {
+                path: "materias-primas",
+                element: (
+                    <GroupsRouter group="Admin">
+                        <MateriasPrimasPage />
+                    </GroupsRouter>),
+            },
+            {
+                path: "sabados",
+                element: (
+                    <GroupsRouter group="Admin">
+                        <SabadosPage />
+                    </GroupsRouter>),
             },
         ]
     },
