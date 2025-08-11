@@ -178,7 +178,7 @@ const SabadosMesGrid = ({ exportNombre }) => {
                 showToolbar
                 localeText={dataGridEs}
             />
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 2 }}>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 2, gap: 2 }}>
                 <Button
                 variant="outlined"
                 component={Link}
