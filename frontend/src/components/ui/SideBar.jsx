@@ -18,7 +18,7 @@ import sabado from '../../assets/iconos/sabado.png';
 import materias from '../../assets/iconos/materias-primas.png';
 import { useSelector } from 'react-redux';
 
-const drawerWidth = 180;
+const drawerWidth = 190;
 
 
 
@@ -59,7 +59,13 @@ const SidebarContent = ({ onClick }) => {
       <ListItemIcon sx={{ minWidth: 32 }}>
         <img src={materias} alt="Materias Primas" style={{ width: 24, height: 24 }} />
       </ListItemIcon>
-      <ListItemText primary="M. Primas" />
+      <ListItemText primary="Pedir M. Primas" />
+    </ListItemButton>
+    <ListItemButton component={NavLink} to="/lista-materias-primas" onClick={onClick}>
+      <ListItemIcon sx={{ minWidth: 32 }}>
+        <img src={materias} alt="Materias Primas" style={{ width: 24, height: 24 }} />
+      </ListItemIcon>
+      <ListItemText primary="Lista M. Primas" />
     </ListItemButton>
     </>}
   </List>

@@ -113,27 +113,62 @@ class NotasSerializer(serializers.ModelSerializer):
         validated_data['id_usuario_modificacion'] = self.context['request'].user
         return super().update(instance, validated_data)
     
-class ProductosSerializer(serializers.ModelSerializer):
+from rest_framework import serializers
+from .models import Productos, ProductoProveedor, Proveedores
 
+class ProductoProveedorInputSerializer(serializers.ModelSerializer):
+    proveedor_id = serializers.PrimaryKeyRelatedField(
+        queryset=Proveedores.objects.all(),
+        source='proveedor'
+    )
+
+    class Meta:
+        model = ProductoProveedor
+        fields = ['proveedor_id', 'precio_compra', 'fecha_inicio', 'activo']
+
+
+class ProductoProveedorSerializer(serializers.ModelSerializer):
+    proveedor_id = serializers.PrimaryKeyRelatedField(
+        queryset=Proveedores.objects.all(),
+        source='proveedor'
+    )
+
+    class Meta:
+        model = ProductoProveedor
+        fields = ['proveedor_id', 'precio_compra', 'fecha_inicio', 'activo']
+
+
+class ProductosSerializer(serializers.ModelSerializer):
     usuario_creador = serializers.CharField(source='id_usuario.username', read_only=True)
     usuario_modificador = serializers.CharField(source='id_usuario_modificacion.username', read_only=True)
+    proveedores = ProductoProveedorSerializer(many=True, write_only=True, required=False)
 
     class Meta:
         model = Productos
         fields = '__all__'
         read_only_fields = ['id_usuario', 'id_usuario_modificacion']
-    
+
     def create(self, validated_data):
-    
-        # Asigna automáticamente el id_usuario del usuario autenticado
-        validated_data['id_usuario'] = self.context['request'].user 
-        return super().create(validated_data)
-    
-    def update(self, instance, validated_data):
+        proveedores_data = validated_data.pop('proveedores', [])
+        validated_data['id_usuario'] = self.context['request'].user
+        producto = super().create(validated_data)
         
-        # Asigna automáticamente el id_usuario_modificacion del usuario autenticado al actualizar
+        for prov_data in proveedores_data:
+            ProductoProveedor.objects.create(producto=producto, **prov_data)
+        return producto
+
+    def update(self, instance, validated_data):
+        proveedores_data = validated_data.pop('proveedores', [])
         validated_data['id_usuario_modificacion'] = self.context['request'].user
-        return super().update(instance, validated_data)
+        producto = super().update(instance, validated_data)
+        
+        if proveedores_data:
+            # Borrar relaciones previas para este producto
+            producto.proveedores_relacionados.all().delete()
+            for prov_data in proveedores_data:
+                ProductoProveedor.objects.create(producto=producto, **prov_data)
+        return producto
+
 
 class ProveedoresSerializer(serializers.ModelSerializer):
 

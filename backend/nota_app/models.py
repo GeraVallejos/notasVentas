@@ -56,6 +56,9 @@ class Clientes(models.Model):
         managed = True
         db_table = 'clientes'
 
+    def __str__(self):
+        return f"{self.razon_social} - Rut:  {self.rut_cliente}"
+
 
 class Productos(models.Model):
     id_producto = models.AutoField(primary_key=True)
@@ -68,7 +71,6 @@ class Productos(models.Model):
     id_usuario = models.ForeignKey('Usuarios', models.DO_NOTHING, db_column='id_usuario', related_name='productos_creados')
     id_usuario_modificacion = models.ForeignKey('Usuarios', models.DO_NOTHING, db_column='id_usuario_modificacion', related_name='productos_modificados', null=True, blank=True)
     categoria = models.CharField(max_length=100, blank=True, null=True)
-    id_proveedor = models.ForeignKey('Proveedores', models.DO_NOTHING, db_column='id_proveedor', related_name='producto_proveedor', null=True, blank=True)
     precio_compra = models.DecimalField(max_digits=10, decimal_places=6, blank=True, null=True)
     codigo = models.CharField(max_length=20, blank=False, null=False, unique=True)
     estado = models.CharField(max_length=20, default='Activo')
@@ -80,6 +82,9 @@ class Productos(models.Model):
     class Meta:
         managed = True
         db_table = 'productos'
+    
+    def __str__(self):
+        return f"{self.nombre} - {self.codigo}"
 
 
 class Proveedores(models.Model):
@@ -102,6 +107,44 @@ class Proveedores(models.Model):
         managed = True
         db_table = 'proveedores'
 
+    def __str__(self):
+        return f"{self.razon_social} - id: {self.id_proveedor}"
+
+
+class ProductoProveedor(models.Model):
+    producto = models.ForeignKey('Productos', on_delete=models.CASCADE)
+    proveedor = models.ForeignKey('Proveedores', on_delete=models.CASCADE)
+    precio_compra = models.DecimalField(max_digits=10, decimal_places=6, null=True, blank=True)
+    fecha_inicio = models.DateField(null=True, blank=True)
+    activo = models.BooleanField(default=True)
+
+    class Meta:
+        unique_together = ('producto', 'proveedor')
+
+    def __str__(self):
+        return f"{self.producto.nombre} - {self.proveedor.nombre}"
+
+
+class PedidoMateriasPrimas(models.Model):
+    id_pedido = models.AutoField(primary_key=True)
+    fecha_creacion = models.DateTimeField(auto_now_add=True)
+    fecha_modificacion = models.DateTimeField(auto_now=True)
+    estado = models.CharField(max_length=20, default='Pendiente')
+    id_usuario = models.ForeignKey('Usuarios', models.DO_NOTHING, db_column='id_usuario', related_name='pedidos_materias_primas_creados')
+    id_usuario_modificacion = models.ForeignKey('Usuarios', models.DO_NOTHING, db_column='id_usuario_modificacion', related_name='pedidos_materias_primas_modificados', null=True, blank=True)
+    id_proveedor = models.ForeignKey('Proveedores', models.DO_NOTHING, db_column='id_proveedor', related_name='pedidos_materias_primas')
+    id_producto = models.ForeignKey('Productos', models.DO_NOTHING, db_column='id_producto', related_name='pedidos_materias_primas')
+    cantidad = models.IntegerField(default=0, blank=False, null=False)
+    unidad_medida = models.CharField(max_length=50, blank=True, null=True)
+    fecha_entrega = models.DateField(blank=False, null=False)
+
+    class Meta:
+        managed = True
+        db_table = 'pedido_materias_primas'
+
+    def __str__(self):
+        return f"Pedido {self.id_pedido} - Producto: {self.id_producto.nombre} - Proveedor: {self.id_proveedor.razon_social}"
+
 class Personal(models.Model):
     id_personal = models.AutoField(primary_key=True)
     nombre = models.CharField(max_length=200, blank=False, null=False)
@@ -121,6 +164,9 @@ class Personal(models.Model):
     class Meta:
         managed = True
         db_table = 'personal'
+
+    def __str__(self):
+        return f"{self.nombre} {self.apellido} - Rut: {self.rut}"
 
 
 class Sabado(models.Model):
