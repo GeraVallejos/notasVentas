@@ -177,6 +177,9 @@ const SabadosMesGrid = ({ exportNombre }) => {
                 slotProps={{ toolbar: { onExport } }}
                 showToolbar
                 localeText={dataGridEs}
+                initialState={{
+          sorting: { sortModel: [{ field: 'nombre_completo', sort: 'asc' }] }
+                }}
             />
             <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 2, gap: 2 }}>
                 <Button
