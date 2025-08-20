@@ -67,6 +67,12 @@ const SidebarContent = ({ onClick }) => {
       </ListItemIcon>
       <ListItemText primary="Lista M. Primas" />
     </ListItemButton>
+    <ListItemButton component={NavLink} to="/historico-materias-primas" onClick={onClick}>
+      <ListItemIcon sx={{ minWidth: 32 }}>
+        <img src={materias} alt="Historico Materias Primas" style={{ width: 24, height: 24 }} />
+      </ListItemIcon>
+      <ListItemText primary="Histórico M. Primas" />
+    </ListItemButton>
     </>}
   </List>
   )}

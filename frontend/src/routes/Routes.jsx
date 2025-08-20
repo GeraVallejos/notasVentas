@@ -12,6 +12,7 @@ import MateriasPrimasPage from "../pages/MateriasPrimasPage";
 import SabadosPage from "../pages/SabadosPage";
 import HistoricoSabadosPage from "../pages/HistoricoSabadosPage";
 import ListaMateriasPrimasPage from "../pages/ListaMateriasPrimasPage";
+import HistoricoPrimasPage from "../pages/HistoricoPrimasPage";
 
 
 export const getRoutes = () => createBrowserRouter([
@@ -51,6 +52,13 @@ export const getRoutes = () => createBrowserRouter([
                 element: (
                     <GroupsRouter group="Admin">
                         <MateriasPrimasPage />
+                    </GroupsRouter>),
+            },
+            {
+                path: "historico-materias-primas",
+                element: (
+                    <GroupsRouter group="Admin">
+                        <HistoricoPrimasPage />
                     </GroupsRouter>),
             },
             {

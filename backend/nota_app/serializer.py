@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Usuarios, Notas, Clientes, Productos, Proveedores, Personal, Sabado, SabadoTrabajado
+from .models import Usuarios, Notas, Clientes, Productos, Proveedores, Personal, Sabado, SabadoTrabajado, PedidoMateriasPrimas
 
 class UsuariosSerializer(serializers.ModelSerializer):
     
@@ -229,3 +229,35 @@ class HistoricoSabadosSerializer(serializers.Serializer):
     class Meta:
         model = Personal
         fields = '__all__'
+
+
+class PedidoMateriasPrimasSerializer(serializers.ModelSerializer):
+    usuario_creador = serializers.CharField(source='id_usuario.username', read_only=True)
+    usuario_modificador = serializers.CharField(source='id_usuario_modificacion.username', read_only=True)
+    id_proveedor = serializers.PrimaryKeyRelatedField(
+        queryset=Proveedores.objects.all(),
+    )
+    id_producto = serializers.PrimaryKeyRelatedField(
+        queryset=Productos.objects.all(),
+    )
+
+    rut_proveedor = serializers.CharField(source='id_proveedor.rut_proveedor', read_only=True)
+    nombre_proveedor = serializers.CharField(source='id_proveedor.razon_social', read_only=True)
+    nombre_producto = serializers.CharField(source='id_producto.nombre', read_only=True)
+    codigo_producto = serializers.CharField(source='id_producto.codigo', read_only=True)
+
+    fecha_creacion = serializers.DateTimeField(read_only=True)
+    fecha_modificacion = serializers.DateTimeField(read_only=True)
+
+    class Meta:
+        model = PedidoMateriasPrimas
+        fields = '__all__'
+        read_only_fields = ['id_usuario', 'id_usuario_modificacion', 'fecha_creacion', 'fecha_modificacion']
+
+    def create(self, validated_data):
+        validated_data['id_usuario'] = self.context['request'].user 
+        return super().create(validated_data)
+    
+    def update(self, instance, validated_data):
+        validated_data['id_usuario_modificacion'] = self.context['request'].user
+        return super().update(instance, validated_data)

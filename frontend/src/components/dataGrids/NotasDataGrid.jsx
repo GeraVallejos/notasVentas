@@ -27,10 +27,10 @@ const formatearNota = (nota) => ({
     ? format(parseISO(nota.fecha_creacion), 'HH:mm')
     : '',
   fecha_modificacion_date: nota.fecha_modificacion
-   ? format(parseISO(nota.fecha_modificacion), 'dd/MM/yyyy')
+    ? format(parseISO(nota.fecha_modificacion), 'dd/MM/yyyy')
     : '',
   fecha_modificacion_time: nota.fecha_modificacion
-  ? format(parseISO(nota.fecha_modificacion), 'HH:mm')
+    ? format(parseISO(nota.fecha_modificacion), 'HH:mm')
     : '',
   horario_desde: typeof nota.horario_desde === 'string' ? nota.horario_desde : '',
   horario_hasta: typeof nota.horario_hasta === 'string' ? nota.horario_hasta : '',
@@ -187,9 +187,9 @@ const NotasDataGrid = ({ estado, nombre, exportNombre, userGroups }) => {
   const columns = esVentas ? baseColumns : [...baseColumns, deleteColumn];
 
   const onExport = () => {
-  const columnsToExport = columns.filter(column => !column.disableExport);
-  exportExcel(columnsToExport, notas, exportNombre);
-};
+    const columnsToExport = columns.filter(column => !column.disableExport);
+    exportExcel(columnsToExport, notas, exportNombre);
+  };
 
   if (loading) {
     return (

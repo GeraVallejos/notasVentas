@@ -30,8 +30,6 @@ export const NotaForm = () => {
   const [clienteOriginal, setClienteOriginal] = useState(null);
   
 
-
-
   // Funcion para dejar los strigs de la data en mayus, con exepciones
   const transformMayus = (obj, excluir = []) => {
     const nuevoObj = { ...obj };
@@ -101,12 +99,10 @@ export const NotaForm = () => {
         horario_desde: data.horario_desde,
         horario_hasta: data.horario_hasta,
       };
-
       await api.post('/nota/', transformMayus(payload, ['correo']));
       enqueueSnackbar('Nota creada exitosamente', { variant: 'success' });
       form.reset({ num_nota: '', rut_cliente: '', observacion: '' });
     } catch (error) {
-      console.error(error);
       const msg = error.response?.data?.detail || 'Error al crear la nota';
       enqueueSnackbar(msg, { variant: 'error' });
     }

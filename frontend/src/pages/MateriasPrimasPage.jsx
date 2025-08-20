@@ -1,7 +1,10 @@
 
+import MPrimasForm from "../components/forms/MPrimasForm"
+
 const MateriasPrimasPage = () => {
+
   return (
-    <div>MateriasPrimasPage</div>
+    <MPrimasForm />
   )
 }
 

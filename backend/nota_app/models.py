@@ -129,14 +129,15 @@ class PedidoMateriasPrimas(models.Model):
     id_pedido = models.AutoField(primary_key=True)
     fecha_creacion = models.DateTimeField(auto_now_add=True)
     fecha_modificacion = models.DateTimeField(auto_now=True)
-    estado = models.CharField(max_length=20, default='Pendiente')
+    estado = models.CharField(max_length=20, default='PENDIENTE')
     id_usuario = models.ForeignKey('Usuarios', models.DO_NOTHING, db_column='id_usuario', related_name='pedidos_materias_primas_creados')
     id_usuario_modificacion = models.ForeignKey('Usuarios', models.DO_NOTHING, db_column='id_usuario_modificacion', related_name='pedidos_materias_primas_modificados', null=True, blank=True)
     id_proveedor = models.ForeignKey('Proveedores', models.DO_NOTHING, db_column='id_proveedor', related_name='pedidos_materias_primas')
     id_producto = models.ForeignKey('Productos', models.DO_NOTHING, db_column='id_producto', related_name='pedidos_materias_primas')
     cantidad = models.IntegerField(default=0, blank=False, null=False)
     unidad_medida = models.CharField(max_length=50, blank=True, null=True)
-    fecha_entrega = models.DateField(blank=False, null=False)
+    fecha_entrega = models.DateTimeField(blank=False, null=False)
+    observacion = models.CharField(max_length=1000, blank=True, null=True)
 
     class Meta:
         managed = True

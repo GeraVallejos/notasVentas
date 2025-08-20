@@ -1,7 +1,7 @@
 from rest_framework import viewsets
 from django.db import transaction
-from .serializer import UsuariosSerializer, NotasSerializer, ClientesSerializer, ProductosSerializer, ProveedoresSerializer, PersonalSerializer, HistoricoSabadosSerializer
-from .models import Usuarios, Notas, Clientes, Productos, Proveedores, Personal, Sabado, SabadoTrabajado
+from .serializer import UsuariosSerializer, NotasSerializer, ClientesSerializer, ProductosSerializer, ProveedoresSerializer, PersonalSerializer, HistoricoSabadosSerializer, PedidoMateriasPrimasSerializer
+from .models import Usuarios, Notas, Clientes, Productos, Proveedores, Personal, Sabado, SabadoTrabajado, PedidoMateriasPrimas
 from rest_framework import permissions
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -294,11 +294,77 @@ class ProductosView(viewsets.ModelViewSet):
     queryset = Productos.objects.all()
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
+    @action(detail=False, methods=['get', 'put', 'patch'], url_path='por-codigo')
+    def obtener_por_codigo(self, request):
+        codigo = request.query_params.get('codigo')
+        if not codigo:
+            return Response({'error': 'Código es requerido'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        try:
+            producto = Productos.objects.get(codigo=codigo)
+            
+            # Manejo de métodos PUT/PATCH
+            if request.method in ['PUT', 'PATCH']:
+                partial = request.method == 'PATCH'  # True para PATCH, False para PUT
+                serializer = self.get_serializer(producto, data=request.data, partial=partial)
+                serializer.is_valid(raise_exception=True)
+                serializer.save()
+                return Response(serializer.data)
+            
+            # Manejo del GET
+            data = {
+                'id_producto': producto.id_producto,
+                'nombre': producto.nombre,
+                'codigo': producto.codigo,
+                'descripcion': producto.descripcion,
+                'precio': producto.precio_venta,
+                'stock': producto.stock,
+                'categoria': producto.categoria,
+                'unidad_medida': producto.unidad_medida,
+                'precio_compra': producto.precio_compra,
+            }
+            return Response(data)
+            
+        except Productos.DoesNotExist:
+            return Response({'error': 'Producto no encontrado'}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
 
 class ProveedoresView(viewsets.ModelViewSet):
     serializer_class = ProveedoresSerializer
     queryset = Proveedores.objects.all()
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+
+    @action(detail=False, methods=['get', 'put', 'patch'], url_path='por-rut')
+    def obtener_por_rut(self, request):
+        rut = request.query_params.get('rut')
+        if not rut:
+            return Response({'error': 'RUT es requerido'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        try:
+            proveedor = Proveedores.objects.get(rut_proveedor=rut)
+            
+            # Manejo de métodos PUT/PATCH
+            if request.method in ['PUT', 'PATCH']:
+                partial = request.method == 'PATCH'  # True para PATCH, False para PUT
+                serializer = self.get_serializer(proveedor, data=request.data, partial=partial)
+                serializer.is_valid(raise_exception=True)
+                serializer.save()
+                return Response(serializer.data)
+            
+            # Manejo del GET
+            data = {
+                'id_proveedor': proveedor.id_proveedor,
+                'razon_social': proveedor.razon_social,
+                'rut_proveedor': proveedor.rut_proveedor,
+            }
+            return Response(data)
+            
+        except Proveedores.DoesNotExist:
+            return Response({'error': 'Proveedor no encontrado'}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class PersonalView(viewsets.ModelViewSet):
@@ -394,3 +460,22 @@ class PersonalView(viewsets.ModelViewSet):
         # Validar y serializar la respuesta
         serializer = HistoricoSabadosSerializer(response_data, many=True)
         return Response(serializer.data)
+    
+class PedidoMateriasPrimasView(viewsets.ModelViewSet):
+    serializer_class = PedidoMateriasPrimasSerializer
+    queryset = PedidoMateriasPrimas.objects.all()
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+
+    @action(detail=False, methods=['get'], url_path='buscar-proveedores')
+    def buscar_proveedores(self, request):
+        q = request.GET.get('q', '')
+        proveedores = Proveedores.objects.filter(razon_social__icontains=q)[:10]
+        serializer = ProveedoresSerializer(proveedores, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    @action(detail=False, methods=['get'], url_path='buscar-productos')
+    def buscar_productos(self, request):
+        q = request.GET.get('q', '')
+        productos = Productos.objects.filter(nombre__icontains=q)[:10]
+        serializer = ProductosSerializer(productos, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)

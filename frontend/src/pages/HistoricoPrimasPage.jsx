@@ -1,8 +1,9 @@
 import { format } from 'date-fns';
 import MateriasPrimasGrid from '../components/dataGrids/MateriasPrimasGrid';
 
-const ListaMateriasPrimasPage = () => {
-    const fechaActual = new Date();
+
+const HistoricoPrimasPage = () => {
+   const fechaActual = new Date();
 
   // Formato con fecha y hora completa
   const fecha = format(fechaActual, 'dd/MM/yyyy HH:mm:ss');
@@ -11,11 +12,11 @@ const ListaMateriasPrimasPage = () => {
 
   return (
     <MateriasPrimasGrid
-      estado="PENDIENTE"
-      nombre="Materias Primas"
-      exportNombre={`Materias_Primas${fecha}`}
+      estado="SOLICITADO"
+      nombre="Historico Materias Primas"
+      exportNombre={`Historico_Materias_Primas${fecha}`}
     />
   )
 }
 
-export default ListaMateriasPrimasPage
+export default HistoricoPrimasPage;
