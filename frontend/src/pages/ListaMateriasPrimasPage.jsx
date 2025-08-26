@@ -12,7 +12,7 @@ const ListaMateriasPrimasPage = () => {
   return (
     <MateriasPrimasGrid
       estado="PENDIENTE"
-      nombre="Materias Primas"
+      nombre="Insumos y Materias Primas"
       exportNombre={`Materias_Primas${fecha}`}
     />
   )

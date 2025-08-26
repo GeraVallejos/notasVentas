@@ -13,7 +13,7 @@ const HistoricoPrimasPage = () => {
   return (
     <MateriasPrimasGrid
       estado="SOLICITADO"
-      nombre="Historico Materias Primas"
+      nombre="Historico Insumos y Materias Primas"
       exportNombre={`Historico_Materias_Primas${fecha}`}
     />
   )

@@ -1,7 +1,7 @@
 from rest_framework import viewsets
 from django.db import transaction
-from .serializer import UsuariosSerializer, NotasSerializer, ClientesSerializer, ProductosSerializer, ProveedoresSerializer, PersonalSerializer, HistoricoSabadosSerializer, PedidoMateriasPrimasSerializer
-from .models import Usuarios, Notas, Clientes, Productos, Proveedores, Personal, Sabado, SabadoTrabajado, PedidoMateriasPrimas
+from .serializer import UsuariosSerializer, NotasSerializer, ClientesSerializer, ProductosSerializer, ProveedoresSerializer, PersonalSerializer, HistoricoSabadosSerializer, PedidoMateriasPrimasSerializer, PDFDocumentFacturasSerializer
+from .models import Usuarios, Notas, Clientes, Productos, Proveedores, Personal, Sabado, SabadoTrabajado, PedidoMateriasPrimas, PDFDocumentFacturas
 from rest_framework import permissions
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -25,6 +25,8 @@ from django.db.models import F, Func, Value
 from datetime import timedelta
 from django.utils import timezone
 from collections import defaultdict
+from django.http import FileResponse, Http404
+
 
 logger = logging.getLogger(__name__)
 
@@ -479,3 +481,49 @@ class PedidoMateriasPrimasView(viewsets.ModelViewSet):
         productos = Productos.objects.filter(nombre__icontains=q)[:10]
         serializer = ProductosSerializer(productos, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class PDFDocumentFacturasView(viewsets.ModelViewSet):
+    serializer_class = PDFDocumentFacturasSerializer
+    queryset = PDFDocumentFacturas.objects.all()
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+
+    @action(detail=True, methods=['get'], url_path='view_factura')
+    def view(self, request, pk=None):
+        try:
+            pdf_document = self.get_object()
+            
+            response = FileResponse(
+                pdf_document.file.open(), 
+                as_attachment=False,  # False para visualizar en navegador
+                content_type='application/pdf'
+            )
+            response['Content-Disposition'] = f'inline; filename="{pdf_document.title}"'
+            return response
+            
+        except PDFDocumentFacturas.DoesNotExist:
+            raise Http404("Factura no encontrada")
+
+    @action(detail=True, methods=['get'], url_path='download_factura')
+    def download(self, request, pk=None):
+        try:
+            pdf_document = self.get_object()
+            
+            response = FileResponse(
+                pdf_document.file.open(), 
+                as_attachment=True,  # True para descargar
+                content_type='application/pdf'
+            )
+            response['Content-Disposition'] = f'attachment; filename="{pdf_document.title}"'
+            return response
+            
+        except PDFDocumentFacturas.DoesNotExist:
+            raise Http404("PDF no encontrado")
+
+    @action(detail=False, methods=['get'], url_path='buscar-por-titulo')
+    def buscar_por_titulo(self, request):
+        q = request.GET.get('q', '')
+        pdfs = PDFDocumentFacturas.objects.filter(title__icontains=q)[:10]
+        serializer = self.get_serializer(pdfs, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+

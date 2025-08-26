@@ -14,6 +14,9 @@ import HistoricoSabadosPage from "../pages/HistoricoSabadosPage";
 import ListaMateriasPrimasPage from "../pages/ListaMateriasPrimasPage";
 import HistoricoPrimasPage from "../pages/HistoricoPrimasPage";
 
+import HistoricoFacturasPage from "../pages/HistoricoFacturasPage";
+import FacturasPage from "../pages/FacturasPage";
+
 
 export const getRoutes = () => createBrowserRouter([
     {
@@ -73,6 +76,20 @@ export const getRoutes = () => createBrowserRouter([
                 element: (
                     <GroupsRouter group="Admin">
                         <HistoricoSabadosPage />
+                    </GroupsRouter>),
+            },
+            {
+                path: "pdf-facturas",
+                element: (
+                    <GroupsRouter group="Admin">
+                        <FacturasPage />
+                    </GroupsRouter>),
+            },
+            {
+                path: "pdf-facturas-historico",
+                element: (
+                    <GroupsRouter group="Admin">
+                        <HistoricoFacturasPage />
                     </GroupsRouter>),
             },
             {

@@ -43,10 +43,10 @@ const SearchSelect = ({
                     freeSolo
                     options={options}
                     getOptionLabel={getOptionLabel}
-                    value={null} // no usamos objetos como valor, solo texto
-                    inputValue={field.value || ""} // 🔹 conecta el texto al form
+                    value={null} // no se usan objetos como valor, solo texto
+                    inputValue={field.value || ""} // conecta el texto al form
                     onInputChange={(e, newInputValue) => {
-                        field.onChange(newInputValue); // 🔹 actualiza RHF con el texto
+                        field.onChange(newInputValue); // actualiza RHF con el texto
                         debouncedFetch(newInputValue);
                     }}
                     onChange={(e, value) => {

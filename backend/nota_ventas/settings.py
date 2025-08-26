@@ -261,3 +261,12 @@ if IS_PRODUCTION:
             },
         },
     }
+
+# Configuracion de archivos multimedia
+# Esto es necesario para manejar archivos subidos por los usuarios
+if IS_PRODUCTION:
+    MEDIA_ROOT = Path("/app/media")
+else:
+    MEDIA_ROOT = BASE_DIR / "media"
+
+MEDIA_URL = "/media/"

@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Usuarios, Notas, Clientes, Productos, Proveedores, Personal, Sabado, SabadoTrabajado, PedidoMateriasPrimas
+from .models import Usuarios, Notas, Clientes, Productos, Proveedores, Personal, Sabado, PedidoMateriasPrimas, PDFDocumentFacturas
 
 class UsuariosSerializer(serializers.ModelSerializer):
     
@@ -261,3 +261,23 @@ class PedidoMateriasPrimasSerializer(serializers.ModelSerializer):
     def update(self, instance, validated_data):
         validated_data['id_usuario_modificacion'] = self.context['request'].user
         return super().update(instance, validated_data)
+    
+    
+class PDFDocumentFacturasSerializer(serializers.ModelSerializer):
+    file_url = serializers.SerializerMethodField()
+    usuario_creador = serializers.CharField(source='id_usuario.username', read_only=True)
+    
+    class Meta:
+        model = PDFDocumentFacturas
+        fields = '__all__'
+        read_only_fields = ['id_usuario', 'created_at', 'updated_at']
+    
+    def get_file_url(self, obj):
+        request = self.context.get('request')
+        if obj.file and request:
+            return request.build_absolute_uri(obj.file.url) 
+        return None
+    
+    def create(self, validated_data):
+        validated_data['id_usuario'] = self.context['request'].user 
+        return super().create(validated_data)

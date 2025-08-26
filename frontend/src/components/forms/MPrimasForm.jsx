@@ -120,7 +120,7 @@ const MPrimasForm = () => {
   return (
     <Box sx={{ width: '100%', maxWidth: 700, mx: 'auto', mt: 2, px: 4, py: 2, boxShadow: '0 4px 20px rgba(0,0,0,0.1)' }}>
       <Typography variant="h5" sx={{ textAlign: 'center', mb: 2, background: ' #00BFFF', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-        FORMULARIO PEDIDOS
+        FORMULARIO INSUMOS
       </Typography>
 
       <FormProvider {...form}>
@@ -163,6 +163,7 @@ const MPrimasForm = () => {
                     )
                   }
                   format="dd/MM/yyyy"
+                  minDate={new Date()}
                   slotProps={{
                     textField: {
                       fullWidth: true,
@@ -223,7 +224,7 @@ const MPrimasForm = () => {
 
             <Grid size={{ xs: 12, md: 12 }}>
               <Button type="submit" variant="contained" fullWidth disabled={form.formState.isSubmitting} sx={{ mt: 2, background: ' #00BFFF', color: 'white', fontSize: '1rem', '&:hover': { background: '#1C86EE' } }}>
-                {form.formState.isSubmitting ? 'Guardando...' : 'CREAR PEDIDO'}
+                {form.formState.isSubmitting ? 'Guardando...' : 'PEDIR INSUMOS'}
               </Button>
             </Grid>
           </Grid>

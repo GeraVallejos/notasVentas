@@ -7,21 +7,27 @@ export const ComunaAutocomplete = ({ value, onChange, error, helperText }) => {
   const [filteredOptions, setFilteredOptions] = useState([]);
   const [inputValue, setInputValue] = useState(value || '');
 
-  const filterComunas = (query) => {
-    if (!query) {
-      setFilteredOptions([]);
-      return;
-    }
+  const normalizeText = (str) =>
+  str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
 
-    const matches = comunasData
-      .filter((comuna) =>
-        comuna.nombre.toLowerCase().includes(query.toLowerCase())
-      )
-      .slice(0, 10)
-      .map((item) => ({ label: item.nombre, full: item }));
+const filterComunas = (query) => {
+  if (!query) {
+    setFilteredOptions([]);
+    return;
+  }
 
-    setFilteredOptions(matches);
-  };
+  const normalizedQuery = normalizeText(query);
+
+  const matches = comunasData
+    .filter((comuna) =>
+      normalizeText(comuna.nombre).includes(normalizedQuery)
+    )
+    .slice(0, 10)
+    .map((item) => ({ label: item.nombre, full: item }));
+
+  setFilteredOptions(matches);
+};
+
 
   const debouncedFilter = useMemo(() => debounce(filterComunas, 300), []);
 

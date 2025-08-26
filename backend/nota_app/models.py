@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 import django.contrib.auth.validators
+import PyPDF2
 
 # Create your models here.
 
@@ -65,7 +66,7 @@ class Productos(models.Model):
     nombre = models.CharField(max_length=200, blank=False, null=False)
     descripcion = models.CharField(max_length=1000, blank=True, null=True)
     precio_venta = models.DecimalField(max_digits=10, decimal_places=6, blank=True, null=True)
-    stock = models.IntegerField(default=0, blank=False, null=False)
+    stock = models.IntegerField(default=0, blank=True, null=True)
     fecha_creacion = models.DateTimeField(auto_now_add=True)
     fecha_modificacion = models.DateTimeField(auto_now=True)
     id_usuario = models.ForeignKey('Usuarios', models.DO_NOTHING, db_column='id_usuario', related_name='productos_creados')
@@ -73,10 +74,9 @@ class Productos(models.Model):
     categoria = models.CharField(max_length=100, blank=True, null=True)
     precio_compra = models.DecimalField(max_digits=10, decimal_places=6, blank=True, null=True)
     codigo = models.CharField(max_length=20, blank=False, null=False, unique=True)
-    estado = models.CharField(max_length=20, default='Activo')
+    estado = models.CharField(max_length=20, default='ACTIVO')
     clase1 = models.CharField(max_length=100, blank=True, null=True)
     clase2 = models.CharField(max_length=100, blank=True, null=True)
-    clase3 = models.CharField(max_length=100, blank=True, null=True)
     unidad_medida = models.CharField(max_length=50, blank=True, null=True)
 
     class Meta:
@@ -101,7 +101,7 @@ class Proveedores(models.Model):
     giro = models.CharField(max_length=1000, blank=True, null=True)
     id_usuario = models.ForeignKey('Usuarios', models.DO_NOTHING, db_column='id_usuario', related_name='proveedores_creados')
     id_usuario_modificacion = models.ForeignKey('Usuarios', models.DO_NOTHING, db_column='id_usuario_modificacion', related_name='proveedores_modificados', null=True, blank=True)
-    estado = models.CharField(max_length=20, default='Activo')
+    estado = models.CharField(max_length=20, default='ACTIVO')
 
     class Meta:
         managed = True
@@ -183,4 +183,24 @@ class SabadoTrabajado(models.Model):
 
     class Meta:
         unique_together = ("personal", "sabado")
-    
+
+
+class PDFDocumentFacturas(models.Model):
+    id_pdf = models.AutoField(primary_key=True)
+    id_usuario = models.ForeignKey('Usuarios', on_delete=models.CASCADE, db_column='id_usuario', related_name='usuario_creador')
+    title = models.CharField(max_length=255)
+    file = models.FileField(upload_to='pdfs/')
+    file_size = models.BigIntegerField()
+    page_count = models.IntegerField(blank=True, null=True)
+    observacion = models.TextField(blank=True, null=True)
+    empresa = models.CharField(max_length=100, blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    estado = models.CharField(max_length=20, default='NO PAGADO')
+
+    def __str__(self):
+        return f"{self.title} - {self.id_usuario.username}"
+
+    class Meta:
+        managed = True
+        db_table = 'pdf_document_facturas'

@@ -1,9 +1,11 @@
 from django.contrib import admin
-from .models import Usuarios, Notas, Clientes, Productos, Personal, Proveedores, PedidoMateriasPrimas
+from .models import Usuarios, Notas, Clientes, Productos, Personal, Proveedores, PedidoMateriasPrimas, PDFDocumentFacturas
 from .forms import UsuarioAdminForm
 from import_export.admin import ImportExportModelAdmin
 from import_export import resources, fields
-
+from import_export.formats.base_formats import CSV
+    
+    
 class UsuarioAdmin(admin.ModelAdmin):
     form = UsuarioAdminForm
     list_display = ('username', 'nombre', 'apellido', 'correo', 'rut', 'cargo', 'is_staff', 'is_active')
@@ -28,20 +30,73 @@ class PersonalResource(resources.ModelResource):
            'direccion', 'comuna', 'telefono', 'cargo', 'id_usuario', 'id_usuario_modificacion', 'estado'
         )
 
+class ProveedoresResource(resources.ModelResource):
+    class Meta:
+        model = Proveedores
+        import_id_fields = ('id_proveedor',)
+        fields = (
+            'id_proveedor',
+            'razon_social',
+            'rut_proveedor',
+            'fecha_creacion',
+            'fecha_modificacion',
+            'contacto',
+            'correo',
+            'direccion',
+            'comuna',
+            'telefono',
+            'giro',
+            'id_usuario',
+            'id_usuario_modificacion',
+        )
+
+class ProductosResource(resources.ModelResource):
+    class Meta:
+        model = Productos
+        import_id_fields = ('id_producto',)
+        fields = (
+            'id_producto',
+            'nombre',
+            'descripcion',
+            'precio_venta',
+            'stock',
+            'fecha_creacion',
+            'fecha_modificacion',
+            'id_usuario',
+            'id_usuario_modificacion',
+            'categoria',
+            'precio_compra',
+            'codigo',
+            'clase1',
+            'clase2',
+            'clase3',
+            'unidad_medida',
+        )
+
+class ClientesResource(resources.ModelResource):
+    class Meta:
+        model = Clientes
+        import_id_fields = ('id_cliente',)
+        exclude = ('id_cliente', 'fecha_creacion', 'fecha_modificacion', 'contacto', 'id_usuario_modificacion')
+
 class ProveedoresAdmin(ImportExportModelAdmin):
-    pass
+    resource_class = ProveedoresResource
+
 
 
 class ProductosAdmin(ImportExportModelAdmin):
-    pass
+    resource_class = ProductosResource
+
+
+
+class ClientesAdmin(ImportExportModelAdmin):
+    resource_class = ClientesResource
+
 
 
 class PersonalAdmin(ImportExportModelAdmin):
     resource_class = PersonalResource
 
-
-class ClientesAdmin(ImportExportModelAdmin):
-    pass
 
 
 admin.site.register(Usuarios, UsuarioAdmin)
@@ -51,5 +106,7 @@ admin.site.register(Personal, PersonalAdmin)
 admin.site.register(Proveedores, ProveedoresAdmin)
 admin.site.register(Productos, ProductosAdmin)
 admin.site.register(PedidoMateriasPrimas)
+admin.site.register(PDFDocumentFacturas)
+
 
 
