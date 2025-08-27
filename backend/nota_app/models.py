@@ -160,7 +160,7 @@ class Personal(models.Model):
     cargo = models.CharField(max_length=1000, blank=True, null=True)
     id_usuario = models.ForeignKey('Usuarios', models.DO_NOTHING, db_column='id_usuario', related_name='personal_creado')
     id_usuario_modificacion = models.ForeignKey('Usuarios', models.DO_NOTHING, db_column='id_usuario_modificacion', related_name='personal_modificado', null=True, blank=True)
-    estado = models.CharField(max_length=20, default='Activo')
+    estado = models.CharField(max_length=20, default='ACTIVO')
 
     class Meta:
         managed = True
