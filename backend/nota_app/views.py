@@ -1,7 +1,7 @@
 from rest_framework import viewsets
 from django.db import transaction
-from .serializer import UsuariosSerializer, NotasSerializer, ClientesSerializer, ProductosSerializer, ProveedoresSerializer, PersonalSerializer, HistoricoSabadosSerializer, PedidoMateriasPrimasSerializer, PDFDocumentFacturasSerializer
-from .models import Usuarios, Notas, Clientes, Productos, Proveedores, Personal, Sabado, SabadoTrabajado, PedidoMateriasPrimas, PDFDocumentFacturas
+from .serializer import UsuariosSerializer, NotasSerializer, ClientesSerializer, ProductosSerializer, ProveedoresSerializer, PersonalSerializer, HistoricoSabadosSerializer, PedidoMateriasPrimasSerializer, DocumentFacturasSerializer
+from .models import Usuarios, Notas, Clientes, Productos, Proveedores, Personal, Sabado, SabadoTrabajado, PedidoMateriasPrimas, DocumentFacturas
 from rest_framework import permissions
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -14,14 +14,12 @@ from django.db.models import Count, Q
 from datetime import datetime
 import logging
 from django.utils.timezone import make_aware
-from django.db.models import DateField, CharField
-from django.db.models.functions import Cast, Concat, ExtractMonth, ExtractYear
+from django.db.models import DateField
+from django.db.models.functions import Cast
 from rest_framework.views import APIView
 from django.views.decorators.csrf import ensure_csrf_cookie
 from django.http import JsonResponse
 from django.middleware.csrf import get_token
-from django.db.models.functions import ExtractMonth, ExtractYear
-from django.db.models import F, Func, Value
 from datetime import timedelta
 from django.utils import timezone
 from collections import defaultdict
@@ -483,9 +481,9 @@ class PedidoMateriasPrimasView(viewsets.ModelViewSet):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
-class PDFDocumentFacturasView(viewsets.ModelViewSet):
-    serializer_class = PDFDocumentFacturasSerializer
-    queryset = PDFDocumentFacturas.objects.all()
+class DocumentFacturasView(viewsets.ModelViewSet):
+    serializer_class = DocumentFacturasSerializer
+    queryset = DocumentFacturas.objects.all()
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
     @action(detail=True, methods=['get'], url_path='view_factura')
@@ -501,7 +499,7 @@ class PDFDocumentFacturasView(viewsets.ModelViewSet):
             response['Content-Disposition'] = f'inline; filename="{pdf_document.title}"'
             return response
             
-        except PDFDocumentFacturas.DoesNotExist:
+        except DocumentFacturas.DoesNotExist:
             raise Http404("Factura no encontrada")
 
     @action(detail=True, methods=['get'], url_path='download_factura')
@@ -517,13 +515,13 @@ class PDFDocumentFacturasView(viewsets.ModelViewSet):
             response['Content-Disposition'] = f'attachment; filename="{pdf_document.title}"'
             return response
             
-        except PDFDocumentFacturas.DoesNotExist:
+        except DocumentFacturas.DoesNotExist:
             raise Http404("PDF no encontrado")
 
     @action(detail=False, methods=['get'], url_path='buscar-por-titulo')
     def buscar_por_titulo(self, request):
         q = request.GET.get('q', '')
-        pdfs = PDFDocumentFacturas.objects.filter(title__icontains=q)[:10]
+        pdfs = DocumentFacturas.objects.filter(title__icontains=q)[:10]
         serializer = self.get_serializer(pdfs, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 

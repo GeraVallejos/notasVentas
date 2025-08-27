@@ -1,7 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 import django.contrib.auth.validators
-import PyPDF2
 
 # Create your models here.
 
@@ -185,7 +184,7 @@ class SabadoTrabajado(models.Model):
         unique_together = ("personal", "sabado")
 
 
-class PDFDocumentFacturas(models.Model):
+class DocumentFacturas(models.Model):
     id_pdf = models.AutoField(primary_key=True)
     id_usuario = models.ForeignKey('Usuarios', on_delete=models.CASCADE, db_column='id_usuario', related_name='usuario_creador')
     title = models.CharField(max_length=255)
@@ -203,4 +202,4 @@ class PDFDocumentFacturas(models.Model):
 
     class Meta:
         managed = True
-        db_table = 'pdf_document_facturas'
+        db_table = 'document_facturas'

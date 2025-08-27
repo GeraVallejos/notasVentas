@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Usuarios, Notas, Clientes, Productos, Proveedores, Personal, Sabado, PedidoMateriasPrimas, PDFDocumentFacturas
+from .models import Usuarios, Notas, Clientes, Productos, Proveedores, Personal, Sabado, PedidoMateriasPrimas, DocumentFacturas
 
 class UsuariosSerializer(serializers.ModelSerializer):
     
@@ -263,12 +263,12 @@ class PedidoMateriasPrimasSerializer(serializers.ModelSerializer):
         return super().update(instance, validated_data)
     
     
-class PDFDocumentFacturasSerializer(serializers.ModelSerializer):
+class DocumentFacturasSerializer(serializers.ModelSerializer):
     file_url = serializers.SerializerMethodField()
     usuario_creador = serializers.CharField(source='id_usuario.username', read_only=True)
     
     class Meta:
-        model = PDFDocumentFacturas
+        model = DocumentFacturas
         fields = '__all__'
         read_only_fields = ['id_usuario', 'created_at', 'updated_at']
     
