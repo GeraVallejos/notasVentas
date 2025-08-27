@@ -41,7 +41,7 @@ const formatearFacturas = (pdf) => ({
     : "",
 });
 
-const PDFDataGrid = ({ nombre, exportNombre, estado }) => {
+const FacturasDataGrid = ({ nombre, exportNombre, estado }) => {
   const [facturas, setfacturas] = useState([]);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
@@ -57,7 +57,7 @@ const PDFDataGrid = ({ nombre, exportNombre, estado }) => {
 
   const fetchFacturas = useCallback(async () => {
     try {
-      const res = await api.get("/pdf-facturas/");
+      const res = await api.get("/facturas/");
       const formateados = res.data
         .filter((n) => n.estado === estado)
         .map(formatearFacturas);
@@ -108,7 +108,7 @@ const PDFDataGrid = ({ nombre, exportNombre, estado }) => {
 
 
     try {
-      await api.post('/pdf-facturas/', formData, {
+      await api.post('/facturas/', formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
 
@@ -136,7 +136,7 @@ const PDFDataGrid = ({ nombre, exportNombre, estado }) => {
 
   const handleDownload = async (pdfId, pdfTitle) => {
     try {
-      const res = await api.get(`pdf-facturas/${pdfId}/download_factura/`, {
+      const res = await api.get(`facturas/${pdfId}/download_factura/`, {
         responseType: "blob",
       });
 
@@ -167,7 +167,7 @@ const PDFDataGrid = ({ nombre, exportNombre, estado }) => {
 
   const handleConfirm = async () => {
     try {
-      await api.delete(`/pdf-facturas/${pdfSeleccionado.id_pdf}/`);
+      await api.delete(`/facturas/${pdfSeleccionado.id_pdf}/`);
       enqueueSnackbar("factura eliminada correctamente", { variant: "success" });
       setConfirmOpen(false);
       fetchFacturas(); // refresca la grilla
@@ -179,7 +179,7 @@ const PDFDataGrid = ({ nombre, exportNombre, estado }) => {
 
   const handlePagar = async () => {
     try {
-      await api.patch(`/pdf-facturas/${pdfSeleccionado.id_pdf}/`, { estado: "PAGADO" });
+      await api.patch(`/facturas/${pdfSeleccionado.id_pdf}/`, { estado: "PAGADO" });
       enqueueSnackbar("Factura marcada como PAGADO", { variant: "success" });
       setConfirmOpenPagar(false);
       fetchFacturas(); // refresca la grilla
@@ -401,4 +401,4 @@ const PDFDataGrid = ({ nombre, exportNombre, estado }) => {
   );
 };
 
-export default PDFDataGrid;
+export default FacturasDataGrid;

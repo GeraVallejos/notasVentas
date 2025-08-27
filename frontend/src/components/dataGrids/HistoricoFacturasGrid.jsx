@@ -17,7 +17,6 @@ import {
   PictureAsPdf,
   Download,
   Visibility,
-  Delete
 } from "@mui/icons-material";
 
 
@@ -53,7 +52,7 @@ const HistoricoFacturasGrid = ({ nombre, exportNombre, estado }) => {
 
   const fetchFacturas = useCallback(async () => {
     try {
-      const res = await api.get("/pdf-facturas/");
+      const res = await api.get("/facturas/");
       const formateados = res.data
         .filter((n) => n.estado === estado)
         .map(formatearFacturas);
@@ -84,7 +83,7 @@ const HistoricoFacturasGrid = ({ nombre, exportNombre, estado }) => {
 
   const handleDownload = async (pdfId, pdfTitle) => {
     try {
-      const res = await api.get(`pdf-facturas/${pdfId}/download_factura/`, {
+      const res = await api.get(`facturas/${pdfId}/download_factura/`, {
         responseType: "blob",
       });
 
@@ -115,7 +114,7 @@ const HistoricoFacturasGrid = ({ nombre, exportNombre, estado }) => {
 
   const handleConfirm = async () => {
     try {
-      await api.delete(`/pdf-facturas/${pdfSeleccionado.id_pdf}/`);
+      await api.delete(`/facturas/${pdfSeleccionado.id_pdf}/`);
       enqueueSnackbar("factura eliminada correctamente", { variant: "success" });
       setConfirmOpen(false);
       fetchFacturas(); // refresca la grilla
@@ -127,7 +126,7 @@ const HistoricoFacturasGrid = ({ nombre, exportNombre, estado }) => {
 
   const handlePagar = async () => {
     try {
-      await api.patch(`/pdf-facturas/${pdfSeleccionado.id_pdf}/`, { estado: "NO PAGADO" });
+      await api.patch(`/facturas/${pdfSeleccionado.id_pdf}/`, { estado: "NO PAGADO" });
       enqueueSnackbar("Factura marcada como PAGADO", { variant: "success" });
       setConfirmOpenPagar(false);
       fetchFacturas(); // refresca la grilla

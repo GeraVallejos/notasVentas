@@ -1,5 +1,5 @@
 import { format } from "date-fns";
-import PDFDataGrid from "../components/dataGrids/PDFDataGrid"
+import FacturasDataGrid from "../components/dataGrids/FacturasDataGrid";
 
 
 const FacturasPage = () => {
@@ -10,7 +10,7 @@ const FacturasPage = () => {
     const fecha = format(fechaActual, 'dd/MM/yyyy HH:mm:ss');
 
   return (
-    <PDFDataGrid
+    <FacturasDataGrid
       nombre="Facturas de Compras"
       exportNombre={`Facturas_${fecha}`}
       estado={'NO PAGADO'}
