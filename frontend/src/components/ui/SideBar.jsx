@@ -22,7 +22,7 @@ import factura from '../../assets/iconos/factura.png';
 import materia_prima from '../../assets/iconos/materia-prima.png';
 
 
-const drawerWidth = 190;
+const drawerWidth = 180;
 
 const SidebarContent = ({ onClick }) => {
   const [openNotas, setOpenNotas] = useState(false);
