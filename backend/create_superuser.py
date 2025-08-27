@@ -51,10 +51,7 @@ if __name__ == "__main__":
     
     # Verificar conexión a la base de datos
     if check_database_connection():
-        # Ejecutar migraciones primero
         run_migrations()
-        
-        # Luego crear superusuario
         create_superuser()
     else:
         print("No se pudo conectar a la base de datos. Abortando.")
