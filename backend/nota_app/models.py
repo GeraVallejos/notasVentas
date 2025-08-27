@@ -189,7 +189,7 @@ class PDFDocumentFacturas(models.Model):
     id_pdf = models.AutoField(primary_key=True)
     id_usuario = models.ForeignKey('Usuarios', on_delete=models.CASCADE, db_column='id_usuario', related_name='usuario_creador')
     title = models.CharField(max_length=255)
-    file = models.FileField(upload_to='pdfs/')
+    file = models.FileField(upload_to='facturas/')
     file_size = models.BigIntegerField()
     page_count = models.IntegerField(blank=True, null=True)
     observacion = models.TextField(blank=True, null=True)

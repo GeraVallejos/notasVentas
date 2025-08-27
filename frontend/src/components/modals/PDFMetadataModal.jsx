@@ -35,9 +35,7 @@ const PDFMetadataModal = ({
             empresa: '',
             observacion: ''
         }
-    });
-
-
+    }); 
 
     useEffect(() => {
         if (metadata) {
@@ -50,7 +48,6 @@ const PDFMetadataModal = ({
     }, [metadata, reset]);
 
     const onSubmit = (data) => {
-        console.log('Datos del formulario:', data);
         if (onSave) {
             onSave(data);
         }
@@ -64,10 +61,7 @@ const PDFMetadataModal = ({
     };
 
     const handleEmpresaSelect = (selectedValue) => {
-        console.log('Proveedor seleccionado:', selectedValue);
-        // Si necesitas hacer algo adicional con el valor seleccionado
         if (selectedValue && selectedValue.razon_social) {
-            // Puedes setear valores adicionales si es necesario
             setValue('empresa', selectedValue.razon_social);
         }
     };
