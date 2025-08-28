@@ -355,7 +355,7 @@ const FacturasDataGrid = ({ nombre, exportNombre, estado }) => {
         rows={facturas}
         columns={columns}
         loading={loading}
-        getRowId={(row) => row.id_pdf}
+        getRowId={(row) => row.id_factura}
         pageSize={10}
         slots={{ toolbar: CustomToolBar }}
         slotProps={{ toolbar: { onExport } }}
