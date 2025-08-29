@@ -167,7 +167,7 @@ const FacturasDataGrid = ({ nombre, exportNombre, estado }) => {
 
   const handleConfirm = async () => {
     try {
-      await api.delete(`/facturas/${pdfSeleccionado.id_pdf}/`);
+      await api.delete(`/facturas/${pdfSeleccionado.id_factura}/`);
       enqueueSnackbar("factura eliminada correctamente", { variant: "success" });
       setConfirmOpen(false);
       fetchFacturas(); // refresca la grilla
@@ -179,7 +179,7 @@ const FacturasDataGrid = ({ nombre, exportNombre, estado }) => {
 
   const handlePagar = async () => {
     try {
-      await api.patch(`/facturas/${pdfSeleccionado.id_pdf}/`, { estado: "PAGADO" });
+      await api.patch(`/facturas/${pdfSeleccionado.id_factura}/`, { estado: "PAGADO" });
       enqueueSnackbar("Factura marcada como PAGADO", { variant: "success" });
       setConfirmOpenPagar(false);
       fetchFacturas(); // refresca la grilla
@@ -291,7 +291,7 @@ const FacturasDataGrid = ({ nombre, exportNombre, estado }) => {
           <IconButton
             color="secondary"
             size="small"
-            onClick={() => handleDownload(params.row.id_pdf, params.row.title)}
+            onClick={() => handleDownload(params.row.id_factura, params.row.title)}
             title="Descargar Factura"
           >
             <Download />
