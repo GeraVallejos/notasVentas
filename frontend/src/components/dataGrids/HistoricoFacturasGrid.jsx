@@ -114,7 +114,7 @@ const HistoricoFacturasGrid = ({ nombre, exportNombre, estado }) => {
 
   const handleConfirm = async () => {
     try {
-      await api.delete(`/facturas/${pdfSeleccionado.id_pdf}/`);
+      await api.delete(`/facturas/${pdfSeleccionado.id_factura}/`);
       enqueueSnackbar("factura eliminada correctamente", { variant: "success" });
       setConfirmOpen(false);
       fetchFacturas(); // refresca la grilla
@@ -126,7 +126,7 @@ const HistoricoFacturasGrid = ({ nombre, exportNombre, estado }) => {
 
   const handlePagar = async () => {
     try {
-      await api.patch(`/facturas/${pdfSeleccionado.id_pdf}/`, { estado: "NO PAGADO" });
+      await api.patch(`/facturas/${pdfSeleccionado.id_factura}/`, { estado: "NO PAGADO" });
       enqueueSnackbar("Factura marcada como PAGADO", { variant: "success" });
       setConfirmOpenPagar(false);
       fetchFacturas(); // refresca la grilla
@@ -238,7 +238,7 @@ const HistoricoFacturasGrid = ({ nombre, exportNombre, estado }) => {
           <IconButton
             color="secondary"
             size="small"
-            onClick={() => handleDownload(params.row.id_pdf, params.row.title)}
+            onClick={() => handleDownload(params.row.id_factura, params.row.title)}
             title="Descargar Factura"
           >
             <Download />
@@ -297,7 +297,7 @@ const HistoricoFacturasGrid = ({ nombre, exportNombre, estado }) => {
         rows={facturas}
         columns={columns}
         loading={loading}
-        getRowId={(row) => row.id_pdf}
+        getRowId={(row) => row.id_factura}
         pageSize={10}
         slots={{ toolbar: CustomToolBar }}
         slotProps={{ toolbar: { onExport } }}
