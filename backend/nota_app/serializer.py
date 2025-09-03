@@ -278,7 +278,7 @@ class DocumentFacturasSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         request = self.context['request']
         validated_data['id_usuario'] = request.user
-
+ 
         file_obj = request.FILES.get("file")
         if file_obj:
             # Subida a Cloudflare R2
