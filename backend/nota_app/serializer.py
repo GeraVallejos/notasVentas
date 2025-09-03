@@ -1,5 +1,7 @@
 from rest_framework import serializers
 from .models import Usuarios, Notas, Clientes, Productos, Proveedores, Personal, Sabado, PedidoMateriasPrimas, DocumentFacturas
+import boto3
+from django.conf import settings
 
 class UsuariosSerializer(serializers.ModelSerializer):
     
@@ -263,21 +265,36 @@ class PedidoMateriasPrimasSerializer(serializers.ModelSerializer):
         return super().update(instance, validated_data)
     
     
+
 class DocumentFacturasSerializer(serializers.ModelSerializer):
-    file_url = serializers.SerializerMethodField()
+
     usuario_creador = serializers.CharField(source='id_usuario.username', read_only=True)
-    
+
     class Meta:
         model = DocumentFacturas
         fields = '__all__'
-        read_only_fields = ['id_usuario', 'created_at', 'updated_at']
-    
-    def get_file_url(self, obj):
-        request = self.context.get('request')
-        if obj.file and request:
-            return request.build_absolute_uri(obj.file.url) 
-        return None
-    
+        read_only_fields = ['id_usuario', 'created_at', 'updated_at', 'file_url']
+
     def create(self, validated_data):
-        validated_data['id_usuario'] = self.context['request'].user 
+        request = self.context['request']
+        validated_data['id_usuario'] = request.user
+
+        file_obj = request.FILES.get("file")
+        if file_obj:
+            # Subida a Cloudflare R2
+            s3 = boto3.client(
+                "s3",
+                endpoint_url=settings.AWS_S3_ENDPOINT_URL,
+                aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
+                aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
+            )
+
+            key = f"facturas/{file_obj.name}"
+            s3.upload_fileobj(file_obj, settings.AWS_STORAGE_BUCKET_NAME, key)
+
+            # Guardamos la URL pública en la BD
+            file_url = f"{settings.AWS_S3_ENDPOINT_URL}/{settings.AWS_STORAGE_BUCKET_NAME}/{key}"
+            validated_data["file_url"] = file_url  
+            validated_data["file_size"] = file_obj.size
+
         return super().create(validated_data)

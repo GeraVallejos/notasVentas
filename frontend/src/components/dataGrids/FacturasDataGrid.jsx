@@ -134,25 +134,8 @@ const FacturasDataGrid = ({ nombre, exportNombre, estado }) => {
     window.open(fileUrl, "_blank");
   };
 
-  const handleDownload = async (pdfId, pdfTitle) => {
-    try {
-      const res = await api.get(`facturas/${pdfId}/download_factura/`, {
-        responseType: "blob",
-      });
-
-      const blob = res.data;
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = pdfTitle.endsWith(".pdf") ? pdfTitle : `${pdfTitle}.pdf`;
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      window.URL.revokeObjectURL(url);
-    } catch (error) {
-      console.error(error);
-      enqueueSnackbar("Error al descargar Factura", { variant: "error" });
-    }
+  const handleDownload = (pdfUrl) => {
+    window.open(pdfUrl, "_blank");
   };
 
   // const handleOpenConfirm = (row) => {
@@ -205,7 +188,7 @@ const FacturasDataGrid = ({ nombre, exportNombre, estado }) => {
       headerName: "Título",
       width: 140,
       renderCell: (params) => (
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, width: '100%', mt:1.7 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, width: '100%', mt: 1.7 }}>
           <PictureAsPdf color="primary" />
           <Typography variant="body2" noWrap sx={{ flex: 1 }}>
             {params.value}
@@ -373,7 +356,7 @@ const FacturasDataGrid = ({ nombre, exportNombre, estado }) => {
             },
           },
         }}
-        
+
       />
 
       <ConfirmDialog

@@ -486,38 +486,7 @@ class DocumentFacturasView(viewsets.ModelViewSet):
     queryset = DocumentFacturas.objects.all()
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
-    @action(detail=True, methods=['get'], url_path='view_factura')
-    def view(self, request, pk=None):
-        try:
-            pdf_document = self.get_object()
-            
-            response = FileResponse(
-                pdf_document.file.open(), 
-                as_attachment=False,  # False para visualizar en navegador
-                content_type='application/pdf'
-            )
-            response['Content-Disposition'] = f'inline; filename="{pdf_document.title}"'
-            return response
-            
-        except DocumentFacturas.DoesNotExist:
-            raise Http404("Factura no encontrada")
-
-    @action(detail=True, methods=['get'], url_path='download_factura')
-    def download(self, request, pk=None):
-        try:
-            pdf_document = self.get_object()
-            
-            response = FileResponse(
-                pdf_document.file.open(), 
-                as_attachment=True,  # True para descargar
-                content_type='application/pdf'
-            )
-            response['Content-Disposition'] = f'attachment; filename="{pdf_document.title}"'
-            return response
-            
-        except DocumentFacturas.DoesNotExist:
-            raise Http404("PDF no encontrado")
-
+   
     @action(detail=False, methods=['get'], url_path='buscar-por-titulo')
     def buscar_por_titulo(self, request):
         q = request.GET.get('q', '')
