@@ -100,7 +100,7 @@ const FacturasDataGrid = ({ nombre, exportNombre, estado }) => {
     if (!currentFile) return;
 
     const formData = new FormData();
-    formData.append('file', currentFile);
+    formData.append('file_url', currentFile);
     formData.append('title', metadata.title);
     formData.append('file_size', currentFile.size);
     if (metadata.observacion) formData.append('observacion', metadata.observacion);

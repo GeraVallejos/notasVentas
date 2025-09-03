@@ -6,8 +6,6 @@ const usePDFMetadata = () => {
   const extractPDFMetadata = async (file) => {
     setExtracting(true);
     try {
-      // Simulación de extracción de metadatos
-      // En una implementación real, usarías pdf.js
       const metadata = {
         fileName: file.name,
         fileSize: `${(file.size / (1024 * 1024)).toFixed(2)} MB`,
