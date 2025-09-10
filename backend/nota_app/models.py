@@ -7,7 +7,7 @@ import django.contrib.auth.validators
 class Usuarios(AbstractUser):
     nombre = models.CharField(max_length=45)
     apellido = models.CharField(max_length=45)
-    email = models.EmailField(unique=True)
+    correo = models.CharField(max_length=45)
     username = models.CharField(error_messages={'unique': 'Este Nombre de Usuario ya existe'}, max_length=150, unique=True, validators=[django.contrib.auth.validators.UnicodeUsernameValidator()], verbose_name='Nombre de Usuario')
     cargo = models.CharField(max_length=45, blank=True, null=True)
     rut = models.CharField(unique=True, max_length=45)
