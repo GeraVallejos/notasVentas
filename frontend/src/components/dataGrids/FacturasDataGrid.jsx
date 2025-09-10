@@ -39,6 +39,8 @@ const formatearFacturas = (pdf) => ({
   observacion: pdf.observacion
     ? pdf.observacion.toUpperCase()
     : "",
+  signed_url: pdf.signed_url || pdf.file_url,
+  download_url: pdf.download_url || pdf.signed_url || pdf.file_url,
 });
 
 const FacturasDataGrid = ({ nombre, exportNombre, estado }) => {
@@ -95,12 +97,22 @@ const FacturasDataGrid = ({ nombre, exportNombre, estado }) => {
     }
   };
 
+  const normalizeFileName = (file) => {
+    const name = file.name
+      .trim()
+      .replace(/\s+/g, "_")      // reemplaza espacios por _
+      .replace(/[^a-zA-Z0-9_.-]/g, ""); // elimina caracteres especiales
+    return new File([file], name, { type: file.type });
+  };
+
 
   const handleSaveMetadata = async (metadata) => {
     if (!currentFile) return;
 
+    const normalizedFile = normalizeFileName(currentFile);
+
     const formData = new FormData();
-    formData.append('file_url', currentFile);
+    formData.append('file', normalizedFile);
     formData.append('title', metadata.title);
     formData.append('file_size', currentFile.size);
     if (metadata.observacion) formData.append('observacion', metadata.observacion);
@@ -130,13 +142,37 @@ const FacturasDataGrid = ({ nombre, exportNombre, estado }) => {
     exportExcel(columnsToExport, facturas, exportNombre);
   };
 
-  const handleView = (fileUrl) => {
-    window.open(fileUrl, "_blank");
+  const handleView = (pdf) => {
+
+    window.open(pdf.signed_url, "_blank");
   };
 
-  const handleDownload = (pdfUrl) => {
-    window.open(pdfUrl, "_blank");
-  };
+  const handleDownload = async (pdf) => {
+  if (!pdf.download_url) return;
+
+  try {
+    const response = await fetch(pdf.download_url);
+    if (!response.ok) throw new Error("Error al descargar el archivo");
+
+    // 👇 Fuerza a que sea tratado como archivo genérico, no PDF
+    const blob = await response.blob();
+    const file = new Blob([blob], { type: "application/octet-stream" });
+    const url = window.URL.createObjectURL(file);
+
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = pdf.title ? `${pdf.title}.pdf` : "archivo.pdf"; // nombre amigable
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    window.URL.revokeObjectURL(url);
+  } catch (error) {
+    console.error("Error al descargar la factura:", error);
+  }
+};
+
+
 
   // const handleOpenConfirm = (row) => {
   //   setPdfSeleccionado(row);
@@ -255,7 +291,7 @@ const FacturasDataGrid = ({ nombre, exportNombre, estado }) => {
           <IconButton
             color="primary"
             size="small"
-            onClick={() => handleView(params.row.file_url)}
+            onClick={() => handleView(params.row)}
             title="Ver Factura"
           >
             <Visibility />
@@ -274,7 +310,7 @@ const FacturasDataGrid = ({ nombre, exportNombre, estado }) => {
           <IconButton
             color="secondary"
             size="small"
-            onClick={() => handleDownload(params.row.id_factura, params.row.title)}
+            onClick={() => handleDownload(params.row)}
             title="Descargar Factura"
           >
             <Download />

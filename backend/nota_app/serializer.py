@@ -2,6 +2,7 @@ from rest_framework import serializers
 from .models import Usuarios, Notas, Clientes, Productos, Proveedores, Personal, Sabado, PedidoMateriasPrimas, DocumentFacturas
 import boto3
 from django.conf import settings
+from urllib.parse import quote, urlparse
 
 class UsuariosSerializer(serializers.ModelSerializer):
     
@@ -267,34 +268,92 @@ class PedidoMateriasPrimasSerializer(serializers.ModelSerializer):
     
 
 class DocumentFacturasSerializer(serializers.ModelSerializer):
-
     usuario_creador = serializers.CharField(source='id_usuario.username', read_only=True)
+    signed_url = serializers.SerializerMethodField()
+    download_url = serializers.SerializerMethodField()
 
     class Meta:
         model = DocumentFacturas
-        fields = '__all__'
+        fields = ['id_factura', 'title', 'empresa', 'observacion', 
+              'file_url', 'file_size', 'created_at', 'updated_at',
+              'usuario_creador', 'estado', 'page_count','signed_url', 'download_url']
         read_only_fields = ['id_usuario', 'created_at', 'updated_at', 'file_url']
 
+    def _generate_presigned_url(self, obj, for_download=False):
+        if not obj.file_url:
+            return None
+
+
+        s3 = boto3.client(
+            "s3",
+            endpoint_url=settings.AWS_S3_ENDPOINT_URL,
+            aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
+            aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
+            region_name="auto",
+        )
+
+        parsed = urlparse(obj.file_url)
+        key = parsed.path.split('/', 2)[-1]
+        key = quote(key, safe="/")
+
+        try:
+            params = {
+                "Bucket": settings.AWS_STORAGE_BUCKET_NAME, 
+                "Key": key
+            }
+            
+            # Diferentes parámetros según el propósito
+            if for_download:
+                filename = f"{obj.title}.pdf" if obj.title else "archivo.pdf"
+                params["ResponseContentDisposition"] = f'attachment; filename="{filename}"'
+                params["ResponseContentType"] = "application/octet-stream"
+            else:
+                # Para ver: permitir que el navegador decida cómo manejar el PDF
+                params["ResponseContentDisposition"] = "inline"
+
+            url = s3.generate_presigned_url(
+                "get_object",
+                Params=params,
+                ExpiresIn=24 * 60 * 60,
+            )
+            return url
+        except Exception as e:
+            print("Error generando signed_url:", e)
+            return None
+        
+    def get_signed_url(self, obj):
+        """URL para VER el archivo (se abre en el navegador)"""
+        return self._generate_presigned_url(obj, for_download=False)
+
+    def get_download_url(self, obj):
+        """URL para DESCARGAR el archivo (fuerza descarga)"""
+        return self._generate_presigned_url(obj, for_download=True)
+
     def create(self, validated_data):
-        request = self.context['request']
-        validated_data['id_usuario'] = request.user
- 
+        request = self.context["request"]
+        validated_data["id_usuario"] = request.user
+
         file_obj = request.FILES.get("file")
         if file_obj:
-            # Subida a Cloudflare R2
+            # Normalizar nombre del archivo
+            import re
+            file_name = re.sub(r"\s+", "_", file_obj.name)
+            file_name = re.sub(r"[^a-zA-Z0-9_.-]", "", file_name)
+
+            key = f"facturas/{file_name}"
+
             s3 = boto3.client(
                 "s3",
                 endpoint_url=settings.AWS_S3_ENDPOINT_URL,
                 aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
                 aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
+                region_name="auto",
             )
 
-            key = f"facturas/{file_obj.name}"
             s3.upload_fileobj(file_obj, settings.AWS_STORAGE_BUCKET_NAME, key)
 
-            # Guardamos la URL pública en la BD
-            file_url = f"{settings.AWS_S3_ENDPOINT_URL}/{settings.AWS_STORAGE_BUCKET_NAME}/{key}"
-            validated_data["file_url"] = file_url  
+            # Guardamos la URL base en la DB
+            validated_data["file_url"] = f"{settings.AWS_S3_ENDPOINT_URL}/{settings.AWS_STORAGE_BUCKET_NAME}/{key}"
             validated_data["file_size"] = file_obj.size
 
         return super().create(validated_data)

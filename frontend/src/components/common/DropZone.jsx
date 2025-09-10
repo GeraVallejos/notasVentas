@@ -99,9 +99,6 @@ const DropZone = ({ onFilesDrop, onFileSelect, loading = false, accept = ".pdf",
       <Typography variant="h6" gutterBottom>
         {loading ? 'Procesando archivos...' : 'Arrastra las Facturas aquí o haz clic para seleccionar'}
       </Typography>
-      <Typography variant="body2" color="text.secondary">
-        Soporta uno o múltiples archivos PDF
-      </Typography>
     </Paper>
   );
 };

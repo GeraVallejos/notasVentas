@@ -7,7 +7,7 @@ import django.contrib.auth.validators
 class Usuarios(AbstractUser):
     nombre = models.CharField(max_length=45)
     apellido = models.CharField(max_length=45)
-    correo = models.CharField(max_length=45)
+    email = models.EmailField(unique=True)
     username = models.CharField(error_messages={'unique': 'Este Nombre de Usuario ya existe'}, max_length=150, unique=True, validators=[django.contrib.auth.validators.UnicodeUsernameValidator()], verbose_name='Nombre de Usuario')
     cargo = models.CharField(max_length=45, blank=True, null=True)
     rut = models.CharField(unique=True, max_length=45)
@@ -19,7 +19,7 @@ class Usuarios(AbstractUser):
 
 class Notas(models.Model):
     id_nota = models.AutoField(primary_key=True)
-    num_nota = models.IntegerField(null=False)
+    num_nota = models.IntegerField(null=False, unique=True)
     cliente = models.ForeignKey('Clientes', on_delete=models.PROTECT, related_name='notas')
     fecha_creacion = models.DateTimeField(auto_now_add=True)
     fecha_modificacion = models.DateTimeField(auto_now=True)
@@ -121,7 +121,7 @@ class ProductoProveedor(models.Model):
         unique_together = ('producto', 'proveedor')
 
     def __str__(self):
-        return f"{self.producto.nombre} - {self.proveedor.nombre}"
+        return f"{self.producto.nombre} - {self.proveedor.razon_social}"
 
 
 class PedidoMateriasPrimas(models.Model):
