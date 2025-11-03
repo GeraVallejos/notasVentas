@@ -16,6 +16,9 @@ import HistoricoPrimasPage from "../pages/HistoricoPrimasPage";
 
 import HistoricoFacturasPage from "../pages/HistoricoFacturasPage";
 import FacturasPage from "../pages/FacturasPage";
+import PickingPage from "../pages/PickingPage";
+import PickingGridPage from "../pages/PickingGridPage";
+import PickingHistPage from "../pages/PickingHistPage";
 
 
 export const getRoutes = () => createBrowserRouter([
@@ -90,6 +93,27 @@ export const getRoutes = () => createBrowserRouter([
                 element: (
                     <GroupsRouter group="Admin">
                         <HistoricoFacturasPage />
+                    </GroupsRouter>),
+            },
+            {
+                path: "picking",
+                element: (
+                    <GroupsRouter group="Admin">
+                        <PickingPage />
+                    </GroupsRouter>),
+            },
+            {
+                path: "picking-lista",
+                element: (
+                    <GroupsRouter group="Admin">
+                        <PickingGridPage />
+                    </GroupsRouter>),
+            },
+            {
+                path: "picking-historico",
+                element: (
+                    <GroupsRouter group="Admin">
+                        <PickingHistPage />
                     </GroupsRouter>),
             },
             {

@@ -214,7 +214,8 @@ CSRF_COOKIE_HTTPONLY = False
 CSRF_COOKIE_SAMESITE = 'None' # backend y frontend en dominios diferentes
 CSRF_USE_SESSIONS = False
 CSRF_TRUSTED_ORIGINS = [
-    origin for origin in os.getenv('CORS_KEYS', '').split(',') if origin.startswith('https://')
+    origin for origin in os.getenv('CORS_KEYS', '').split(',') if origin.startswith('https://') 
+    or origin.startswith('http://')
     ]
 
 # Cookies de sesión
@@ -288,3 +289,9 @@ AWS_S3_OBJECT_PARAMETERS = {
     "ContentDisposition": "inline",
     "CacheControl": "max-age=86400",
 }
+
+if not IS_PRODUCTION:
+    CSRF_COOKIE_SAMESITE = 'Lax'
+    SESSION_COOKIE_SAMESITE = 'Lax'
+    CSRF_COOKIE_SECURE = False
+    SESSION_COOKIE_SECURE = False

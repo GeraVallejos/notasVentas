@@ -27,17 +27,32 @@ const MPrimasForm = () => {
 
   const form = usePrimasForm(async (data) => {
     try {
-      // Primero verificamos proveedor y producto
-      const [proveedorResponse, productoResponse] = await Promise.all([
-        api.get('proveedores/por-rut', { params: { rut: data.rut_proveedor } }),
-        api.get('productos/por-codigo', { params: { codigo: data.codigo } })
-      ]);
+      let proveedor = null;
 
-      const proveedor = proveedorResponse.data;
-      const producto = productoResponse.data;
+      if (data.rut_proveedor) {
+        try {
+          const { data: provData } = await api.get('/proveedores/por-rut/', {
+            params: { rut: data.rut_proveedor },
+          });
+          proveedor = provData;
+        } catch {
+          enqueueSnackbar('Proveedor no encontrado', { variant: 'warning' });
+        }
+      }
+
+      let producto = null;
+      try {
+        const { data: prodData } = await api.get('/productos/por-codigo/', {
+          params: { codigo: data.codigo },
+        });
+        producto = prodData;
+      } catch {
+        enqueueSnackbar('Producto no encontrado', { variant: 'warning' });
+        return; // sin producto, no podemos crear el pedido
+      }
 
       const payload = {
-        id_proveedor: proveedor.id_proveedor,
+        id_proveedor: proveedor ? proveedor.id_proveedor : null,
         id_producto: producto.id_producto,
         cantidad: data.cantidad,
         unidad_medida: data.unidad_medida,
@@ -71,13 +86,16 @@ const MPrimasForm = () => {
   };
 
   const handleBlurRut = async (e) => {
-    const rutFormateado = e.target.value;
+    const rutFormateado = e.target.value?.trim();
+
+    // Si no hay valor o es solo espacios, no hace nada
     if (!rutFormateado) return;
 
     try {
       const { data } = await api.get('/proveedores/por-rut/', {
         params: { rut: rutFormateado },
       });
+
       form.setValue('rut_proveedor', data.rut_proveedor || '');
       form.setValue('razon_social', data.razon_social || '');
       form.setValue('id_proveedor', data.id_proveedor || '');
@@ -86,9 +104,11 @@ const MPrimasForm = () => {
       console.error(error);
       form.setValue('rut_proveedor', '');
       form.setValue('razon_social', '');
+      form.setValue('id_proveedor', '');
       enqueueSnackbar('Proveedor no encontrado', { variant: 'warning' });
     }
   };
+
 
   const handleBlurProducto = async (e) => {
     const codigoProducto = e.target.value;

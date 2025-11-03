@@ -37,9 +37,8 @@ const schema = yup.object().shape({
   despacho_retira: yup.string().required('Debe elegir entre despacho o retira'),
   horario_desde: yup.string().nullable(),
   horario_hasta: yup.string().nullable(),
-  estado_solicitud: yup.string().oneOf(["Solicitado", "No Solicitado"]).required("El estado es obligatorio"),
+  estado_solicitud: yup.string().oneOf(["SOLICITADO", "NO SOLICITADO"]).required("El estado es obligatorio"),
   notas_usuario: yup.string(),
-  password: yup.string().required('Contraseña requerida'),
 });
 
 const EditNotaModal = ({ open, onClose, nota, onSave }) => {
@@ -48,16 +47,15 @@ const EditNotaModal = ({ open, onClose, nota, onSave }) => {
   const [clienteOriginal, setClienteOriginal] = useState(null);
   const [confirmarActualizacion, setConfirmarActualizacion] = useState(false);
 
-
   const methods = useForm({
     resolver: yupResolver(schema),
     mode: 'onTouched',
     defaultValues: {}
   });
 
-  const { register, handleSubmit, reset, setValue, control, formState: { errors }, watch, getValues } = methods;
+  const { register, handleSubmit, reset, control, formState: { errors }, watch, getValues } = methods;
 
-  // Funcion para dejar los strigs de la data en mayus, con exepciones
+  // Función para pasar strings a mayúsculas
   const transformMayus = (obj, excluir = []) => {
     const nuevoObj = { ...obj };
     for (const key in nuevoObj) {
@@ -79,7 +77,6 @@ const EditNotaModal = ({ open, onClose, nota, onSave }) => {
         contacto: nota.contacto || '',
       });
 
-
       reset({
         ...nota,
         telefono: nota.telefono?.startsWith('+56') ? nota.telefono.slice(3) : nota.telefono,
@@ -87,7 +84,6 @@ const EditNotaModal = ({ open, onClose, nota, onSave }) => {
         estado_solicitud: nota.estado_solicitud || '',
         horario_desde: typeof nota.horario_desde === 'string' ? nota.horario_desde : '',
         horario_hasta: typeof nota.horario_hasta === 'string' ? nota.horario_hasta : '',
-        password: ''
       });
     }
   }, [nota, reset]);
@@ -103,10 +99,8 @@ const EditNotaModal = ({ open, onClose, nota, onSave }) => {
 
   const camposEditados = useMemo(() => {
     if (!clienteOriginal) return [];
-
     const campos = ['razon_social', 'direccion', 'comuna', 'telefono', 'correo', 'contacto'];
     const actuales = { razon_social, direccion, comuna, telefono, correo, contacto };
-
     return campos.filter((campo) => actuales[campo] !== clienteOriginal[campo]);
   }, [razon_social, direccion, comuna, telefono, correo, contacto, clienteOriginal]);
 
@@ -140,15 +134,9 @@ const EditNotaModal = ({ open, onClose, nota, onSave }) => {
     }
   };
 
-  // Guardar solo la nota
+  // Guardar solo la nota 
   const guardarNota = async (data) => {
     try {
-      const res = await api.post('/usuario/verify_password/', { password: data.password });
-      if (!res.data.valid) {
-        enqueueSnackbar('Contraseña incorrecta', { variant: 'error' });
-        return;
-      }
-
       const cleanHorario = (value) =>
         typeof value === 'string' && /^\d{2}:\d{2}$/.test(value.trim()) ? value : '';
 
@@ -159,21 +147,17 @@ const EditNotaModal = ({ open, onClose, nota, onSave }) => {
         horario_hasta: cleanHorario(data.horario_hasta),
         fecha_despacho: data.fecha_despacho?.toISOString(),
       };
-      delete payload.password;
 
       await api.put(`/nota/${nota.id_nota}/`, payload);
-      enqueueSnackbar('Pedido actualizado', { variant: 'success' });
       onSave();
       onClose();
     } catch (err) {
       console.error(err);
       enqueueSnackbar('Error al actualizar el Pedido', { variant: 'error' });
     } finally {
-      setValue('password', '');
       setLoading(false);
     }
   };
-
 
   const onSubmit = async (data) => {
     setLoading(true);
@@ -184,10 +168,7 @@ const EditNotaModal = ({ open, onClose, nota, onSave }) => {
     }
   };
 
-
-
   const handleClose = () => {
-    setValue('password', '');
     onClose();
   };
 
@@ -326,21 +307,12 @@ const EditNotaModal = ({ open, onClose, nota, onSave }) => {
                         labelId="estado-label"
                         label="Estado"
                       >
-                        <MenuItem value="Solicitado">Solicitado</MenuItem>
-                        <MenuItem value="No Solicitado">No solicitado</MenuItem>
+                        <MenuItem value="SOLICITADO">Solicitado</MenuItem>
+                        <MenuItem value="NO SOLICITADO">No solicitado</MenuItem>
                       </Select>
                       <FormHelperText>{fieldState.error?.message}</FormHelperText>
                     </FormControl>
                   )}
-                />
-                <TextField
-                  label="Contraseña"
-                  autoComplete='current-password'
-                  type="password"
-                  {...register('password')}
-                  error={!!errors.password}
-                  helperText={errors.password?.message}
-                  fullWidth
                 />
               </Stack>
             </DialogContent>
@@ -353,6 +325,7 @@ const EditNotaModal = ({ open, onClose, nota, onSave }) => {
           </form>
         </FormProvider>
       </Dialog>
+
       {/* Diálogo de confirmación de actualización de cliente */}
       <Dialog open={confirmarActualizacion} onClose={() => setConfirmarActualizacion(false)}>
         <DialogTitle>Actualizar datos del cliente</DialogTitle>

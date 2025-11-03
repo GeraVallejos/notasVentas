@@ -152,7 +152,7 @@ const HistoricoFacturasGrid = ({ nombre, exportNombre, estado }) => {
       headerName: "Título",
       width: 140,
       renderCell: (params) => (
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, width: '100%', mt: 1.7 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, width: '100%', mt: 0.3 }}>
           <PictureAsPdf color="primary" />
           <Typography variant="body2" noWrap sx={{ flex: 1 }}>
             {params.value}
@@ -303,6 +303,7 @@ const HistoricoFacturasGrid = ({ nombre, exportNombre, estado }) => {
         slotProps={{ toolbar: { onExport } }}
         showToolbar
         rowsPerPageOptions={[10, 20, 50]}
+        getRowHeight={() => 30}
         disableSelectionOnClick
         initialState={{
           sorting: { sortModel: [{ field: "created_at", sort: "desc" }] },

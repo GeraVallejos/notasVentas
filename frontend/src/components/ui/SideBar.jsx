@@ -20,6 +20,7 @@ import lista_notas from '../../assets/iconos/lista_notas.png';
 import sabado from '../../assets/iconos/sabado.png';
 import factura from '../../assets/iconos/factura.png';
 import materia_prima from '../../assets/iconos/materia-prima.png';
+import pedido_en_linea from '../../assets/iconos/pedido-en-linea.png';
 
 
 const drawerWidth = 180;
@@ -28,6 +29,7 @@ const SidebarContent = ({ onClick }) => {
   const [openNotas, setOpenNotas] = useState(false);
   const [openFacturas, setOpenFacturas] = useState(false);
   const [openMaterias, setOpenMaterias] = useState(false);
+  const [openPicking, setOpenPicking] = useState(false);
 
   const grupo = useSelector((state) => state.auth.user?.groups || []);
   const adminGroup = grupo.some((g) => g.includes('Admin'));
@@ -49,8 +51,8 @@ const SidebarContent = ({ onClick }) => {
             onClick={onClick}
             sx={{ pl: 4 }}
           >
-            <ListItemText 
-              primary="Nueva Nota" 
+            <ListItemText
+              primary="Nueva Nota"
               primaryTypographyProps={{ fontSize: 13 }}
             />
           </ListItemButton>
@@ -60,8 +62,8 @@ const SidebarContent = ({ onClick }) => {
             onClick={onClick}
             sx={{ pl: 4 }}
           >
-            <ListItemText 
-              primary="Lista de Notas" 
+            <ListItemText
+              primary="Lista de Notas"
               primaryTypographyProps={{ fontSize: 13 }}
             />
           </ListItemButton>
@@ -71,8 +73,8 @@ const SidebarContent = ({ onClick }) => {
             onClick={onClick}
             sx={{ pl: 4 }}
           >
-            <ListItemText 
-              primary="Histórico Notas" 
+            <ListItemText
+              primary="Histórico Notas"
               primaryTypographyProps={{ fontSize: 13 }}
             />
           </ListItemButton>
@@ -96,8 +98,8 @@ const SidebarContent = ({ onClick }) => {
                 onClick={onClick}
                 sx={{ pl: 4 }}
               >
-                <ListItemText 
-                  primary="Lista Facturas" 
+                <ListItemText
+                  primary="Lista de Facturas"
                   primaryTypographyProps={{ fontSize: 13 }}
                 />
               </ListItemButton>
@@ -107,8 +109,8 @@ const SidebarContent = ({ onClick }) => {
                 onClick={onClick}
                 sx={{ pl: 4 }}
               >
-                <ListItemText 
-                  primary="Facturas Pagadas" 
+                <ListItemText
+                  primary="Facturas Pagadas"
                   primaryTypographyProps={{ fontSize: 13 }}
                 />
               </ListItemButton>
@@ -124,15 +126,15 @@ const SidebarContent = ({ onClick }) => {
           </ListItemButton>
           <Collapse in={openMaterias} timeout="auto" unmountOnExit>
             <List component="div" disablePadding>
-             
+
               <ListItemButton
                 component={NavLink}
                 to="/materias-primas"
                 onClick={onClick}
                 sx={{ pl: 4 }}
               >
-                <ListItemText 
-                  primary="Pedir Insumos" 
+                <ListItemText
+                  primary="Pedir Insumos"
                   primaryTypographyProps={{ fontSize: 13 }}
                 />
               </ListItemButton>
@@ -142,8 +144,8 @@ const SidebarContent = ({ onClick }) => {
                 onClick={onClick}
                 sx={{ pl: 4 }}
               >
-                <ListItemText 
-                  primary="Lista Insumos" 
+                <ListItemText
+                  primary="Lista de Insumos"
                   primaryTypographyProps={{ fontSize: 13 }}
                 />
               </ListItemButton>
@@ -153,26 +155,69 @@ const SidebarContent = ({ onClick }) => {
                 onClick={onClick}
                 sx={{ pl: 4 }}
               >
-                <ListItemText 
-                  primary="Histórico Insumos" 
+                <ListItemText
+                  primary="Histórico Insumos"
                   primaryTypographyProps={{ fontSize: 13 }}
                 />
               </ListItemButton>
             </List>
           </Collapse>
-           <ListItemButton
+          <ListItemButton onClick={() => setOpenPicking(!openPicking)}>
+            <ListItemIcon sx={{ minWidth: 32 }}>
+              <img src={pedido_en_linea} alt="Notas" style={{ width: 24, height: 24 }} />
+            </ListItemIcon>
+            <ListItemText primary="Picking" />
+          </ListItemButton>
+          <Collapse in={openPicking} timeout="auto" unmountOnExit>
+            <List component="div" disablePadding>
+              <ListItemButton
                 component={NavLink}
-                to="/sabados"
+                to="/picking"
                 onClick={onClick}
-                sx={{ pl: 2 }}
+                sx={{ pl: 4 }}
               >
-                <ListItemIcon sx={{ minWidth: 32 }}>
-                  <img src={sabado} alt="Sábados" style={{ width: 20, height: 20 }} />
-                </ListItemIcon>
-                <ListItemText 
-                  primary="Sábados" 
+                <ListItemText
+                  primary="Nuevo Pedido"
+                  primaryTypographyProps={{ fontSize: 13 }}
                 />
               </ListItemButton>
+              <ListItemButton
+                component={NavLink}
+                to="/picking-lista"
+                onClick={onClick}
+                sx={{ pl: 4 }}
+              >
+                <ListItemText
+                  primary="Lista de Pedidos"
+                  primaryTypographyProps={{ fontSize: 13 }}
+                />
+              </ListItemButton>
+              <ListItemButton
+                component={NavLink}
+                to="/picking-historico"
+                onClick={onClick}
+                sx={{ pl: 4 }}
+              >
+                <ListItemText
+                  primary="Histórico Pedidos"
+                  primaryTypographyProps={{ fontSize: 13 }}
+                />
+              </ListItemButton>
+            </List>
+          </Collapse>
+          <ListItemButton
+            component={NavLink}
+            to="/sabados"
+            onClick={onClick}
+            sx={{ pl: 2 }}
+          >
+            <ListItemIcon sx={{ minWidth: 32 }}>
+              <img src={sabado} alt="Sábados" style={{ width: 20, height: 20 }} />
+            </ListItemIcon>
+            <ListItemText
+              primary="Sábados"
+            />
+          </ListItemButton>
         </>
       )}
     </List>
@@ -227,7 +272,7 @@ const Sidebar = ({ mobileOpen, onClose }) => {
           {/* Footer abajo */}
           <Box sx={{ p: 2 }}>
             <Typography variant="caption" color="text.secondary" align='center' >
-              © {getYear(new Date())} Gerardo Vallejos <br /> <span style={{fontSize: 10}}>Todos los derechos reservados</span>
+              © {getYear(new Date())} Gerardo Vallejos <br /> <span style={{ fontSize: 10 }}>Todos los derechos reservados</span>
             </Typography>
           </Box>
         </Drawer>

@@ -3,13 +3,10 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
 
 const schema = yup.object().shape({
-  razon_social: yup.string().required('Nombre del proveedor requerido'),
-  rut_proveedor: yup.string().required('Rut del proveedor requerido'),
-  fecha_entrega: yup.date().nullable().transform((value, originalValue) => {return originalValue==='' ? null : value}).required('Fecha de despacho requerida'),
+  fecha_entrega: yup.date().nullable().transform((value, originalValue) => {return originalValue==='' ? null : value}),
   observacion: yup.string(),
   producto: yup.string().required('Producto requerido'),
   cantidad: yup.string().required('Cantidad requerida'),
-  unidad_medida: yup.string().required('Unidad de medida requerida'),
 });
 
 export const usePrimasForm = (onSubmit) => {

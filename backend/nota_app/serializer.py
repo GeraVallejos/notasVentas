@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Usuarios, Notas, Clientes, Productos, Proveedores, Personal, Sabado, PedidoMateriasPrimas, DocumentFacturas
+from .models import Usuarios, Notas, Clientes, Productos, Proveedores, Personal, Sabado, PedidoMateriasPrimas, DocumentFacturas, NotaProducto, ProductoProveedor
 import boto3
 from django.conf import settings
 from urllib.parse import quote, urlparse
@@ -116,8 +116,6 @@ class NotasSerializer(serializers.ModelSerializer):
         validated_data['id_usuario_modificacion'] = self.context['request'].user
         return super().update(instance, validated_data)
     
-from rest_framework import serializers
-from .models import Productos, ProductoProveedor, Proveedores
 
 class ProductoProveedorInputSerializer(serializers.ModelSerializer):
     proveedor_id = serializers.PrimaryKeyRelatedField(
@@ -239,6 +237,8 @@ class PedidoMateriasPrimasSerializer(serializers.ModelSerializer):
     usuario_modificador = serializers.CharField(source='id_usuario_modificacion.username', read_only=True)
     id_proveedor = serializers.PrimaryKeyRelatedField(
         queryset=Proveedores.objects.all(),
+        required=False,
+        allow_null=True,
     )
     id_producto = serializers.PrimaryKeyRelatedField(
         queryset=Productos.objects.all(),
@@ -357,3 +357,56 @@ class DocumentFacturasSerializer(serializers.ModelSerializer):
             validated_data["file_size"] = file_obj.size
 
         return super().create(validated_data)
+    
+
+
+class NotaProductoSerializer(serializers.ModelSerializer):
+    # lectura: objeto anidado
+    nota = NotasSerializer(read_only=True)
+    producto = ProductosSerializer(read_only=True)
+
+    # usuario creador/modificador
+    usuario_creador = serializers.CharField(source='usuario_creacion.username', read_only=True)
+    usuario_modificador = serializers.CharField(source='usuario_modificacion.username', read_only=True)
+
+    # escritura: solo IDs
+
+    producto_id = serializers.PrimaryKeyRelatedField(
+        queryset=Productos.objects.all(),
+        source="producto",
+        write_only=True
+    )
+
+    nota_id = serializers.PrimaryKeyRelatedField(
+        queryset=Notas.objects.all(),
+        source="nota",
+        write_only=True,
+        required=False,
+        allow_null=True 
+    )
+
+    class Meta:
+        model = NotaProducto
+        fields = [
+            "id",
+            "nota", "nota_id",
+            "producto", "producto_id",
+            "cantidad",
+            "tipo",
+            "observacion",
+            "fecha_creacion",
+            "fecha_modificacion",
+            "usuario_creador",
+            "usuario_modificador",
+            "estado",
+        ]
+        read_only_fields = ['usuario_creacion', 'usuario_modificacion', 'fecha_creacion', 'fecha_modificacion']
+
+    def create(self, validated_data):
+        validated_data['usuario_creacion'] = self.context['request'].user 
+        return super().create(validated_data)
+    
+    def update(self, instance, validated_data):
+        validated_data['usuario_modificacion'] = self.context['request'].user
+        return super().update(instance, validated_data)
+

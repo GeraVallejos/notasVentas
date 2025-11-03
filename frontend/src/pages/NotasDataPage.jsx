@@ -16,7 +16,7 @@ const NotasDataPage = () => {
   
   return (
     <NotasDataGrid
-      estado="No Solicitado"
+      estado="NO SOLICITADO"
       nombre="Notas de Ventas"
       exportNombre={`Notas_de_Ventas_${fecha}`}
       userGroups={userGroups}

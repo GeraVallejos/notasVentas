@@ -215,7 +215,7 @@ export const NotaForm = () => {
   return (
     <Box sx={{ width: '100%', maxWidth: 700, mx: 'auto', mt: 2, px: 4, py: 2, boxShadow: '0 4px 20px rgba(0,0,0,0.1)' }}>
       <Typography variant="h5" sx={{ textAlign: 'center', mb: 2, background: ' #00BFFF', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-        FORMULARIO PEDIDOS
+        FORMULARIO NOTAS DE VENTA
       </Typography>
 
       <FormProvider {...form}>

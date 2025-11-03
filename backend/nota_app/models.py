@@ -24,7 +24,7 @@ class Notas(models.Model):
     fecha_creacion = models.DateTimeField(auto_now_add=True)
     fecha_modificacion = models.DateTimeField(auto_now=True)
     fecha_despacho = models.DateTimeField(blank=False, null=False)
-    estado_solicitud = models.CharField(max_length=30, default='No Solicitado')
+    estado_solicitud = models.CharField(max_length=30, default='NO SOLICITADO')
     observacion = models.CharField(max_length=1000, blank=True, null=True)
     despacho_retira = models.CharField(max_length=50, blank=True, null=True)
     horario_desde = models.CharField(max_length=50, blank=True, null=True)
@@ -131,11 +131,11 @@ class PedidoMateriasPrimas(models.Model):
     estado = models.CharField(max_length=20, default='PENDIENTE')
     id_usuario = models.ForeignKey('Usuarios', models.DO_NOTHING, db_column='id_usuario', related_name='pedidos_materias_primas_creados')
     id_usuario_modificacion = models.ForeignKey('Usuarios', models.DO_NOTHING, db_column='id_usuario_modificacion', related_name='pedidos_materias_primas_modificados', null=True, blank=True)
-    id_proveedor = models.ForeignKey('Proveedores', models.DO_NOTHING, db_column='id_proveedor', related_name='pedidos_materias_primas')
+    id_proveedor = models.ForeignKey('Proveedores', models.DO_NOTHING, db_column='id_proveedor', related_name='pedidos_materias_primas', blank=True, null=True)
     id_producto = models.ForeignKey('Productos', models.DO_NOTHING, db_column='id_producto', related_name='pedidos_materias_primas')
     cantidad = models.IntegerField(default=0, blank=False, null=False)
     unidad_medida = models.CharField(max_length=50, blank=True, null=True)
-    fecha_entrega = models.DateTimeField(blank=False, null=False)
+    fecha_entrega = models.DateTimeField(blank=True, null=True)
     observacion = models.CharField(max_length=1000, blank=True, null=True)
 
     class Meta:
@@ -203,3 +203,23 @@ class DocumentFacturas(models.Model):
     class Meta:
         managed = True
         db_table = 'document_facturas'
+
+
+class NotaProducto(models.Model):
+    nota = models.ForeignKey('Notas', on_delete=models.CASCADE, related_name='nota_productos', null=True, blank=True)
+    producto = models.ForeignKey('Productos', on_delete=models.CASCADE, related_name='producto_notas')
+    cantidad = models.IntegerField(default=0, blank=False, null=False)
+    tipo = models.CharField(max_length=50, blank=True, null=True)
+    observacion = models.CharField(max_length=1000, blank=True, null=True)
+    fecha_creacion = models.DateTimeField(auto_now_add=True)
+    usuario_creacion = models.ForeignKey('Usuarios', models.DO_NOTHING, db_column='usuario_creacion', related_name='nota_producto_creados')
+    usuario_modificacion = models.ForeignKey('Usuarios', models.DO_NOTHING, db_column='usuario_modificacion', related_name='nota_producto_modificados', null=True, blank=True)
+    fecha_modificacion = models.DateTimeField(auto_now=True)
+    estado = models.CharField(max_length=20, default='PENDIENTE')
+
+    class Meta:
+        db_table = 'nota_producto'
+        unique_together = ('nota', 'producto')
+
+    def __str__(self):
+        return f"Nota {self.nota.num_nota} - {self.producto.nombre} - Cantidad: {self.cantidad}"

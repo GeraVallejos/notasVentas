@@ -1,7 +1,8 @@
 from rest_framework import viewsets
 from django.db import transaction
-from .serializer import UsuariosSerializer, NotasSerializer, ClientesSerializer, ProductosSerializer, ProveedoresSerializer, PersonalSerializer, HistoricoSabadosSerializer, PedidoMateriasPrimasSerializer, DocumentFacturasSerializer
-from .models import Usuarios, Notas, Clientes, Productos, Proveedores, Personal, Sabado, SabadoTrabajado, PedidoMateriasPrimas, DocumentFacturas
+from .serializer import UsuariosSerializer, NotasSerializer, ClientesSerializer, ProductosSerializer, ProveedoresSerializer, PersonalSerializer, HistoricoSabadosSerializer, PedidoMateriasPrimasSerializer, DocumentFacturasSerializer, NotaProductoSerializer
+from .models import Usuarios, Notas, Clientes, Productos, Proveedores, Personal, Sabado, SabadoTrabajado, PedidoMateriasPrimas, DocumentFacturas, NotaProducto
+import pandas as pd
 from rest_framework import permissions
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -23,8 +24,8 @@ from django.middleware.csrf import get_token
 from datetime import timedelta
 from django.utils import timezone
 from collections import defaultdict
-from django.http import FileResponse, Http404
-
+from django.conf import settings
+import os
 
 logger = logging.getLogger(__name__)
 
@@ -83,6 +84,41 @@ class NotasView(viewsets.ModelViewSet):
         
         existe = Notas.objects.filter(num_nota=num_nota).exists()
         return Response({'existe': existe})
+    
+    @action(detail=False, methods=['get'], url_path='cliente_por_nota')
+    def cliente_por_nota(self, request):
+        num_nota = request.query_params.get('nota')
+
+        # Validar parámetro
+        if not num_nota:
+            return Response({'error': 'Debe proporcionar el número de nota.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            nota = Notas.objects.get(num_nota=num_nota)
+            cliente = nota.cliente
+
+            if cliente:
+                data = {
+                    'id_cliente': cliente.id_cliente,
+                    'razon_social': cliente.razon_social,
+                    'rut_cliente': cliente.rut_cliente,
+                    'direccion': cliente.direccion,
+                    'comuna': cliente.comuna,
+                    'telefono': cliente.telefono,
+                    'correo': cliente.correo,
+                    'contacto': cliente.contacto,
+                    'despacho_retira': nota.despacho_retira,
+                    'fecha_despacho': nota.fecha_despacho,
+                    'nota_id': nota.id_nota,
+                }
+                return Response(data, status=status.HTTP_200_OK)
+            else:
+                return Response({'error': 'La nota no tiene cliente asociado.'}, status=status.HTTP_404_NOT_FOUND)
+
+        except ValueError:
+            return Response({'error': 'El número de nota debe ser un entero válido.'}, status=status.HTTP_400_BAD_REQUEST)
+        except Notas.DoesNotExist:
+            return Response({'error': 'No existe esa nota de venta.'}, status=status.HTTP_404_NOT_FOUND)
 
 
 class ClientesView(viewsets.ModelViewSet):
@@ -493,4 +529,75 @@ class DocumentFacturasView(viewsets.ModelViewSet):
         pdfs = DocumentFacturas.objects.filter(title__icontains=q)[:10]
         serializer = self.get_serializer(pdfs, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
+    
 
+class NotaProductoView(viewsets.ModelViewSet):
+    """
+    ViewSet para manejar NotaProducto.
+    - CRUD de NotaProducto
+    - Subida de Excel para cargar/actualizar datos
+    """
+    permission_classes = [permissions.IsAuthenticated]
+    queryset = NotaProducto.objects.all()
+    serializer_class = NotaProductoSerializer
+
+
+    @action(detail=False, methods=['post'], url_path='upload_excel')
+    def upload_excel(self, request):
+        """
+        Sube un Excel con columnas [numnota, cod_articu, pend] y
+        lo guarda en la tabla NotaProducto (crea o actualiza).
+        """
+        file = request.FILES.get("file")
+        if not file:
+            return Response(
+                {"error": "No se recibió archivo"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        try:
+            columnas_necesarias = ['numnota', 'cod_articu', 'pend']
+            df = pd.read_excel(file, usecols=columnas_necesarias)
+
+            registros_procesados = 0
+            for _, row in df.iterrows():
+
+                num_nota_excel = int(row['numnota'])
+                cod_articu_excel = str(row['cod_articu']).strip()
+                cantidad = int(row['pend'])
+
+                try:
+                   
+                    nota = Notas.objects.get(num_nota=num_nota_excel)
+                    producto = Productos.objects.get(codigo=cod_articu_excel)
+
+                    obj, created = NotaProducto.objects.update_or_create(
+                        nota=nota,
+                        producto=producto,
+                        defaults={
+                            'cantidad': cantidad,
+                            'usuario_creacion': request.user, 
+                            'usuario_modificacion': request.user
+                            }
+                    )
+                    if created:
+                        obj.usuario_creacion = request.user
+                        obj.save()
+                    registros_procesados += 1
+
+                except (Notas.DoesNotExist, Productos.DoesNotExist):
+                    # Si no existe la nota o el producto, se omite
+                    continue
+
+            return Response(
+                {"msg": f"Archivo procesado correctamente. {registros_procesados} registros cargados/actualizados."},
+                status=status.HTTP_200_OK
+            )
+
+        except Exception as e:
+            return Response(
+                {"error": f"Error al procesar el archivo: {str(e)}"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+    

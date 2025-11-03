@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Usuarios, Notas, Clientes, Productos, Personal, Proveedores, PedidoMateriasPrimas, DocumentFacturas
+from .models import Usuarios, Notas, Clientes, Productos, Personal, Proveedores, PedidoMateriasPrimas, DocumentFacturas, NotaProducto
 from .forms import UsuarioAdminForm
 from import_export.admin import ImportExportModelAdmin
 from import_export import resources
@@ -107,6 +107,7 @@ admin.site.register(Proveedores, ProveedoresAdmin)
 admin.site.register(Productos, ProductosAdmin)
 admin.site.register(PedidoMateriasPrimas)
 admin.site.register(DocumentFacturas)
+admin.site.register(NotaProducto)
 
 
 

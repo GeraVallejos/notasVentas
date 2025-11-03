@@ -13,7 +13,7 @@ import { format, parseISO } from 'date-fns';
 import CustomToolBar from '../common/CustomToolbar';
 import ConfirmDialog from '../common/ConfirmDialog';
 
-// 🔁 Función para transformar una nota en formato listo para el grid
+// Función para transformar una nota en formato listo para el grid
 const formatearNota = (nota) => ({
   ...nota,
   fecha_despacho_original: nota.fecha_despacho,
@@ -214,7 +214,10 @@ const NotasDataGrid = ({ estado, nombre, exportNombre, userGroups }) => {
         slotProps={{ toolbar: { onExport } }}
         showToolbar
         localeText={dataGridEs}
-        sx={{ userSelect: 'none' }}
+        sx={{ 
+          userSelect: 'none',
+          fontSize: 13,
+        }}
         initialState={{
           sorting: { sortModel: [{ field: 'fecha_despacho', sort: 'asc' }] },
           columns: {

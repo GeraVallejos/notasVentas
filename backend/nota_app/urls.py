@@ -1,6 +1,6 @@
 from django.urls import path, include
 from rest_framework import routers
-from .views import UsuarioView, NotasView, ClientesView, DashboardViewSet, CSRFTokenView, ProductosView, ProveedoresView, PersonalView, PedidoMateriasPrimasView, DocumentFacturasView
+from .views import UsuarioView, NotasView, ClientesView, DashboardViewSet, CSRFTokenView, ProductosView, ProveedoresView, PersonalView, PedidoMateriasPrimasView, DocumentFacturasView, NotaProductoView
 
 
 router = routers.DefaultRouter()
@@ -13,6 +13,7 @@ router.register(r'proveedores', ProveedoresView, 'proveedores')
 router.register(r'personal', PersonalView, 'personal')
 router.register(r'pedido_materias_primas', PedidoMateriasPrimasView, 'pedido_materias_primas')
 router.register(r'facturas', DocumentFacturasView, 'facturas')
+router.register(r'notas_productos', NotaProductoView, 'notas_productos')
 
 # URLs para acciones personalizadas
 usuario_extra_routes = [

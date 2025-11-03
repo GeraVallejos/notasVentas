@@ -10,6 +10,9 @@ import { api } from '../../utils/api';
 import { useSnackbar } from 'notistack';
 import { Link } from 'react-router-dom';
 import HistoryIcon from '@mui/icons-material/History';
+import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
+import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
+
 
 function getSaturdaysOfMonth(date) {
     const days = eachDayOfInterval({
@@ -23,13 +26,14 @@ function getSaturdaysOfMonth(date) {
 }
 
 const SabadosMesGrid = ({ exportNombre }) => {
-    const today = new Date();
-    const saturdays = getSaturdaysOfMonth(today);
+    const [mes, setMes] = useState(new Date());
     const [personal, setPersonal] = useState([]);
     const [originalData, setOriginalData] = useState([]); // Para guardar los datos originales
     const { enqueueSnackbar } = useSnackbar();
     const [loading, setLoading] = useState(true);
     const [hasChanges, setHasChanges] = useState(false); // Para controlar si hay cambios pendientes
+
+    const saturdays = getSaturdaysOfMonth(mes)
 
     // Cargar datos del personal y sus sábados trabajados
     const fetchData = useCallback(async () => {
@@ -190,6 +194,15 @@ const SabadosMesGrid = ({ exportNombre }) => {
             >
                 Ver Histórico
             </Button>
+            <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={es}>
+    <DatePicker
+      views={['year', 'month']}
+      label="Seleccionar mes"
+      value={mes}
+      onChange={(newValue) => setMes(newValue)}
+      slotProps={{ textField: { size: "small" } }}
+    />
+  </LocalizationProvider>
                 <Button
                     variant="contained"
                     color="primary"

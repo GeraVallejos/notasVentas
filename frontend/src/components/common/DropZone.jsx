@@ -7,7 +7,7 @@ import {
 } from "@mui/material";
 import { CloudUpload } from "@mui/icons-material";
 
-const DropZone = ({ onFilesDrop, onFileSelect, loading = false, accept = ".pdf", multiple = true }) => {
+const DropZone = ({ onFilesDrop, onFileSelect, loading = false, accept , multiple = true }) => {
   const [isDragging, setIsDragging] = useState(false);
 
   const handleDragOver = (e) => {
@@ -23,11 +23,13 @@ const DropZone = ({ onFilesDrop, onFileSelect, loading = false, accept = ".pdf",
   const handleDrop = (e) => {
     e.preventDefault();
     setIsDragging(false);
-    
-    const files = Array.from(e.dataTransfer.files).filter(
-      file => file.type === 'application/pdf'
-    );
-    
+
+    const files = Array.from(e.dataTransfer.files).filter(file => {
+      if (!accept) return true;
+      // checkea por extensión
+      return accept.split(',').some(ext => file.name.toLowerCase().endsWith(ext.trim().toLowerCase()));
+    });
+
     if (files.length > 0 && onFilesDrop) {
       onFilesDrop(files);
     }
@@ -42,14 +44,14 @@ const DropZone = ({ onFilesDrop, onFileSelect, loading = false, accept = ".pdf",
       input.type = 'file';
       input.accept = accept;
       input.multiple = multiple;
-      
+
       input.onchange = (e) => {
         const files = Array.from(e.target.files);
         if (files.length > 0 && onFilesDrop) {
           onFilesDrop(files);
         }
       };
-      
+
       input.click();
     }
   };
@@ -94,10 +96,10 @@ const DropZone = ({ onFilesDrop, onFileSelect, loading = false, accept = ".pdf",
           <CircularProgress />
         </Box>
       )}
-      
+
       <CloudUpload sx={{ fontSize: 48, color: 'primary.main', mb: 1 }} />
       <Typography variant="h6" gutterBottom>
-        {loading ? 'Procesando archivos...' : 'Arrastra las Facturas aquí o haz clic para seleccionar'}
+        {loading ? 'Procesando archivos...' : 'Arrastra el archivo aquí o haz clic para seleccionar'}
       </Typography>
     </Paper>
   );
