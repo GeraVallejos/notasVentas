@@ -1,4 +1,4 @@
-from rest_framework import viewsets
+from rest_framework import viewsets, status
 from django.db import transaction
 from .serializer import UsuariosSerializer, NotasSerializer, ClientesSerializer, ProductosSerializer, ProveedoresSerializer, PersonalSerializer, HistoricoSabadosSerializer, PedidoMateriasPrimasSerializer, DocumentFacturasSerializer, NotaProductoSerializer
 from .models import Usuarios, Notas, Clientes, Productos, Proveedores, Personal, Sabado, SabadoTrabajado, PedidoMateriasPrimas, DocumentFacturas, NotaProducto
@@ -24,7 +24,7 @@ from django.middleware.csrf import get_token
 from datetime import timedelta
 from django.utils import timezone
 from collections import defaultdict
-from django.conf import settings
+import boto3
 import os
 
 logger = logging.getLogger(__name__)
@@ -533,28 +533,24 @@ class DocumentFacturasView(viewsets.ModelViewSet):
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
 
-        # Extraer el nombre del archivo desde la URL        
-        file_url = instance.file_url
-        file_key = None
-        if file_url and ".r2.cloudflarestorage.com/" in file_url:
-            file_key = file_url.split(".r2.cloudflarestorage.com/")[-1]
+        # Obtener el nombre del archivo del campo file_url
+        file_key = instance.file_url.split(f"{os.getenv('AWS_STORAGE_BUCKET_NAME')}/")[-1]
 
-        # Intentar eliminar el archivo en R2
-        if file_key:
-            try:
-                s3 = boto3.client(
-                    "s3",
-                    endpoint_url=settings.R2_ENDPOINT_URL,
-                    aws_access_key_id=settings.R2_ACCESS_KEY_ID,
-                    aws_secret_access_key=settings.R2_SECRET_ACCESS_KEY,
-                    region_name="auto",
-                )
-                s3.delete_object(Bucket=settings.R2_BUCKET_NAME, Key=file_key)
-                print(f" Archivo eliminado en R2: {file_key}")
-            except Exception as e:
-                print(f" Error al eliminar archivo en R2: {e}")
+        # Conexión a R2
+        s3 = boto3.client(
+            "s3",
+            endpoint_url=os.getenv("AWS_S3_ENDPOINT_URL"),
+            aws_access_key_id=os.getenv("AWS_ACCESS_KEY_ID"),
+            aws_secret_access_key=os.getenv("AWS_SECRET_ACCESS_KEY"),
+        )
 
-        # Eliminar el registro en la BD
+        try:
+            s3.delete_object(Bucket=os.getenv("AWS_STORAGE_BUCKET_NAME"), Key=file_key)
+            print(f"✅ Archivo eliminado de R2: {file_key}")
+        except Exception as e:
+            print(f"⚠️ Error al eliminar en R2: {e}")
+
+        # Finalmente elimina el registro en la base de datos
         self.perform_destroy(instance)
         return Response(status=status.HTTP_204_NO_CONTENT)
     
