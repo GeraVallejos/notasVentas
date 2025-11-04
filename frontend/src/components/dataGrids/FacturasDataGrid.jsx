@@ -159,12 +159,10 @@ const FacturasDataGrid = ({ nombre, exportNombre, estado }) => {
 };
 
 
-
-
-  // const handleOpenConfirm = (row) => {
-  //   setPdfSeleccionado(row);
-  //   setConfirmOpen(true);
-  // };
+  const handleOpenConfirm = (row) => {
+    setPdfSeleccionado(row);
+    setConfirmOpen(true);
+  };
 
   const handleOpenConfirmPagar = (row) => {
     setPdfSeleccionado(row);
@@ -323,25 +321,25 @@ const FacturasDataGrid = ({ nombre, exportNombre, estado }) => {
         </Box>
       ),
     },
-    // {
-    //   field: 'eliminar',
-    //   headerName: 'Eliminar',
-    //   headerAlign: 'center',
-    //   width: 100,
-    //   disableExport: true,
-    //   renderCell: (params) => (
-    //     <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', height: '100%' }}>
-    //       <IconButton
-    //         color="error"
-    //         size="small"
-    //         onClick={() => handleOpenConfirm(params.row)}
-    //         title="Eliminar Factura"
-    //       >
-    //         <Delete />
-    //       </IconButton>
-    //     </Box>
-    //   )
-    // }
+    {
+      field: 'eliminar',
+      headerName: 'Eliminar',
+      headerAlign: 'center',
+      width: 100,
+      disableExport: true,
+      renderCell: (params) => (
+        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', height: '100%' }}>
+          <IconButton
+            color="error"
+            size="small"
+            onClick={() => handleOpenConfirm(params.row)}
+            title="Eliminar Factura"
+          >
+            <Delete />
+          </IconButton>
+        </Box>
+      )
+    }
   ];
 
 

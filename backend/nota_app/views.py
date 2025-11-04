@@ -530,6 +530,34 @@ class DocumentFacturasView(viewsets.ModelViewSet):
         serializer = self.get_serializer(pdfs, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
     
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+
+        # Extraer el nombre del archivo desde la URL        
+        file_url = instance.file_url
+        file_key = None
+        if file_url and ".r2.cloudflarestorage.com/" in file_url:
+            file_key = file_url.split(".r2.cloudflarestorage.com/")[-1]
+
+        # Intentar eliminar el archivo en R2
+        if file_key:
+            try:
+                s3 = boto3.client(
+                    "s3",
+                    endpoint_url=settings.R2_ENDPOINT_URL,
+                    aws_access_key_id=settings.R2_ACCESS_KEY_ID,
+                    aws_secret_access_key=settings.R2_SECRET_ACCESS_KEY,
+                    region_name="auto",
+                )
+                s3.delete_object(Bucket=settings.R2_BUCKET_NAME, Key=file_key)
+                print(f" Archivo eliminado en R2: {file_key}")
+            except Exception as e:
+                print(f" Error al eliminar archivo en R2: {e}")
+
+        # Eliminar el registro en la BD
+        self.perform_destroy(instance)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+    
 
 class NotaProductoView(viewsets.ModelViewSet):
     """
