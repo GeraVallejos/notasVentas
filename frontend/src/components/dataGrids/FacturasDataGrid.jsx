@@ -147,30 +147,17 @@ const FacturasDataGrid = ({ nombre, exportNombre, estado }) => {
     window.open(pdf.signed_url, "_blank");
   };
 
-  const handleDownload = async (pdf) => {
+ const handleDownload = (pdf) => {
   if (!pdf.download_url) return;
 
-  try {
-    const response = await fetch(pdf.download_url);
-    if (!response.ok) throw new Error("Error al descargar el archivo");
-
-    // 👇 Fuerza a que sea tratado como archivo genérico, no PDF
-    const blob = await response.blob();
-    const file = new Blob([blob], { type: "application/octet-stream" });
-    const url = window.URL.createObjectURL(file);
-
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = pdf.title ? `${pdf.title}.pdf` : "archivo.pdf"; // nombre amigable
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-
-    window.URL.revokeObjectURL(url);
-  } catch (error) {
-    console.error("Error al descargar la factura:", error);
-  }
+  const link = document.createElement("a");
+  link.href = pdf.download_url;
+  link.download = pdf.title ? `${pdf.title}.pdf` : "archivo.pdf";
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
 };
+
 
 
 
