@@ -24,22 +24,25 @@ class PersonalResource(resources.ModelResource):
 
     class Meta:
         model = Personal
-        import_id_fields = ('id_personal',) 
-        fields = (
-           'id_personal', 'nombre', 'apellido', 'rut', 'fecha_creacion', 'correo', 
-           'direccion', 'comuna', 'telefono', 'cargo', 'id_usuario', 'id_usuario_modificacion', 'estado'
-        )
+        
 
 class ProveedoresResource(resources.ModelResource):
     class Meta:
         model = Proveedores
-        import_id_fields = ('id_proveedor',)
+       
+
+class ProductosResource(resources.ModelResource):
+    class Meta:
+        model = Productos
+        
+
+class ClientesResource(resources.ModelResource):
+    class Meta:
+        model = Clientes
+        import_id_fields = ()
         fields = (
-            'id_proveedor',
             'razon_social',
-            'rut_proveedor',
-            'fecha_creacion',
-            'fecha_modificacion',
+            'rut_cliente',
             'contacto',
             'correo',
             'direccion',
@@ -47,35 +50,7 @@ class ProveedoresResource(resources.ModelResource):
             'telefono',
             'giro',
             'id_usuario',
-            'id_usuario_modificacion',
         )
-
-class ProductosResource(resources.ModelResource):
-    class Meta:
-        model = Productos
-        import_id_fields = ('id_producto',)
-        fields = (
-            'id_producto',
-            'nombre',
-            'descripcion',
-            'precio_venta',
-            'stock',
-            'fecha_creacion',
-            'fecha_modificacion',
-            'id_usuario',
-            'id_usuario_modificacion',
-            'categoria',
-            'precio_compra',
-            'codigo',
-            'clase1',
-            'clase2',
-            'clase3',
-            'unidad_medida',
-        )
-
-class ClientesResource(resources.ModelResource):
-    class Meta:
-        model = Clientes
 
 
 class ProveedoresAdmin(ImportExportModelAdmin):
