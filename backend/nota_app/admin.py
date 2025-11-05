@@ -76,8 +76,7 @@ class ProductosResource(resources.ModelResource):
 class ClientesResource(resources.ModelResource):
     class Meta:
         model = Clientes
-        import_id_fields = ('id_cliente',)
-        exclude = ('id_cliente', 'fecha_creacion', 'fecha_modificacion', 'contacto', 'id_usuario_modificacion')
+
 
 class ProveedoresAdmin(ImportExportModelAdmin):
     resource_class = ProveedoresResource

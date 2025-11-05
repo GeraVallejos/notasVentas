@@ -229,6 +229,7 @@ const NotasDataGrid = ({ estado, nombre, exportNombre, userGroups }) => {
               fecha_modificacion_time: false,
               ciudad: false,
               region: false,
+              contacto_cliente: false,
             },
           },
         }}
