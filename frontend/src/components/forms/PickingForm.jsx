@@ -10,34 +10,52 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 import { format, parseISO } from 'date-fns';
 
-const schema = yup.object().shape({
-    nota: yup
-        .mixed()
-        .nullable()
-        .notRequired(),
-    producto: yup
-        .mixed()
-        .nullable()
-        .notRequired(),
-    cantidad: yup
-        .number()
-        .transform((value, originalValue) =>
-            String(originalValue).trim() === '' ? null : value
+const schema = (productosAgregados) =>
+    yup.object().shape({
+        nota: yup
+            .mixed()
+            .nullable()
+            .notRequired(),
+        producto: yup
+            .mixed()
+            .nullable()
+            .notRequired(),
+        cantidad: yup
+            .number()
+            .transform((value, originalValue) =>
+                String(originalValue).trim() === '' ? null : value
+            )
+            .typeError('La cantidad debe ser un número')
+            .positive('Debe ser mayor que cero')
+            .integer('Debe ser entero')
+            .nullable()
+            .notRequired(),
+        observacion: yup.string(),
+        tipo: yup.string().test(
+            "tipo-required",
+            "Debe seleccionar un local",
+            function (value) {
+                const { nota } = this.parent;
+                const tieneNota = nota && nota !== "";
+
+                // Si existe nota válida, no exigir tipo
+                if (tieneNota) return true;
+
+                // Verificar que todos los productos tengan tipo si no hay nota
+                const todosTienenTipo = productosAgregados?.every(
+                    (p) => p.tipo && p.tipo !== ""
+                );
+
+                // Si no hay productos aún, también exigir tipo en el formulario
+                if (!productosAgregados.length) {
+                    return !!value;
+                }
+
+                // Si hay productos y alguno no tiene tipo → error
+                return todosTienenTipo;
+            }
         )
-        .typeError('La cantidad debe ser un número')
-        .positive('Debe ser mayor que cero')
-        .integer('Debe ser entero')
-        .nullable()
-        .notRequired(),
-    observacion: yup.string(),
-    tipo: yup
-        .string()
-        .when('nota', {
-            is: (nota) => nota == null || nota == undefined || nota == '',
-            then: (schema) => schema.required('Debe seleccionar un local'),
-            otherwise: (schema) => schema.notRequired(),
-        }),
-});
+    });
 
 const transformMayus = (obj, excluir = []) => {
     const nuevoObj = { ...obj };
@@ -55,7 +73,7 @@ export const PickingForm = () => {
     const [notaValida, setNotaValida] = useState(true);
 
     const methods = useForm({
-        resolver: yupResolver(schema),
+        resolver: yupResolver(schema(productosAgregados)),
         mode: 'onTouched',
         defaultValues: {
             nota: '',
@@ -72,6 +90,7 @@ export const PickingForm = () => {
     });
 
     const { register, handleSubmit, resetField, control, setValue, getValues, formState: { errors } } = methods;
+
 
     const handleBlurNota = async (e) => {
         const nota = parseInt(e.target.value.trim());
@@ -176,8 +195,15 @@ export const PickingForm = () => {
         }
 
         if (!nota_id) {
-            enqueueSnackbar('Debe ingresar una nota válida antes de guardar.', { variant: 'error' });
-            return;
+            const todosTienenTipo = productosAgregados.every(p => p.tipo && p.tipo !== "");
+
+            if (!todosTienenTipo) {
+                enqueueSnackbar(
+                    "Debe ingresar una nota válida o asegurarse de que todos los productos tengan local (tipo).",
+                    { variant: "error" }
+                );
+                return;
+            }
         }
 
         setLoading(true);
@@ -221,7 +247,7 @@ export const PickingForm = () => {
                 }
             }
 
-            // ✅ Mostrar resumen general
+            // Mostrar resumen general
             if (guardadosExitosamente.length > 0) {
                 enqueueSnackbar(
                     `${guardadosExitosamente.length} producto(s) guardado(s) correctamente.`,
@@ -236,7 +262,7 @@ export const PickingForm = () => {
                 );
             }
 
-            // 🔹 Mantener en la vista previa solo los productos que NO se guardaron
+            // Mantener en la vista previa solo los productos que no se guardaron
             setProductosAgregados((prev) =>
                 prev.filter(
                     (p) =>
@@ -249,11 +275,12 @@ export const PickingForm = () => {
                 )
             );
 
-            // 🔹 Limpieza del formulario
+            // Limpieza del formulario
             resetField('producto');
             resetField('producto_id');
             resetField('cantidad', { defaultValue: '' });
             resetField('observacion');
+            resetField('tipo');
         } catch (error) {
             console.error('Error general al guardar pedido:', error);
             enqueueSnackbar('Error general al guardar pedido', { variant: 'error' });
