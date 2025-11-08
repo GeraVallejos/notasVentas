@@ -24,6 +24,18 @@ class PersonalResource(resources.ModelResource):
 
     class Meta:
         model = Personal
+        import_id_fields = ()
+        fields = (
+            'nombre',
+            'apellido',
+            'rut',
+            'correo',
+            'direccion',
+            'comuna',
+            'telefono',
+            'cargo',
+            'id_usuario',
+        )
         
 
 class ProveedoresResource(resources.ModelResource):
