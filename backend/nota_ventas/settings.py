@@ -306,12 +306,16 @@ PERMISSIONS_POLICY = {
 }
 
 # Configuracion de Content Security Policy (CSP)
-CSP_DEFAULT_SRC = ("'self'",)
-CSP_SCRIPT_SRC = ("'self'",)
-CSP_STYLE_SRC = ("'self'", "'unsafe-inline'")
-CSP_IMG_SRC = ("'self'", "data:", AWS_S3_ENDPOINT_URL)
-CSP_CONNECT_SRC = ("'self'", AWS_S3_ENDPOINT_URL)
-CSP_FRAME_ANCESTORS = ("'none'",)
+CONTENT_SECURITY_POLICY = {
+    "DIRECTIVES": {
+        "default-src": ["'self'"],
+        "script-src": ["'self'"],
+        "style-src": ["'self'", "'unsafe-inline'"],
+        "img-src": ["'self'", "data:", AWS_S3_ENDPOINT_URL],
+        "connect-src": ["'self'", AWS_S3_ENDPOINT_URL],
+        "frame-ancestors": ["'none'"],
+    }
+}
 
 if not IS_PRODUCTION:
     CSRF_COOKIE_SAMESITE = 'Lax'
