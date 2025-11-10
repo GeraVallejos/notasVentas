@@ -227,7 +227,7 @@ CSRF_TRUSTED_ORIGINS = [
 # Cookies de sesión
 SESSION_COOKIE_HTTPONLY = True
 SESSION_COOKIE_SECURE = IS_PRODUCTION
-SESSION_COOKIE_SAMESITE = 'Lax'
+SESSION_COOKIE_SAMESITE = 'None'
 
 # Headers de seguridad
 SECURE_CONTENT_TYPE_NOSNIFF = True
@@ -290,13 +290,12 @@ AWS_S3_ENDPOINT_URL = os.getenv("AWS_S3_ENDPOINT_URL")
 
 AWS_S3_REGION_NAME = "auto"
 AWS_S3_SIGNATURE_VERSION = "s3v4"
-AWS_DEFAULT_ACL = None
+AWS_DEFAULT_ACL = 'private'
 AWS_S3_FILE_OVERWRITE = False
 
 AWS_S3_OBJECT_PARAMETERS = {
     "ContentDisposition": "inline",
     "CacheControl": "max-age=86400",
-    "ACL": "private",
 }
 
 # Configuracion de Permissions Policy
