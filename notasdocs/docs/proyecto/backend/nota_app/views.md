@@ -6,10 +6,14 @@ Algunas importaciones claves (no son todas las que estan presentes en el código
 
 ```python
 from rest_framework import viewsets
+from .serializer import UsuariosSerializer, NotasSerializer, ClientesSerializer
+from .models import Usuarios, Notas, Clientes
 from rest_framework import permissions
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from django.contrib.auth.hashers import check_password
+from django.utils.decorators import method_decorator
+from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from rest_framework.permissions import AllowAny
 from rest_framework import status
 from django.db.models import Count, Q
@@ -18,6 +22,10 @@ import logging
 from django.utils.timezone import make_aware
 from django.db.models import DateField
 from django.db.models.functions import Cast
+from rest_framework.views import APIView
+from django.views.decorators.csrf import ensure_csrf_cookie
+from django.http import JsonResponse
+from django.middleware.csrf import get_token
 
 logger = logging.getLogger(__name__)
 ```
@@ -32,6 +40,12 @@ logger = logging.getLogger(__name__)
 - Count: para agregaciones, Q: para filtros complejos
 - Utilidades estándar: fechas y logging para depuración o errores.
 - Herramientas para manejar zonas horarias y convertir campos
+- Vista genérica base para crear endpoints personalizados que no requieren un ViewSet.
+- Permiten convertir campos a tipos específicos en las consultas, por ejemplo, para filtrar por fecha sin hora (Cast(fecha, DateField())).
+- Convierte objetos datetime en fechas con zona horaria.
+- `ensure_csrf_cookie`: fuerza el envío del token CSRF en las respuestas (útil para Single Page Apps).
+- `get_token`: obtiene el token CSRF para entregarlo al cliente.
+- Habilita un logger específico para este módulo, útil para registrar errores, advertencias u otra información de depuración.
 
 ### Vistas
 
@@ -206,6 +220,8 @@ Crea una acción personalizada accesible desde:
 
 **Devuelve la respuesta en formato JSON**
 
+---
+
 ## **`class ClientesView(viewsets.ModelViewSet):`**
 
 ```python
@@ -224,6 +240,8 @@ Crea una acción personalizada accesible desde:
 
 **Si no se envía un rut, devuelve un error 400 con un mensaje.**
 
+---
+
 ```python
         try:
             cliente = Clientes.objects.get(rut_cliente=rut)
@@ -234,6 +252,21 @@ Crea una acción personalizada accesible desde:
 ---
 
 ```python
+# Manejo de métodos PUT/PATCH
+            if request.method in ['PUT', 'PATCH']:
+                partial = request.method == 'PATCH'  # True para PATCH, False para PUT
+                serializer = self.get_serializer(cliente, data=request.data, partial=partial)
+                serializer.is_valid(raise_exception=True)
+                serializer.save()
+                return Response(serializer.data)
+```
+
+**PUT: reemplaza todos los datos del cliente. PATCH: actualiza parcialmente. Se usa el serializer para validar y guardar.**
+
+---
+
+```python
+         # Manejo del GET
             data = {
                 'direccion': cliente.direccion,
                 'comuna': cliente.comuna,
@@ -242,18 +275,23 @@ Crea una acción personalizada accesible desde:
                 'contacto': cliente.contacto,
                 'razon_social': cliente.razon_social,
             }
+
 ```
 
-**Extrae los campos más relevantes del cliente en un diccionario para enviarlo como respuesta.**
+**Retorna los datos principales del cliente como JSON.**
 
 ---
 
 ```python
-        except Clientes.DoesNotExist:
-            return Response({'error': 'Cliente no encontrado'}, status=status.HTTP_404_NOT_FOUND)
+    except Clientes.DoesNotExist:
+        return Response({'error': 'Cliente no encontrado'}, status=status.HTTP_404_NOT_FOUND)
+    except Exception as e:
+        return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 ```
 
-**Si no se encuentra el cliente con el RUT especificado, devuelve un error 404 con un mensaje.**
+**Si no se encuentra el cliente con el RUT especificado, devuelve un error 404 con un mensaje. Otros errores generales devuelven 400 con el mensaje.**
+
+---
 
 ## **`class CookieTokenObtainPairView(TokenObtainPairView):`**
 
@@ -290,7 +328,7 @@ Crea una acción personalizada accesible desde:
             value=access,
             httponly=True,
             secure=True,
-            samesite='Lax',
+            samesite='None',
             max_age=60 * 60,  # 1 hora
         )
 ```
@@ -299,7 +337,7 @@ Crea una acción personalizada accesible desde:
 
 - httponly=True: el frontend no puede acceder al token con JavaScript.
 - secure=True: solo se envía por HTTPS.
-- samesite='Lax': ayuda a prevenir CSRF.
+- samesite='None': Ya que son dos dominios diferentes el backend con el frontend.
 - max_age=3600: expira en 1 hora.
 
 ---
@@ -310,7 +348,7 @@ Crea una acción personalizada accesible desde:
             value=refresh,
             httponly=True,
             secure=True,
-            samesite='Lax',
+            samesite='None',
             max_age=7 * 24 * 60 * 60,  # 7 días
         )
 ```
@@ -318,6 +356,19 @@ Crea una acción personalizada accesible desde:
 **Similar para el refresh_token, pero con un tiempo de vida más largo (7 días).**
 
 ---
+
+```python
+        response.set_cookie(
+            key="csrftoken",
+            value=get_token(request),
+            httponly=False,
+            secure=True,
+            samesite='None',
+            max_age=60 * 60,
+        )
+```
+
+**Similar a los anteriores pero para el CSRF, con un tiempo de vida de 1 hora.**
 
 ```python
         response.data = {"message": "Login exitoso"}
@@ -382,7 +433,7 @@ Hereda de TokenRefreshView, que se usa para renovar el access_token usando el re
             value=access,
             httponly=True,
             secure=True,
-            samesite='Lax',
+            samesite='None',
             max_age=60 * 60,  # 1 hora
         )
 ```
@@ -402,7 +453,7 @@ Hereda de TokenRefreshView, que se usa para renovar el access_token usando el re
 
 ## **`class DashboardViewSet(viewsets.ViewSet):`**
 
-Se usa para agrupar vistas lógicas bajo una sola ruta (como /dashboard/resumen/).
+Se usa para agrupar vistas lógicas bajo una sola ruta (como /dashboard/resumen/) para entregar un resumen estadístico del sistema en un rango de fechas, usando Django REST Framework. 
 
 ```python
         fecha_inicio_str = request.query_params.get('fecha_inicio')
@@ -433,6 +484,19 @@ Se usa para agrupar vistas lógicas bajo una sola ruta (como /dashboard/resumen/
 **Convierte los strings a datetime, asegurándose de incluir todo el día (inicio 00:00, fin 23:59).**
 
 - make_aware agrega la zona horaria de Django.
+
+---
+
+
+```python
+       if fecha_fin < fecha_inicio:
+                return Response(
+                    {'error': 'La fecha de fin no puede ser anterior a la fecha de inicio'},
+                    status=400
+                )
+```
+
+**Impide que se consulten rangos de fechas inválidos (fin antes del inicio).**
 
 ---
 
@@ -502,18 +566,19 @@ Se usa para agrupar vistas lógicas bajo una sola ruta (como /dashboard/resumen/
 ---
 
 ```python
-        notas_por_comuna = Notas.objects.filter(notas_filtro).exclude(
-            comuna__isnull=True
-        ).values(
-            'comuna', 'estado_solicitud'
-        ).annotate(
-            total=Count('id_nota')
-        ).order_by('-total')
+         # Notas por comuna
+            notas_por_comuna = Notas.objects.filter(notas_filtro).exclude(
+                cliente__comuna__isnull=True
+            ).values(
+                'cliente__comuna', 'despacho_retira'
+            ).annotate(
+                total=Count('id_nota')
+            ).order_by('-total')
 ```
 
-**Agrupa por comuna y estado_solicitud (ej. "entregado", "pendiente").**
+**Agrupa por comuna del cliente y tipo de despacho.**
 
-**Devuelve una lista con el total por cada combinación.**
+**Ignora clientes sin comuna.**
 
 ---
 

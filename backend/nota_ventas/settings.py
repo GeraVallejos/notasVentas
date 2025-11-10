@@ -36,7 +36,7 @@ DEBUG = os.getenv('DEBUG', 'False') == 'True'
 
 
 
-ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "").split(",")
+ALLOWED_HOSTS = [h for h in os.getenv("ALLOWED_HOSTS", "").split(",") if h]
 
 
 # Application definition
@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'nota_app.apps.NotaAppConfig',
     'rest_framework',
     'rest_framework_simplejwt',
+    'rest_framework_simplejwt.token_blacklist',
     'corsheaders',
     'django.contrib.admin',
     'django.contrib.auth',
@@ -53,11 +54,15 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'axes',
+    'import_export',
+    'storages',
+    'csp',
 ]
 
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
     'nota_app.middleware.JWTTokenFromCookieMiddleware',
+    'csp.middleware.CSPMiddleware',
     'django.middleware.security.SecurityMiddleware', 
     'whitenoise.middleware.WhiteNoiseMiddleware',   
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -92,11 +97,11 @@ WSGI_APPLICATION = 'nota_ventas.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
-# Esto solo es necesario en produccion, en local no funiona con SSL
+# define configuraciones avanzadas para la conexión a la base de datos
 db_options = {
     'charset': 'utf8mb4',
 }
-
+# Esto solo es necesario en produccion, en local no funiona con SSL
 if IS_PRODUCTION:
     db_options['ssl'] = {'ssl_mode': 'REQUIRED'}
 
@@ -147,7 +152,7 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
-# Para collectsatic neecsario en Railway
+# Para collectsatic necesario en Railway
 STATIC_URL = '/static/'
 STATIC_ROOT = '/app/backend/staticfiles' if os.getenv('IS_PRODUCTION') == 'True' else os.path.join(BASE_DIR, 'staticfiles')
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
@@ -176,8 +181,8 @@ REST_FRAMEWORK = {
         'rest_framework.throttling.UserRateThrottle'
     ],
     'DEFAULT_THROTTLE_RATES': {
-        'anon': '50/hour',
-        'user': '1000/hour'
+        'anon': '30/hour',
+        'user': '200/hour'
     }
 }
 
@@ -198,6 +203,8 @@ SIMPLE_JWT = {
     'AUTH_COOKIE_SAMESITE': 'None',   # Protección CSRF
     'AUTH_COOKIE_PATH': '/',         # Ruta donde es válida la cookie
     'AUTH_COOKIE_DOMAIN': None,      # Dominio (None para localhost)
+    'ROTATE_REFRESH_TOKENS': True,
+    'BLACKLIST_AFTER_ROTATION': True,
 }
 
 # Configuracion CORS
@@ -206,18 +213,21 @@ CORS_ALLOWED_ORIGINS = os.getenv('CORS_KEYS', '').split(',') if os.getenv('CORS_
 CORS_ALLOW_CREDENTIALS = True
 CORS_EXPOSE_HEADERS = ['Content-Type', 'X-CSRFToken']  # Necesario para CSRF
 
+
 # CSRF
 CSRF_COOKIE_SECURE = IS_PRODUCTION
 CSRF_COOKIE_HTTPONLY = False
-CSRF_COOKIE_SAMESITE = 'None'
+CSRF_COOKIE_SAMESITE = 'None' # backend y frontend en dominios diferentes
 CSRF_USE_SESSIONS = False
 CSRF_TRUSTED_ORIGINS = [
-    origin for origin in os.getenv('CORS_KEYS', '').split(',') if origin.startswith('https://')
+    origin for origin in os.getenv('CORS_KEYS', '').split(',') if origin.startswith('https://') 
+    or origin.startswith('http://')
     ]
 
 # Cookies de sesión
+SESSION_COOKIE_HTTPONLY = True
 SESSION_COOKIE_SECURE = IS_PRODUCTION
-SESSION_COOKIE_SAMESITE = 'Lax'
+SESSION_COOKIE_SAMESITE = 'None'
 
 # Headers de seguridad
 SECURE_CONTENT_TYPE_NOSNIFF = True
@@ -236,8 +246,10 @@ AXES_LOCKOUT_PARAMETERS = ['ip_address', 'username']  # Bloquear por IP + usuari
 AXES_RESET_ON_SUCCESS = True  # Reiniciar contador tras login exitoso
 AXES_ENABLED = IS_PRODUCTION
 
+# HTTPS en produccion
 SECURE_SSL_REDIRECT = IS_PRODUCTION
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+SECURE_REFERRER_POLICY = "strict-origin-when-cross-origin"
 
 # Configuracion del logger
 if IS_PRODUCTION:
@@ -259,3 +271,60 @@ if IS_PRODUCTION:
             },
         },
     }
+
+# Configuracion de archivos multimedia
+# Esto es necesario para manejar archivos subidos por los usuarios
+if IS_PRODUCTION:
+    MEDIA_ROOT = Path("/app/media")
+else:
+    MEDIA_ROOT = BASE_DIR / "media"
+
+MEDIA_URL = "/media/"
+
+# Cloudflare S3
+
+AWS_ACCESS_KEY_ID = os.getenv("AWS_ACCESS_KEY_ID")
+AWS_SECRET_ACCESS_KEY = os.getenv("AWS_SECRET_ACCESS_KEY")
+AWS_STORAGE_BUCKET_NAME = os.getenv("AWS_STORAGE_BUCKET_NAME")
+AWS_S3_ENDPOINT_URL = os.getenv("AWS_S3_ENDPOINT_URL")
+
+AWS_S3_REGION_NAME = "auto"
+AWS_S3_SIGNATURE_VERSION = "s3v4"
+AWS_DEFAULT_ACL = 'private'
+AWS_S3_FILE_OVERWRITE = False
+
+AWS_S3_OBJECT_PARAMETERS = {
+    "ContentDisposition": "inline",
+    "CacheControl": "max-age=86400",
+}
+
+# Configuracion de Permissions Policy
+PERMISSIONS_POLICY = {
+    "geolocation": [],
+    "camera": [],
+    "microphone": [],
+}
+
+# Configuracion de Content Security Policy (CSP)
+CONTENT_SECURITY_POLICY = {
+    "DIRECTIVES": {
+        "default-src": ["'self'"],
+        "script-src": ["'self'"],
+        "style-src": ["'self'", "'unsafe-inline'"],
+        "img-src": ["'self'", "data:", AWS_S3_ENDPOINT_URL],
+        "connect-src": ["'self'", AWS_S3_ENDPOINT_URL],
+        "frame-ancestors": ["'none'"],
+    }
+}
+
+if not IS_PRODUCTION:
+    CSRF_COOKIE_SAMESITE = 'Lax'
+    SESSION_COOKIE_SAMESITE = 'Lax'
+    CSRF_COOKIE_SECURE = False
+    SESSION_COOKIE_SECURE = False
+
+if IS_PRODUCTION:
+    SECURE_HSTS_SECONDS = 31536000  # 1 año
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
+

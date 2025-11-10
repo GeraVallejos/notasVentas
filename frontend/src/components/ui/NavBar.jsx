@@ -44,7 +44,7 @@ const Navbar = ({ mobileOpen, onMenuClick }) => {
         )}
 
         <Link href='/' underline='none' variant="h6" noWrap sx={{ color: 'white' }}>
-          Sistema de Pedidos
+          JJ  DETERGENTES
         </Link>
         <Box sx={{ flexGrow: 1 }} />
         {user?.nombre && (

@@ -97,7 +97,15 @@ Si aplicamos .parent nuevamente, subimos otro nivel:
 - Multiplataforma: Path funciona correctamente en Windows, Linux y macOS (usa / o \ automáticamente).
 - Legibilidad: Es más claro que usar os.path.join(os.path.dirname(...)).
 
-### <font color=#ad39dc>SECRET_KEY`</font>
+### <font color=#ad39dc>IS_PRODUCTION</font>
+
+Es una variable que permite el cambio entre desarrollo y producción. Es necesaria para las variables booleanas que requeiren ser cambiadas cuando pasan de un estado a otro en producción
+
+```python
+IS_PRODUCTION = os.getenv('IS_PRODUCTION', 'False') == 'True'
+```
+
+### <font color=#ad39dc>SECRET_KEY</font>
 
 La clave secreta utilizada en la producción para la seguridad de las sesiones y el manejo de cookies. Nunca se debe compartir esta clave.
 
@@ -135,7 +143,9 @@ messages.success(request, "Éxito!")  # El mensaje se firma
 ```python
 import os  
 
-SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY')
+SECRET_KEY = os.getenv('SECRET_KEY_DJANGO')
+if IS_PRODUCTION and not SECRET_KEY:
+    raise ValueError("SECRET_KEY_DJANGO debe estar definido en producción!")
 ```
 
 ### <font color=#ad39dc>DEBUG</font>
@@ -183,6 +193,10 @@ Es una lista de strings que representa los nombres de host/dominios que el sitio
 - Seguridad: Previene ataques de HTTP Host header poisoning.
 - Validación: Asegura que la aplicación solo responda a los dominios que se ha especificado.
 - Requerimiento obligatorio: Cuando DEBUG=False, Django requiere que esta lista no esté vacía.
+
+```python
+ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "").split(",")
+```
 
 #### Buenas prácticas
 - En desarrollo local se puede dejar vacío si DEBUG=True
@@ -316,16 +330,25 @@ Es un diccionario que contiene la configuración de conexión a la(s) base(s) de
 #### Ejemplo con MySQL
 
 ```python
-DATABASES = {  
+# define configuraciones avanzadas para la conexión a la base de datos
+db_options = {
+    'charset': 'utf8mb4',
+}
+# Esto solo es necesario en produccion, en local no funiona con SSL
+if IS_PRODUCTION:
+    db_options['ssl'] = {'ssl_mode': 'REQUIRED'}
+
+DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'mi_bd',
-        'USER': 'root',
-        'PASSWORD': 'password123',
-        'HOST': 'localhost',
-        'PORT': '3306',
+       'ENGINE': 'django.db.backends.mysql',
+        'NAME': os.getenv('MYSQLDATABASE') or os.getenv('DB_NAME'),
+        'USER': os.getenv('MYSQLUSER') or os.getenv('DB_USER'),
+        'PASSWORD': os.getenv('MYSQLPASSWORD') or os.getenv('DB_PASSWORD'),
+        'HOST': os.getenv('MYSQLHOST') or os.getenv('DB_HOST'),
+        'PORT': os.getenv('MYSQLPORT') or os.getenv('DB_PORT'),
+        'OPTIONS': db_options,
     }
-} 
+}
 ```
 
 ##### Tips
@@ -458,6 +481,26 @@ Define la URL base desde la que se servirán los archivos estáticos (CSS, JavaS
 
 - Durante el desarrollo, Django sirve los archivos estáticos automáticamente.
 - En producción, es primordial configurar el servidor web para servir estos archivos y nunca depender de Django para este propósito por razones de rendimiento y seguridad.
+
+```python
+# Para collectsatic necesario en Railway
+STATIC_URL = '/static/'
+STATIC_ROOT = '/app/backend/staticfiles' if os.getenv('IS_PRODUCTION') == 'True' else os.path.join(BASE_DIR, 'staticfiles')
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+WHITENOISE_MAX_AGE = 604800 if IS_PRODUCTION else 0
+```
+
+#### Especifica cómo Django debe almacenar y servir los archivos estáticos.
+
+Se usa WhiteNoise, una librería que:
+
+- Comprime automáticamente los archivos (gzip o brotli).
+- Genera versiones con hash únicos en el nombre para control de caché (main.abcd1234.css).
+- Permite servir los archivos estáticos directamente desde la app sin depender de Nginx o S3.
+- Esta opción es ideal para entornos como Railway, donde no se usa un servidor web dedicado.
+- Controla el tiempo de caché de los archivos estáticos en el navegador del cliente.
+- 604800 segundos = 7 días (ideal en producción).
+- 0 en desarrollo para que los cambios se vean de inmediato al actualizar el navegador.
 
 ### <font color=#ad39dc>DEFAULT_AUTO_FIELD</font>
 
@@ -756,33 +799,37 @@ CORS (Cross-Origin Resource Sharing) es un mecanismo de seguridad del navegador 
 *En este proyecto*
 
 ```python
-CORS_ALLOWED_ORIGINS = [
-    os.getenv('CORS_KEYS'), 'http://localhost:5173' # Es el dominio por defecto de Vite
-]
+CORS_ALLOWED_ORIGINS = os.getenv('CORS_KEYS', '').split(',') if os.getenv('CORS_KEYS') else []
 ```
 
 ## <font color=#ad39dc>CONFIGURACIONES DE SEGURIDAD</font>
 
 ```python
+# Configuracion CORS
+CORS_ALLOWED_ORIGINS = os.getenv('CORS_KEYS', '').split(',') if os.getenv('CORS_KEYS') else []
+
 CORS_ALLOW_CREDENTIALS = True
 CORS_EXPOSE_HEADERS = ['Content-Type', 'X-CSRFToken']  # Necesario para CSRF
 
-CSRF_COOKIE_SECURE = False
+# CSRF
+CSRF_COOKIE_SECURE = IS_PRODUCTION
 CSRF_COOKIE_HTTPONLY = False
-CSRF_COOKIE_SAMESITE = 'Lax'
+CSRF_COOKIE_SAMESITE = 'None' # backend y frontend en dominios diferentes
 CSRF_USE_SESSIONS = False
-CSRF_COOKIE_HTTPONLY = False  # React debe leer el token
 CSRF_TRUSTED_ORIGINS = [
-    os.getenv('CORS_KEYS')
-]
+    origin for origin in os.getenv('CORS_KEYS', '').split(',') if origin.startswith('https://')
+    ]
 
-SESSION_COOKIE_SECURE = False
+# Cookies de sesión
+SESSION_COOKIE_SECURE = IS_PRODUCTION
 SESSION_COOKIE_SAMESITE = 'Lax'
 
+# Headers de seguridad
 SECURE_CONTENT_TYPE_NOSNIFF = True
 SECURE_BROWSER_XSS_FILTER = True
 X_FRAME_OPTIONS = 'DENY'
 
+# Axes
 AUTHENTICATION_BACKENDS = [
     'axes.backends.AxesStandaloneBackend',  
     'django.contrib.auth.backends.ModelBackend',
@@ -792,7 +839,11 @@ AXES_FAILURE_LIMIT = 10  # Número de intentos fallidos antes de bloquear
 AXES_COOLOFF_TIME = 1  # 1 hora de bloqueo (puede ser timedelta(hours=1))
 AXES_LOCKOUT_PARAMETERS = ['ip_address', 'username']  # Bloquear por IP + usuario
 AXES_RESET_ON_SUCCESS = True  # Reiniciar contador tras login exitoso
-AXES_ENABLED = False
+AXES_ENABLED = IS_PRODUCTION
+
+# HTTPS en produccion
+SECURE_SSL_REDIRECT = IS_PRODUCTION
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 ```
 
 ### <font color=#ad39dc>CORS_ALLOW_CREDENTIALS</font>
@@ -858,6 +909,24 @@ AXES_ENABLED = False
 - Propósito: Impide que el sitio se embeda en un iframe (evita clickjacking).
 - 'DENY': Bloqueo total.
 - 'SAMEORIGIN': Permite iframes solo desde el mismo dominio.
+
+### <font color=#ad39dc>SECURE_SSL_REDIRECT</font>
+
+Esta opción fuerza que todas las solicitudes HTTP sean redirigidas a HTTPS. Solo se activa si IS_PRODUCTION es True.
+
+- Asegura que los usuarios usen una conexión segura cifrada.
+- Evita exponer cookies, tokens o datos en texto plano.
+- Mejora la puntuación en herramientas como Lighthouse o SSL Labs.
+
+### <font color=#ad39dc>SECURE_PROXY_SSL_HEADER</font>
+
+Cuando la app está detrás de un proxy inverso (como Railway, Heroku, Nginx, Cloudflare, etc.), Django no puede saber directamente si la conexión original del usuario fue segura (HTTPS), porque las solicitudes que recibe internamente pueden venir como HTTP.
+
+Este header le dice a Django:
+
+- “Confía en el valor del encabezado HTTP_X_FORWARDED_PROTO enviado por el proxy para determinar si la conexión fue HTTPS.”
+
+Railway envía este encabezado automáticamente.
 
 ### <font color=#ad39dc>AUTHENTICATION_BACKENDS</font>
 
@@ -953,3 +1022,69 @@ AUTHENTICATION_BACKENDS = [
     - Cuando se usan otros sistemas de protección.
     - Para diagnóstico de problemas de autenticación.
 - Precaución: Nunca desactivar en producción sin tener alternativa de protección.
+
+### <font color=#ad39dc>LOGGING</font>
+
+```python
+# Configuracion del logger
+if IS_PRODUCTION:
+    LOGGING = {
+        'version': 1,
+        'disable_existing_loggers': False,
+        'handlers': {
+            'file': {
+                'level': 'WARNING',
+                'class': 'logging.FileHandler',
+                'filename': os.path.join(BASE_DIR, 'django.log'),
+            },
+        },
+        'loggers': {
+            'django': {
+                'handlers': ['file'],
+                'level': 'WARNING',
+                'propagate': True,
+            },
+        },
+    }
+```
+
+Este bloque configura el sistema de logging de Django para que, en producción, registre mensajes de advertencia y error en un archivo llamado django.log.
+
+**if IS_PRODUCTION:**
+Solo activa esta configuración en entornos productivos. Así, en desarrollo se puede usar logs por consola sin interferencias.
+
+**'version': 1**
+Indica que está usando la versión 1 del sistema de logging de Python, que es la que usa Django.
+
+**'disable_existing_loggers': False**
+Permite que los loggers existentes sigan funcionando, en lugar de desactivarlos.
+
+**'handlers': { ... }**
+Define cómo y dónde se almacenan los logs. En este caso crea un manejador de logs que:
+
+- Guarda los mensajes con nivel WARNING o superior (ERROR, CRITICAL).
+- Usa un archivo llamado django.log, ubicado en el directorio base del proyecto (BASE_DIR).
+- Utiliza el manejador de archivos estándar de Python.
+
+**'loggers': { 'django': ... }**
+Define los loggers que Django usará. Aquí:
+
+- El logger 'django' (el núcleo del framework) usará el handler 'file'.
+- Su nivel mínimo será 'WARNING'.
+- propagate: True permite que los logs se pasen también a otros loggers padres si existen.
+
+Cuando la app esté corriendo en producción y ocurra, por ejemplo, un Http404, un error de base de datos o un fallo en vistas, se registrará una línea como:
+
+```js
+WARNING 2025-07-24 15:00:00,456 django.request Internal Server Error: /api/endpoint
+Traceback (most recent call last):
+...
+```
+
+- Permite auditar errores sin necesidad de revisar logs del servidor directamente.
+- Útil para debuggear producción cuando no se tiene consola activa (como en Railway).
+- Compatible con herramientas de monitoreo como Sentry, si se quiere mejorar la gestión de errores más adelante.
+
+---
+
+

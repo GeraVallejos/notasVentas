@@ -10,6 +10,7 @@ import AppTheme from './theme/AppTheme';
 import { LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import CSRFLoader from './components/common/CSRFLoader';
+import { es } from 'date-fns/locale';
 
 
 const router = getRoutes();
@@ -22,7 +23,7 @@ createRoot(document.getElementById('root')).render(
         autoHideDuration={3000}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
       >
-        <LocalizationProvider dateAdapter={AdapterDateFns}>
+        <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={es}>
         <AppTheme>
           <CSRFLoader />
           <RouterProvider router={router} />

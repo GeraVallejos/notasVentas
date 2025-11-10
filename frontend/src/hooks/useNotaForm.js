@@ -50,6 +50,7 @@ export const useNotaForm = (onSubmit) => {
       telefono: `+56${data.telefono}`,
     };
     onSubmit(dataConPrefijo);
+    
   });
 
   return {

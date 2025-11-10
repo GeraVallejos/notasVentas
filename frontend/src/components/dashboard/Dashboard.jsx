@@ -52,10 +52,10 @@ const Dashboard = () => {
             setData(response.data);
             setDataDespachos(
                 (response.data.comunas?.resumen || []).map(item => ({
-                    comuna: normalizarNombre(item.comuna),
+                    comuna: normalizarNombre(item.cliente__comuna),
                     despacho_retira: item.despacho_retira,
                     total: item.total,
-                })).filter(item => item.despacho_retira === 'Despacho')
+                })).filter(item => item.despacho_retira === 'DESPACHO')
             );
 
             const datosNotas = [];
@@ -119,13 +119,13 @@ const Dashboard = () => {
     );
 
     return (
-        <Box sx={{ flexGrow: 1, p: 3 }}>
+        <Box sx={{  p: 3, width: '100%'}}>
             <Grid container justifyContent='space-between' alignItems='top' sx={{ mb: 3 }}>
                 <Grid>
                     <Typography variant="h5">Resumen General</Typography>
                 </Grid>
 
-                <Grid>
+                <Grid size={{xs: 12, lg: 6}} >
                     <FilterComponent
                         fechaInicio={fechaInicio}
                         setFechaInicio={setFechaInicio}
@@ -138,7 +138,7 @@ const Dashboard = () => {
             </Grid>
 
             <Grid container spacing={2} display='flex' justifyContent='center'>
-                <Grid size={{ xs: 12, sm: 6, lg: 4 }}>
+                <Grid size={{ xs: 12,  lg: 4 }}>
                     <Paper sx={{ p: 2, height: 400, display: 'flex', flexDirection: 'column' }}>
                         <Box sx={{ mb: 2 }}>
                             <Typography variant="h6" align='center'>Total de Notas</Typography>
@@ -185,7 +185,7 @@ const Dashboard = () => {
                     </Paper>
                 </Grid>
 
-                <Grid size={{ xs: 12, sm: 6, lg: 4 }}>
+                <Grid size={{ xs: 12, lg: 4 }}>
                     <Paper sx={{ p: 2, height: 400 }}>
                         <Typography variant="h6" gutterBottom>
                             Días de Despacho por Notas de Ventas
@@ -245,7 +245,7 @@ const Dashboard = () => {
                     </Paper>
                 </Grid>
 
-                <Grid size={{ xs: 12, sm: 6, lg: 4 }}>
+                <Grid size={{ xs: 12, lg: 4 }}>
                     <Paper sx={{ p: 2, height: 400 }}>
                         <Typography variant="h6" gutterBottom>
                             Otra métrica importante

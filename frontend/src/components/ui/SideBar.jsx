@@ -1,44 +1,228 @@
 import {
-  Drawer,
   List,
   ListItemButton,
   ListItemIcon,
   ListItemText,
+  Collapse,
   useTheme,
   useMediaQuery,
+  Drawer,
   Box,
-  Typography,
+  Typography
 } from '@mui/material';
 import { NavLink } from 'react-router-dom';
+import { ExpandLess, ExpandMore } from '@mui/icons-material';
+import { useState } from 'react';
+import { useSelector } from 'react-redux';
 import { getYear } from 'date-fns';
-import archivo_carpeta from '../../assets/iconos/archivo_carpeta.png';
+
 import lista_notas from '../../assets/iconos/lista_notas.png';
-import bloc from '../../assets/iconos/bloc.png';
+import sabado from '../../assets/iconos/sabado.png';
+import factura from '../../assets/iconos/factura.png';
+import materia_prima from '../../assets/iconos/materia-prima.png';
+import pedido_en_linea from '../../assets/iconos/pedido-en-linea.png';
+
 
 const drawerWidth = 180;
 
-const SidebarContent = ({ onClick }) => (
-  <List sx={{ mt: 10 }}>
-    <ListItemButton component={NavLink} to="/lista-notas" onClick={onClick}>
-      <ListItemIcon sx={{ minWidth: 32 }}>
-        <img src={lista_notas} alt="Lista de Notas" style={{ width: 24, height: 24 }} />
-      </ListItemIcon>
-      <ListItemText primary="Lista de Notas" />
-    </ListItemButton>
-    <ListItemButton component={NavLink} to="/notas" onClick={onClick}>
-      <ListItemIcon sx={{ minWidth: 32 }}>
-        <img src={bloc} alt="Nueva Nota" style={{ width: 24, height: 24 }} />
-      </ListItemIcon>
-      <ListItemText primary="Nueva Nota" />
-    </ListItemButton>
-    <ListItemButton component={NavLink} to="/lista-historico" onClick={onClick}>
-      <ListItemIcon sx={{ minWidth: 32 }}>
-        <img src={archivo_carpeta} alt="Histórico" style={{ width: 24, height: 24 }} />
-      </ListItemIcon>
-      <ListItemText primary="Histórico" />
-    </ListItemButton>
-  </List>
-);
+const SidebarContent = ({ onClick }) => {
+  const [openNotas, setOpenNotas] = useState(false);
+  const [openFacturas, setOpenFacturas] = useState(false);
+  const [openMaterias, setOpenMaterias] = useState(false);
+  const [openPicking, setOpenPicking] = useState(false);
+
+  const grupo = useSelector((state) => state.auth.user?.groups || []);
+  const adminGroup = grupo.some((g) => g.includes('Admin'));
+
+  return (
+    <List sx={{ mt: 10 }}>
+      {/* Menú Notas */}
+      <ListItemButton onClick={() => setOpenNotas(!openNotas)}>
+        <ListItemIcon sx={{ minWidth: 32 }}>
+          <img src={lista_notas} alt="Notas" style={{ width: 24, height: 24 }} />
+        </ListItemIcon>
+        <ListItemText primary="Notas" />
+      </ListItemButton>
+      <Collapse in={openNotas} timeout="auto" unmountOnExit>
+        <List component="div" disablePadding>
+          <ListItemButton
+            component={NavLink}
+            to="/notas"
+            onClick={onClick}
+            sx={{ pl: 4 }}
+          >
+            <ListItemText
+              primary="Nueva Nota"
+              primaryTypographyProps={{ fontSize: 13 }}
+            />
+          </ListItemButton>
+          <ListItemButton
+            component={NavLink}
+            to="/lista-notas"
+            onClick={onClick}
+            sx={{ pl: 4 }}
+          >
+            <ListItemText
+              primary="Lista de Notas"
+              primaryTypographyProps={{ fontSize: 13 }}
+            />
+          </ListItemButton>
+          <ListItemButton
+            component={NavLink}
+            to="/lista-historico"
+            onClick={onClick}
+            sx={{ pl: 4 }}
+          >
+            <ListItemText
+              primary="Histórico Notas"
+              primaryTypographyProps={{ fontSize: 13 }}
+            />
+          </ListItemButton>
+        </List>
+      </Collapse>
+
+      {adminGroup && (
+        <>
+          {/* Menú Facturas */}
+          <ListItemButton onClick={() => setOpenFacturas(!openFacturas)}>
+            <ListItemIcon sx={{ minWidth: 32 }}>
+              <img src={factura} alt="Facturas" style={{ width: 24, height: 24 }} />
+            </ListItemIcon>
+            <ListItemText primary="Facturas" />
+          </ListItemButton>
+          <Collapse in={openFacturas} timeout="auto" unmountOnExit>
+            <List component="div" disablePadding>
+              <ListItemButton
+                component={NavLink}
+                to="/pdf-facturas"
+                onClick={onClick}
+                sx={{ pl: 4 }}
+              >
+                <ListItemText
+                  primary="Lista de Facturas"
+                  primaryTypographyProps={{ fontSize: 13 }}
+                />
+              </ListItemButton>
+              <ListItemButton
+                component={NavLink}
+                to="/pdf-facturas-historico"
+                onClick={onClick}
+                sx={{ pl: 4 }}
+              >
+                <ListItemText
+                  primary="Facturas Pagadas"
+                  primaryTypographyProps={{ fontSize: 13 }}
+                />
+              </ListItemButton>
+            </List>
+          </Collapse>
+
+          {/* Menú Materias Primas */}
+          <ListItemButton onClick={() => setOpenMaterias(!openMaterias)}>
+            <ListItemIcon sx={{ minWidth: 32 }}>
+              <img src={materia_prima} alt="Materias" style={{ width: 24, height: 24 }} />
+            </ListItemIcon>
+            <ListItemText primary="Insumos" />
+          </ListItemButton>
+          <Collapse in={openMaterias} timeout="auto" unmountOnExit>
+            <List component="div" disablePadding>
+
+              <ListItemButton
+                component={NavLink}
+                to="/materias-primas"
+                onClick={onClick}
+                sx={{ pl: 4 }}
+              >
+                <ListItemText
+                  primary="Pedir Insumos"
+                  primaryTypographyProps={{ fontSize: 13 }}
+                />
+              </ListItemButton>
+              <ListItemButton
+                component={NavLink}
+                to="/lista-materias-primas"
+                onClick={onClick}
+                sx={{ pl: 4 }}
+              >
+                <ListItemText
+                  primary="Lista de Insumos"
+                  primaryTypographyProps={{ fontSize: 13 }}
+                />
+              </ListItemButton>
+              <ListItemButton
+                component={NavLink}
+                to="/historico-materias-primas"
+                onClick={onClick}
+                sx={{ pl: 4 }}
+              >
+                <ListItemText
+                  primary="Histórico Insumos"
+                  primaryTypographyProps={{ fontSize: 13 }}
+                />
+              </ListItemButton>
+            </List>
+          </Collapse>
+          <ListItemButton onClick={() => setOpenPicking(!openPicking)}>
+            <ListItemIcon sx={{ minWidth: 32 }}>
+              <img src={pedido_en_linea} alt="Notas" style={{ width: 24, height: 24 }} />
+            </ListItemIcon>
+            <ListItemText primary="Picking" />
+          </ListItemButton>
+          <Collapse in={openPicking} timeout="auto" unmountOnExit>
+            <List component="div" disablePadding>
+              <ListItemButton
+                component={NavLink}
+                to="/picking"
+                onClick={onClick}
+                sx={{ pl: 4 }}
+              >
+                <ListItemText
+                  primary="Nuevo Pedido"
+                  primaryTypographyProps={{ fontSize: 13 }}
+                />
+              </ListItemButton>
+              <ListItemButton
+                component={NavLink}
+                to="/picking-lista"
+                onClick={onClick}
+                sx={{ pl: 4 }}
+              >
+                <ListItemText
+                  primary="Lista de Pedidos"
+                  primaryTypographyProps={{ fontSize: 13 }}
+                />
+              </ListItemButton>
+              <ListItemButton
+                component={NavLink}
+                to="/picking-historico"
+                onClick={onClick}
+                sx={{ pl: 4 }}
+              >
+                <ListItemText
+                  primary="Histórico Pedidos"
+                  primaryTypographyProps={{ fontSize: 13 }}
+                />
+              </ListItemButton>
+            </List>
+          </Collapse>
+          <ListItemButton
+            component={NavLink}
+            to="/sabados"
+            onClick={onClick}
+            sx={{ pl: 2 }}
+          >
+            <ListItemIcon sx={{ minWidth: 32 }}>
+              <img src={sabado} alt="Sábados" style={{ width: 20, height: 20 }} />
+            </ListItemIcon>
+            <ListItemText
+              primary="Sábados"
+            />
+          </ListItemButton>
+        </>
+      )}
+    </List>
+  );
+};
 
 const Sidebar = ({ mobileOpen, onClose }) => {
   const theme = useTheme();
@@ -88,7 +272,7 @@ const Sidebar = ({ mobileOpen, onClose }) => {
           {/* Footer abajo */}
           <Box sx={{ p: 2 }}>
             <Typography variant="caption" color="text.secondary" align='center' >
-              © {getYear(new Date())} Gerardo Vallejos <br /> <span style={{fontSize: 10}}>Todos los derechos reservados</span>
+              © {getYear(new Date())} Gerardo Vallejos <br /> <span style={{ fontSize: 10 }}>Todos los derechos reservados</span>
             </Typography>
           </Box>
         </Drawer>
@@ -98,3 +282,5 @@ const Sidebar = ({ mobileOpen, onClose }) => {
 };
 
 export default Sidebar;
+
+

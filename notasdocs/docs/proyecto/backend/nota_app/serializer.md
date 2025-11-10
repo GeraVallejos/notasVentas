@@ -3,15 +3,16 @@
 ### ¿Qué es un serializer?
 
 Un serializer se encarga de:
+
 - Convertir modelos (u otros objetos de Python) a JSON para enviarlos como respuesta en una API.
 - Validar y convertir datos JSON (u otros formatos) a objetos de Python, como instancias de modelos.
 
-Es como un "traductor" entre tu base de datos (modelos) y el mundo exterior (clientes que consumen tu API).
+Es como un "traductor" entre la base de datos (modelos) y el mundo exterior (clientes que consumen tu API).
 
 ### Tipos de serializers
 
 - **Serializer (clase base)**:
-Se usa cuando quieres control total. Debes definir todos los campos y métodos a mano.
+Se usa cuando se requiere control total. Es necesario definir todos los campos y métodos a mano.
 
 ```python
 from rest_framework import serializers
@@ -167,9 +168,37 @@ Django REST Framework, por defecto, no sabe que password requiere hashing, por l
 #### Campos personalizados
 
 ```python
-usuario_creador = serializers.CharField(source='id_usuario.username', read_only=True)
-usuario_modificador = serializers.CharField(source='id_usuario_modificacion.username', read_only=True)
+class NotasSerializer(serializers.ModelSerializer):
+    cliente = ClientesSerializer(read_only=True)
+
+    # Campo de escritura: se recibe el RUT del cliente
+    rut_cliente = serializers.CharField(write_only=True)
+
+    # Campo opcional para decidir si crear cliente si no existe
+    guardar_cliente = serializers.BooleanField(write_only=True, required=False, default=False)
+
+    # Campos necesarios para crear cliente desde el formulario
+    razon_social = serializers.CharField(write_only=True, required=False)
+    direccion = serializers.CharField(write_only=True, required=False)
+    comuna = serializers.CharField(write_only=True, required=False)
+    telefono = serializers.CharField(write_only=True, required=False)
+    correo = serializers.CharField(write_only=True, required=False)
+    contacto = serializers.CharField(write_only=True, required=False)
+
+    # Campos para mostrar directamente en el frontend (aplanados del cliente)
+    razon_social_cliente = serializers.CharField(source='cliente.razon_social', read_only=True)
+    direccion_cliente = serializers.CharField(source='cliente.direccion', read_only=True)
+    comuna_cliente = serializers.CharField(source='cliente.comuna', read_only=True)
+    telefono_cliente = serializers.CharField(source='cliente.telefono', read_only=True)
+    correo_cliente = serializers.CharField(source='cliente.correo', read_only=True)
+    contacto_cliente = serializers.CharField(source='cliente.contacto', read_only=True)
+    rut_cliente_cliente = serializers.CharField(source='cliente.rut_cliente', read_only=True)
+
+    usuario_creador = serializers.CharField(source='id_usuario.username', read_only=True)
+    usuario_modificador = serializers.CharField(source='id_usuario_modificacion.username', read_only=True)
 ```
+
+En este serailizer se crearon campos para crear al cliente desde el formulario notas, si este no existe en la bd. Además, se mandan los datos aplanados (sin anidación) para mostrar los datos del cliente en el formulario (se rellenan campos si el cliente se encuentra en la bd). 
 
 - `usuario_creador`: campo de solo lectura que muestra el username del usuario que creó la nota.
 
@@ -201,53 +230,102 @@ class Meta:
 #### Método create(self, validated_data)
 
 ```python
+def create(self, validated_data):
+        request = self.context['request']
+        rut_cliente = validated_data.pop('rut_cliente')
+        guardar_cliente = validated_data.pop('guardar_cliente', False)
+
+        # Extrae los campos necesarios para el cliente desde la nota
+        campos_cliente = ['razon_social', 'direccion', 'comuna', 'telefono', 'correo', 'contacto']
+        cliente_data = {campo: validated_data.get(campo) for campo in campos_cliente}
+
+        try:
+            cliente = Clientes.objects.get(rut_cliente=rut_cliente)
+        except Clientes.DoesNotExist:
+            if guardar_cliente:
+                cliente_data.update({
+                    'rut_cliente': rut_cliente,
+                    'id_usuario': request.user,
+                })
+                cliente = Clientes.objects.create(**cliente_data)
+            else:
+                raise serializers.ValidationError(f"El cliente con RUT {rut_cliente} no existe y no se solicitó crearlo.")
+
+        validated_data['cliente'] = cliente
+        validated_data['id_usuario'] = request.user
+        return super().create(validated_data)
+```
+
+Este método se encarga de crear una nueva instancia del modelo y asociarla a un cliente existente, o crear ese cliente si no existe y se ha solicitado guardarlo. Además, asocia el usuario autenticado que hizo la petición. Este método sobrescribe create para manejar la lógica de asociación de un cliente a una nota. Si el cliente no existe y se ha solicitado su creación (guardar_cliente=True), se crea automáticamente con los datos entregados. Además, se asigna el usuario autenticado como creador tanto del cliente (si es creado) como de la nota.
+
+
+```python
+def create(self, validated_data):
+```
+
+- Sobrescribe el método create del serializer para manejar lógica adicional al guardar la instancia.
+
+```python
+request = self.context['request']
+```
+
+- Obtiene el objeto request desde el contexto del serializer (útil para acceder al usuario autenticado u otros datos del request).
+
+```python
+rut_cliente = validated_data.pop('rut_cliente')
 guardar_cliente = validated_data.pop('guardar_cliente', False)
-
 ```
 
-- Se extrae y elimina guardar_cliente del diccionario de datos validados.
-- Si no está presente, por defecto es False.
+- Extrae el rut_cliente desde los datos validados (y lo remueve del diccionario).
+- También extrae guardar_cliente que indica si se debe crear el cliente si no existe. Por defecto es False.
 
 ```python
-validated_data['id_usuario'] = self.context['request'].user
+campos_cliente = ['razon_social', 'direccion', 'comuna', 'telefono', 'correo', 'contacto']
+cliente_data = {campo: validated_data.get(campo) for campo in campos_cliente}
 ```
 
-- Asigna automáticamente al campo id_usuario el usuario autenticado (request.user).
-- self.context contiene el request porque el serializer fue instanciado con context={'request': request} (normal en views DRF).
+- Crea un diccionario con los datos necesarios para el modelo Clientes, extrayéndolos desde validated_data.
 
-```python
-rut_cliente = validated_data.get('rut_cliente')
-if rut_cliente and guardar_cliente:
-```
-
-- Verifica si se recibió un RUT de cliente y si se debe guardar el cliente.
 
 ```python
 try:
-    Clientes.objects.get(rut_cliente=rut_cliente)
-except Clientes.DoesNotExist:
+    cliente = Clientes.objects.get(rut_cliente=rut_cliente)
 ```
 
-- Intenta buscar un cliente con ese RUT.
-- Si no existe, entra al except para crearlo.
+- Intenta buscar un cliente ya existente con ese RUT.
 
 ```python
-cliente_data = {
-    'razon_social': validated_data.get('razon_social'),
-    'rut_cliente': rut_cliente,
-    ...
-}
-Clientes.objects.create(**cliente_data)
+except Clientes.DoesNotExist:
+    if guardar_cliente:
+        cliente_data.update({
+            'rut_cliente': rut_cliente,
+            'id_usuario': request.user,
+        })
+        cliente = Clientes.objects.create(**cliente_data)
 ```
 
-- Construye un diccionario con los campos necesarios para el modelo Clientes.
-- Crea un nuevo cliente con esos datos.
+- Si el cliente no existe y se solicitó crearlo (guardar_cliente=True), se crea un nuevo cliente con los datos extraídos y el usuario autenticado.
+
+```python
+    else:
+        raise serializers.ValidationError(f"El cliente con RUT {rut_cliente} no existe y no se solicitó crearlo.")
+```
+
+- Si el cliente no existe y no se debe crear, lanza un error de validación.
+
+```python
+validated_data['cliente'] = cliente
+validated_data['id_usuario'] = request.user
+```
+
+- Agrega el objeto cliente ya obtenido o creado al validated_data.
+- También se asocia el usuario autenticado como id_usuario.
 
 ```python
 return super().create(validated_data)
 ```
 
-- Llama a la implementación original de ModelSerializer.create, que crea la nota con los datos restantes.
+- Llama al método original del serializer para continuar con la creación del objeto principal
 
 ### Clientes
 

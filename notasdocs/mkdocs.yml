@@ -1,4 +1,4 @@
-site_name: Notas de Ventas
+site_name: Software de Gestión
 dev_addr: 'localhost:9000'
 nav:
     - Introducción: index.md
@@ -11,6 +11,7 @@ nav:
             - Rest Framework SimpleJWT: dependencias/django/rest_framework_simplejwt.md
             - Django Cors Headers: dependencias/django/corsheaders.md
             - Django Axes: dependencias/django/axes.md
+            - Boto3: dependencias/django/boto3.md
         - React:
             - React Dom: dependencias/react/reactdom.md
             - React Router: dependencias/react/reactRouter.md

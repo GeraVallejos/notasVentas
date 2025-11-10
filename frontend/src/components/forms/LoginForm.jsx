@@ -49,6 +49,7 @@ export const LoginForm = () => {
       form.setValue('username', savedUsername);
       setRememberMe(true);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
@@ -75,12 +76,13 @@ export const LoginForm = () => {
           my: 1,
         }}
       >
-        PEDIDOS AIS
+        JJ DETERGENTES
       </Typography>
 
       <Typography variant="subtitle2" color="#929191" mb={4}>
-        Ingresa para gestionar los pedidos de Comercializadora AIS
+        Ingresa al Software de Gestión de Comercializadora AIS
       </Typography>
+
 
       <FormProvider {...form}>
         <form onSubmit={form.onSubmit} noValidate autoComplete="off">

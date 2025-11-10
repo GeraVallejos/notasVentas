@@ -200,7 +200,7 @@
     {
         "codigo": "05502",
         "tipo": "comuna",
-        "nombre": "Calera",
+        "nombre": "La Calera",
         "lat": -32.7837,
         "lng": -71.1586,
         "url": "",
@@ -1280,7 +1280,7 @@
     {
         "codigo": "05703",
         "tipo": "comuna",
-        "nombre": "Llaillay",
+        "nombre": "Llay-Llay",
         "lat": -32.8899,
         "lng": -70.8942,
         "url": "",
@@ -2774,7 +2774,7 @@
     {
         "codigo": "13101",
         "tipo": "comuna",
-        "nombre": "Santiago Centro",
+        "nombre": "Santiago",
         "lat": -33.4417,
         "lng": -70.6541,
         "url": "",

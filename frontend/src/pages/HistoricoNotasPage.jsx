@@ -1,6 +1,7 @@
 import { format } from "date-fns";
-import NotasDataGrid from "../components/common/NotasDataGrid";
+
 import { useSelector } from 'react-redux';
+import NotasDataGrid from "../components/dataGrids/NotasDataGrid";
 
 const HistoricoNotasPage = () => {
 
@@ -13,7 +14,7 @@ const HistoricoNotasPage = () => {
 
   return (
     <NotasDataGrid
-      estado="Solicitado"
+      estado='SOLICITADO'
       nombre="Historial Notas de Ventas"
       exportNombre={`Notas_de_Ventas_${fecha}`}
       userGroups={userGroups}
