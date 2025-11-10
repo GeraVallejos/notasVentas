@@ -36,7 +36,7 @@ DEBUG = os.getenv('DEBUG', 'False') == 'True'
 
 
 
-ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "").split(",")
+ALLOWED_HOSTS = [h for h in os.getenv("ALLOWED_HOSTS", "").split(",") if h]
 
 
 # Application definition
@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'nota_app.apps.NotaAppConfig',
     'rest_framework',
     'rest_framework_simplejwt',
+    'rest_framework_simplejwt.token_blacklist',
     'corsheaders',
     'django.contrib.admin',
     'django.contrib.auth',
@@ -55,11 +56,13 @@ INSTALLED_APPS = [
     'axes',
     'import_export',
     'storages',
+    'csp',
 ]
 
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
     'nota_app.middleware.JWTTokenFromCookieMiddleware',
+    'csp.middleware.CSPMiddleware',
     'django.middleware.security.SecurityMiddleware', 
     'whitenoise.middleware.WhiteNoiseMiddleware',   
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -178,8 +181,8 @@ REST_FRAMEWORK = {
         'rest_framework.throttling.UserRateThrottle'
     ],
     'DEFAULT_THROTTLE_RATES': {
-        'anon': '50/hour',
-        'user': '1000/hour'
+        'anon': '30/hour',
+        'user': '200/hour'
     }
 }
 
@@ -200,6 +203,8 @@ SIMPLE_JWT = {
     'AUTH_COOKIE_SAMESITE': 'None',   # Protección CSRF
     'AUTH_COOKIE_PATH': '/',         # Ruta donde es válida la cookie
     'AUTH_COOKIE_DOMAIN': None,      # Dominio (None para localhost)
+    'ROTATE_REFRESH_TOKENS': True,
+    'BLACKLIST_AFTER_ROTATION': True,
 }
 
 # Configuracion CORS
@@ -207,6 +212,7 @@ CORS_ALLOWED_ORIGINS = os.getenv('CORS_KEYS', '').split(',') if os.getenv('CORS_
 
 CORS_ALLOW_CREDENTIALS = True
 CORS_EXPOSE_HEADERS = ['Content-Type', 'X-CSRFToken']  # Necesario para CSRF
+
 
 # CSRF
 CSRF_COOKIE_SECURE = IS_PRODUCTION
@@ -219,6 +225,7 @@ CSRF_TRUSTED_ORIGINS = [
     ]
 
 # Cookies de sesión
+SESSION_COOKIE_HTTPONLY = True
 SESSION_COOKIE_SECURE = IS_PRODUCTION
 SESSION_COOKIE_SAMESITE = 'Lax'
 
@@ -242,6 +249,7 @@ AXES_ENABLED = IS_PRODUCTION
 # HTTPS en produccion
 SECURE_SSL_REDIRECT = IS_PRODUCTION
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+SECURE_REFERRER_POLICY = "strict-origin-when-cross-origin"
 
 # Configuracion del logger
 if IS_PRODUCTION:
@@ -288,10 +296,32 @@ AWS_S3_FILE_OVERWRITE = False
 AWS_S3_OBJECT_PARAMETERS = {
     "ContentDisposition": "inline",
     "CacheControl": "max-age=86400",
+    "ACL": "private",
 }
+
+# Configuracion de Permissions Policy
+PERMISSIONS_POLICY = {
+    "geolocation": [],
+    "camera": [],
+    "microphone": [],
+}
+
+# Configuracion de Content Security Policy (CSP)
+CSP_DEFAULT_SRC = ("'self'",)
+CSP_SCRIPT_SRC = ("'self'",)
+CSP_STYLE_SRC = ("'self'", "'unsafe-inline'")
+CSP_IMG_SRC = ("'self'", "data:", AWS_S3_ENDPOINT_URL)
+CSP_CONNECT_SRC = ("'self'", AWS_S3_ENDPOINT_URL)
+CSP_FRAME_ANCESTORS = ("'none'",)
 
 if not IS_PRODUCTION:
     CSRF_COOKIE_SAMESITE = 'Lax'
     SESSION_COOKIE_SAMESITE = 'Lax'
     CSRF_COOKIE_SECURE = False
     SESSION_COOKIE_SECURE = False
+
+if IS_PRODUCTION:
+    SECURE_HSTS_SECONDS = 31536000  # 1 año
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
+
