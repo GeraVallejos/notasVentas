@@ -1,6 +1,6 @@
 # Archivo `asgi.py`
 
-Este archivo configura la interfaz ASGI (Asynchronous Server Gateway Interface) para el proyecto Django llamado `notaVentas`.
+Este archivo configura la interfaz ASGI (Asynchronous Server Gateway Interface) para el proyecto Django
 
 ## Propósito
 
@@ -27,3 +27,5 @@ application = get_asgi_application()
 **os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'pedidosMP.settings')**: Define la variable de entorno que Django necesita para encontrar el archivo settings.py del proyecto. Si ya está definida, no la sobrescribe.
 
 **application = get_asgi_application()**: Crea una instancia de la aplicación ASGI que será utilizada por el servidor ASGI para comunicarse con Django.
+
+---

@@ -1,6 +1,6 @@
 # Archivo `urls.py`
 
-Este archivo define la configuración principal de rutas (`URLs`) del proyecto Django `nota_app`. Se encarga de conectar las rutas entrantes con las vistas correspondientes.
+Este archivo define la configuración principal de rutas (`URLs`) del proyecto. Se encarga de conectar las rutas entrantes con las vistas correspondientes.
 
 ## Contenido del archivo
 
@@ -17,6 +17,9 @@ urlpatterns = [
     # Version de API
     path('api/v1/', include('nota_app.urls')),
 ]
+
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 ```
 
 ### Explicación
@@ -25,6 +28,7 @@ urlpatterns = [
 
 - **from django.urls import path, include**: Importa funciones para definir rutas (path) y para incluir configuraciones de URL de otras aplicaciones (include).
 
+- **urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)**: En desarrollo se agrega esta ruta para servir archivos media, en producción esta linea no corre (DEGUG = False)
 
 #### Lista de urlpatterns
 
@@ -40,7 +44,7 @@ urlpatterns = [
 - Prefijar las APIs con /api/v1/ es útil para versionar la API desde el inicio.
 - Las URLs de autenticación están separadas (auth_urls.py).
 - Las URLs principales de la app están en su propio archivo (nota_app/urls.py).
-- api/v1/token/ claramente indica su propósito.
+- api/v1/token/ maneja tokens para autenticación
 - Jerarquía lógica (api → v1 → recurso).
 
 ## include()
@@ -51,7 +55,7 @@ La función include() de Django (importada desde django.urls) permite "incluir" 
 
     - Divide las rutas del proyecto en archivos separados (por app) para mantener el código organizado.
 
-    - Ejemplo: Las URLs de la app pedidosApp están definidas en su propio pedidosApp/urls.py, no en el archivo principal.
+    - Ejemplo: Las URLs de la app están definidas en su propio nota_app/urls.py, no en el archivo principal.
 
 2. Anidar rutas bajo un prefijo común:
 
@@ -59,19 +63,19 @@ La función include() de Django (importada desde django.urls) permite "incluir" 
 
 3. Estructura:
 
-    - Cuando un usuario visita una URL que comienza con api/v1/, Django delega el procesamiento a las rutas definidas en pedidosApp/urls.py.
+    - Cuando un usuario visita una URL que comienza con api/v1/, Django delega el procesamiento a las rutas definidas en nota_appp/urls.py.
 
-    - Ejemplo: Si pedidosApp/urls.py tiene una ruta path('nota/', ...), la URL final será api/v1/nota/
+    - Ejemplo: Si nota_app/urls.py tiene una ruta path('nota/', ...), la URL final será api/v1/nota/
 
 4. Ventajas:
 
     - Escalabilidad: Puedes añadir más apps sin saturar el archivo principal.
-    - Reusabilidad: La app pedidosApp podría usarse en otro proyecto sin modificar sus URLs internas.
+    - Reusabilidad: La app nota_app podría usarse en otro proyecto sin modificar sus URLs internas.
     - Mantención: sin include() se tendrían que definir todas las urls en el archivo principal, lo que generaría un archivo muy grande y podría crear acoplamiento entre el proyecto y la app
 
 #### Flujo de una petición con include()
 
-1. El usuario visita: https://tudominio.com/api/v1/nota/
+1. El usuario visita: https://midominio.com/api/v1/nota/
 
 2. Django:
 
@@ -80,3 +84,5 @@ La función include() de Django (importada desde django.urls) permite "incluir" 
     - Elimina la parte coincidente (api/v1/) y pasa el resto (nota/) a nota_app/urls.py.
 
 3. nota_app/urls.py resuelve la ruta restante y llama a la vista correspondiente.
+
+---

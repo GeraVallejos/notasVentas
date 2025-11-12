@@ -25,4 +25,6 @@ pip install pymysql
 ```
 Y en settings.py de Django, se puede seguir usando 'ENGINE': 'django.db.backends.mysql' sin cambiar nada más, gracias a esta línea en __init__.py.
 
+---
+
 

@@ -6,7 +6,7 @@ Este documento es una guía para el proceso de instalación de un proyecto Djang
 
 Antes de comenzar, hay que tener los siguientes requisitos instalados en el sistema:
 
-- **Python 3.8+**
+- **Python 3.10+**
 - **Pip** 
 - **Virtualenv** 
 
@@ -74,3 +74,5 @@ INSTALLED_APPS = [
 
 ]
 ```
+
+---

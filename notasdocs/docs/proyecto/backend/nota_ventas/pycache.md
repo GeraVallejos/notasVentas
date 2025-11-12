@@ -26,3 +26,5 @@ nombre_del_modulo.cpython-XX.pyc
 ### ¿Por qué aparece en Django?
 
 Django usa muchos módulos Python internamente (modelos, vistas, configuraciones, etc.), por lo que __pycache__ se genera automáticamente al ejecutar comandos como runserver, migrate, o al importar cualquier archivo .py.
+
+---

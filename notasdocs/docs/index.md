@@ -1,4 +1,4 @@
-Este proyecto es una aplicación web construida con Django, React y MySQL, diseñada para gestionar pedidos de notas de venta previamente generadas en un sistema ERP externo. Su propósito es proporcionar una interfaz amigable y eficiente para realizar solicitudes de pedidos, visualizar estadísticas relevantes mediante un dashboard y consultar registros históricos y pendientes de pedido.
+Este proyecto es una aplicación web construida con Django, React y MySQL, diseñada para gestionar pedidos de notas de venta previamente generadas en un sistema ERP externo. Además, es posible hacer pedidos de picking para el correcto despacho y retiro de productos, hacer pedidos de materias primas e insumos a los encargados de esa área, guardar facturas para su posterior visualizacion o descarga y asignar los dias sábados trabajados al personal de la empresa. Su propósito es proporcionar una interfaz amigable y eficiente para realizar solicitudes de pedidos, visualizar estadísticas relevantes mediante un dashboard y consultar registros históricos y pendientes.
 
 ### Tecnologías utilizadas
 
@@ -18,9 +18,12 @@ Este proyecto es una aplicación web construida con Django, React y MySQL, dise�
 
 ### Funcionalidades principales
 
-- Formulario de pedidos: permite solicitar nuevos pedidos basados en notas de venta existentes.
-- Dashboard informativo: muestra estadísticas clave para la toma de decisiones.
-- Gestión de pedidos: visualización de pedidos históricos y no solicitados a través de un DataGrid de MUI, con funciones de búsqueda, filtrado y ordenamiento.
+- Gestión de pedidos: Formulario, visualización, actualización e históricos
+- Gestión de Materias Primas: Formulario, visualización, actualización e históricos
+- Gestión de Picking: Formulario, visualización, actualización e históricos
+- Guardado de facturas: Facturas pendientes de pago e históricas, visualización y descarga
+- Gestión días sábados: Asignación mensual de días a cada trabajador e históricos
+
 
 Este sistema ofrece una solución eficiente para complementar un ERP ya existente, mejorando el flujo de trabajo en la gestión de pedidos y proporcionando herramientas visuales para su seguimiento.
 

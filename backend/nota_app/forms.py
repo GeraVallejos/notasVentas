@@ -7,8 +7,8 @@ from django.core.exceptions import ValidationError
 
 class UsuarioAdminForm(forms.ModelForm):
     password = forms.CharField(widget=forms.PasswordInput(attrs={
-            'autocomplete': 'new-password',  # Esto ayuda a prevenir el autocompletado
-            'placeholder': 'Introduce la contraseña'  # Mejora la UX
+            'autocomplete': 'new-password',  
+            'placeholder': 'Introduce la contraseña'  
         }), required=False, label='Contraseña')
 
     class Meta:
@@ -24,7 +24,7 @@ class UsuarioAdminForm(forms.ModelForm):
                 validate_password(password, user)
             except ValidationError as e:
                 self.add_error('password', e)
-                return user  # evita guardar con password inválida
+                return user  
 
             user.set_password(password)
 

@@ -1,6 +1,6 @@
 # Archivo `wsgi.py`
 
-Este archivo configura la interfaz WSGI (Web Server Gateway Interface) para el proyecto Django `notaVentas`.
+Este archivo configura la interfaz WSGI (Web Server Gateway Interface) para el proyecto
 
 ## Propósito
 
@@ -10,12 +10,15 @@ Permite que Django se comunique con servidores WSGI (como Gunicorn, uWSGI o el s
 
 ```python
 import os
-
+from whitenoise import WhiteNoise
 from django.core.wsgi import get_wsgi_application
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'nota_ventas.settings')
 
 application = get_wsgi_application()
+
+STATIC_ROOT = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'staticfiles')
+application = WhiteNoise(application, root=STATIC_ROOT)
 ```
 
 ### Explicación línea por línea
@@ -39,3 +42,6 @@ Normalmente no es necesario modificarlo. Se podría hacer si:
 
 - Usas un sistema de configuración avanzada con múltiples entornos (settings.dev, settings.prod, etc.).
 - Necesitas envolver la aplicación con middlewares personalizados en el entorno WSGI.
+- En este caso se uso Whitenoise, que no es parte del código original
+
+---
