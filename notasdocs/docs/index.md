@@ -27,7 +27,7 @@ Este proyecto es una aplicación web construida con Django, React y MySQL, dise�
 
 Este sistema ofrece una solución eficiente para complementar un ERP ya existente, mejorando el flujo de trabajo en la gestión de pedidos y proporcionando herramientas visuales para su seguimiento.
 
-### Diagrama de Flujo Django
+### Diagrama de Flujo Software
 
 ![Middleware](images/DjangoDiagrama.jpg)
 

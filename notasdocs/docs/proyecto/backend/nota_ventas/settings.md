@@ -22,7 +22,7 @@ python-dotenv es una librería que carga variables de entorno desde un archivo .
 timedelta es una clase de Python que representa una duración (diferencia entre dos fechas o tiempos). En Django, se usa frecuentemente para configuraciones relacionadas con tiempos, como:
 
 - Sesiones de usuario: SESSION_COOKIE_AGE = timedelta(days=30).
-- Tokens JWT: Si usas librerías como djangorestframework-simplejwt, se configura la expiración del token:
+- Tokens JWT: Si se usa librerías como djangorestframework-simplejwt, se configura la expiración del token:
 
 #### from pathlib import Path
 
@@ -41,9 +41,17 @@ La línea load_dotenv() en el archivo settings.py de un proyecto Django tiene un
 
 #### ¿Qué hace exactamente?
 
-- Busca un archivo .env en el directorio raíz del proyecto (o en la ruta que le indiques).
+- Busca un archivo .env en el directorio raíz del proyecto (o en la ruta que se le indique).
 - Lee las variables definidas en ese archivo (ej: SECRET_KEY=abc123).
 - Las carga en el entorno de Python, haciéndolas accesibles via os.getenv() o os.environ.
+
+### <font color=#ad39dc> IS_PRODUCTION</font>
+
+Con esta variable de entorno se diferencia si el settings.py esta en produccion o desarrollo, siendo False su valor por defecto si es que no encuentra la variable en .env, luego se compara este valor con True, por lo que queda un valor booleano de True o False.
+
+```python
+IS_PRODUCTION = os.getenv('IS_PRODUCTION', 'False') == 'True'
+```
 
 ### <font color=#ad39dc> BASE_DIR</font>
 
@@ -97,13 +105,6 @@ Si aplicamos .parent nuevamente, subimos otro nivel:
 - Multiplataforma: Path funciona correctamente en Windows, Linux y macOS (usa / o \ automáticamente).
 - Legibilidad: Es más claro que usar os.path.join(os.path.dirname(...)).
 
-### <font color=#ad39dc>IS_PRODUCTION</font>
-
-Es una variable que permite el cambio entre desarrollo y producción. Es necesaria para las variables booleanas que requeiren ser cambiadas cuando pasan de un estado a otro en producción
-
-```python
-IS_PRODUCTION = os.getenv('IS_PRODUCTION', 'False') == 'True'
-```
 
 ### <font color=#ad39dc>SECRET_KEY</font>
 
@@ -138,7 +139,7 @@ messages.success(request, "Éxito!")  # El mensaje se firma
 - Entorno de producción: Usar diferentes keys para desarrollo y producción
 - Rotación: Si se compromete, generar uno nuevo (pero afectará sesiones existentes)
 - Almacenamiento seguro: Usar variables de entorno en producción:  
-**settings.py (forma recomendada)**  
+ 
 
 ```python
 import os  
@@ -195,7 +196,7 @@ Es una lista de strings que representa los nombres de host/dominios que el sitio
 - Requerimiento obligatorio: Cuando DEBUG=False, Django requiere que esta lista no esté vacía.
 
 ```python
-ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "").split(",")
+ALLOWED_HOSTS = [h for h in os.getenv("ALLOWED_HOSTS", "").split(",") if h]
 ```
 
 #### Buenas prácticas
@@ -226,6 +227,59 @@ Es una lista/tupla que contiene los nombres de todas las aplicaciones Django que
 <font color='blue'>django.contrib.messages:</font> Sistema de mensajes  
 <font color='blue'>django.contrib.staticfiles:</font> Manejo de archivos estáticos  
 
+### Aplicaciones externas
+
+<font color='blue'>rest_framework:</font>
+
+Framework para construir APIs REST en Django (serializadores, vistas, routers).
+
+<font color='blue'>rest_framework_simplejwt:</font>
+
+Implementación de autenticación JWT (tokens) para DRF. Maneja login, refresh tokens, expiraciones, etc.
+
+<font color='blue'>rest_framework_simplejwt.token_blacklist:</font>
+
+Permite “invalidar” tokens JWT (por ejemplo, al cerrar sesión) mediante un sistema de blacklist almacenado en DB.
+
+<font color='blue'>corsheaders:</font>
+
+Middleware para permitir CORS: que React (u otro front) pueda hacer peticiones a la API Django desde otro dominio o puerto.
+
+<font color='blue'>axes:</font>
+
+Sistema de seguridad para bloquear usuarios después de varios intentos fallidos de login.
+Previene ataques de fuerza bruta.
+
+<font color='blue'>import_export:</font>
+
+Añade herramientas al admin para importar y exportar datos (CSV, XLS, JSON, etc.) directamente desde el panel de administración.
+
+<font color='blue'>storages:</font>
+
+Paquete de Django que permite manejar almacenamiento externo, principalmente para:
+
+- Amazon S3
+- Google Cloud Storage
+- Azure
+- Cloudflare R2
+
+Se usa para subir archivos o estáticos a la nube.
+
+<font color='blue'>csp:</font>
+
+Implementa Content Security Policy, un sistema de seguridad que ayuda a prevenir ataques XSS, inyección de scripts y contenido malicioso.
+
+Permite controlar:
+
+- Qué scripts se pueden ejecutar
+- De dónde pueden venir imágenes
+- Si se permite inline JS
+- Etc.
+
+<font color='blue'>nota_app.apps.NotaAppConfig:</font>
+
+La aplicación interna donde estan los modelos, views y lógica del proyecto.
+
 ##### Buenas prácticas
 
 1. Orden recomendado:
@@ -255,22 +309,88 @@ Cada middleware se ejecuta en el orden definido en settings.py y puede realizar 
 #### Estructura típica en settings.py
 ```python
 MIDDLEWARE = [
-    
-    'django.middleware.security.SecurityMiddleware', # Seguridad básica (HTTPS, headers)
-    'django.contrib.sessions.middleware.SessionMiddleware', # Manejo de sesiones
-    'django.middleware.common.CommonMiddleware', # Procesamiento de URLs
-    'django.middleware.csrf.CsrfViewMiddleware', # Protección CSRF
-    'django.contrib.auth.middleware.AuthenticationMiddleware', # Autenticación de usuarios
-    'django.contrib.messages.middleware.MessageMiddleware', # Mensajes flash
-    'django.middleware.clickjacking.XFrameOptionsMiddleware', # Protección contra clickjacking
-    
-    # Middleware de terceros (ej: CORS)  
     'corsheaders.middleware.CorsMiddleware',
-    
-    #Middleware personalizado (si es que se crea alguno)  
-    'miapp.middleware.CustomMiddleware',
+    'nota_app.middleware.JWTTokenFromCookieMiddleware',
+    'csp.middleware.CSPMiddleware',
+    'django.middleware.security.SecurityMiddleware', 
+    'whitenoise.middleware.WhiteNoiseMiddleware',   
+    'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.common.CommonMiddleware',
+    'django.middleware.csrf.CsrfViewMiddleware',
+    'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'axes.middleware.AxesMiddleware',
+    'django.contrib.messages.middleware.MessageMiddleware',
+    'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 ```
+
+### Descripcion de los middlewares instalados
+
+<font color='blue'>corsheaders.middleware.CorsMiddleware</font>
+
+Permite solicitudes desde otros dominios o puertos (CORS).
+Es esencial para que React u otro frontend pueda llamar a la API.
+
+<font color='blue'>nota_app.middleware.JWTTokenFromCookieMiddleware</font>
+
+Middleware personalizado.
+Toma el JWT almacenado en cookies HttpOnly, lo extrae y lo inserta en el header Authorization para que DRF pueda autenticar al usuario fácilmente.
+
+<font color='blue'>csp.middleware.CSPMiddleware</font>
+
+Habilita Content Security Policy.
+Evita XSS, inyección de scripts y cargas de recursos no permitidos.
+
+<font color='blue'>django.middleware.security.SecurityMiddleware</font>
+
+Aplica capas importantes de seguridad:
+
+- Forzar HTTPS
+- HSTS
+- Seguridad de headers (X-Content-Type-Options, etc.)
+
+<font color='blue'>whitenoise.middleware.WhiteNoiseMiddleware</font>
+
+Sirve archivos estáticos directamente desde Django en producción.
+Ideal para Railway/Render/Heroku.
+Incluye compresión, cacheo y versionado.
+
+<font color='blue'>django.contrib.sessions.middleware.SessionMiddleware</font>
+
+Manejo de sesiones basadas en cookies.
+Guarda datos por usuario (carrito, preferencias, estado de login si no se usa JWT).
+
+<font color='blue'>django.middleware.common.CommonMiddleware</font>
+
+Funciones de conveniencia:
+- Normalización de rutas
+- Manejo de redirecciones sin slash
+- Headers comunes HTTP
+
+<font color='blue'>django.middleware.csrf.CsrfViewMiddleware</font>
+
+Protección contra ataques CSRF.
+Valida tokens en formularios y requests.
+
+<font color='blue'>django.contrib.auth.middleware.AuthenticationMiddleware</font>
+
+Carga automáticamente el usuario autenticado en request.user.
+Requiere que SessionMiddleware esté antes.
+
+<font color='blue'>axes.middleware.AxesMiddleware</font>
+
+Monitorea intentos fallidos de login.
+Bloquea usuarios o IPs si intentan fuerza bruta.
+
+<font color='blue'>django.contrib.messages.middleware.MessageMiddleware</font>
+
+Manejo de mensajes temporales (“flash messages”).
+Usado principalmente en vistas del admin o formularios tradicionales.
+
+<font color='blue'>django.middleware.clickjacking.XFrameOptionsMiddleware</font>
+
+Previene ataques clickjacking.
+Impide que el sitio se cargue dentro de un iframe no autorizado.
 
 #### Buenas prácticas
 - El orden importa: Algunos middleware dependen de otros (ej: SessionMiddleware debe ir antes que AuthenticationMiddleware)
@@ -281,7 +401,7 @@ MIDDLEWARE = [
 
 - Define el archivo principal de URLs: Le dice a Django dónde encontrar las rutas (URL patterns) que debe usar para mapear las URLs a las vistas correspondientes.
 - Punto de entrada para el enrutamiento: Cuando llega una solicitud HTTP, Django consulta este archivo para determinar qué vista debe ejecutarse.
-- Por defecto, Django lo configura automáticamente al crear un proyecto, pero puedes modificarlo si necesitas un esquema de URLs más complejo.
+- Por defecto, Django lo configura automáticamente al crear un proyecto, pero es posible modificarlo si se necesita un esquema de URLs más complejo.
 
 ### <font color=#ad39dc>TEMPLATES</font>
 
@@ -381,7 +501,7 @@ class Pedido(models.Model):
 ```python
 AUTH_USER_MODEL = 'auth.User'  # Modelo User estándar de Django
 ```
-*Este proyecto tiene un modelo de usuario personalizado*
+*Este proyecto tiene un modelo de usuario personalizado, por lo que no se usa User ni settings.AUTH_USER_MODEL*
 
 ```python
 AUTH_USER_MODEL = os.getenv('USERDB')
@@ -538,8 +658,8 @@ REST_FRAMEWORK = {
         'rest_framework.throttling.UserRateThrottle'
     ],
     'DEFAULT_THROTTLE_RATES': {
-        'anon': '200/hour',
-        'user': '2000/hour'
+        'anon': '30/hour',
+        'user': '200/hour'
     }
 }
 ```
@@ -607,18 +727,18 @@ Configuración:
 
 ```python
 'DEFAULT_THROTTLE_CLASSES': [
-    'rest_framework.throttling.AnonRateThrottle',
-    'rest_framework.throttling.UserRateThrottle'
-],
+        'rest_framework.throttling.AnonRateThrottle',
+        'rest_framework.throttling.UserRateThrottle'
+    ],
 'DEFAULT_THROTTLE_RATES': {
-    'anon': '200/hour',
-    'user': '2000/hour'
+        'anon': '30/hour',
+        'user': '200/hour'
 }
 ```
 ##### Explicación:
 
-- AnonRateThrottle: Limita peticiones de usuarios anónimos (ej: 200/hora).
-- UserRateThrottle: Limita peticiones de usuarios autenticados (ej: 2000/hora).
+- AnonRateThrottle: Limita peticiones de usuarios anónimos (ej: 30/hora).
+- UserRateThrottle: Limita peticiones de usuarios autenticados (ej: 200/hora).
 - Formato de tasas:
     - '100/day': 100 peticiones por día.
     - '10/minute': 10 peticiones por minuto.
@@ -641,19 +761,19 @@ Esta configuración controla el comportamiento de los JSON Web Tokens (JWT) en l
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
-    'ROTATE_REFRESH_TOKENS': False,
-    'BLACKLIST_AFTER_ROTATION': True,
     'ALGORITHM': 'HS256',
     'SIGNING_KEY': SECRET_KEY,
     'AUTH_HEADER_TYPES': ('Bearer',),
     'AUTH_HEADER_NAME': 'HTTP_AUTHORIZATION',
     'JTI_CLAIM': 'jti',
-    'AUTH_COOKIE': 'refresh_token',  # Nombre de la cookie
-    'AUTH_COOKIE_HTTP_ONLY': True,   # Solo accesible por HTTP
-    'AUTH_COOKIE_SECURE': True,      # Solo en HTTPS (True en producción)
-    'AUTH_COOKIE_SAMESITE': 'Lax',   # Protección CSRF
-    'AUTH_COOKIE_PATH': '/',         # Ruta donde es válida la cookie
-    'AUTH_COOKIE_DOMAIN': None,      # Dominio (None para localhost)
+    'AUTH_COOKIE': 'refresh_token',   # Nombre de la cookie
+    'AUTH_COOKIE_HTTP_ONLY': True,    # Solo accesible por HTTP
+    'AUTH_COOKIE_SECURE': True,       # Solo en HTTPS (True en producción)
+    'AUTH_COOKIE_SAMESITE': 'None',   # Protección CSRF
+    'AUTH_COOKIE_PATH': '/',          # Ruta donde es válida la cookie
+    'AUTH_COOKIE_DOMAIN': None,       # Dominio (None para localhost)
+    'ROTATE_REFRESH_TOKENS': True,    # Genera un nuevo refres token cada vez que se usa el actual
+    'BLACKLIST_AFTER_ROTATION': True, # Agrega a la lista negra el token que se uso
 }
 ```
 

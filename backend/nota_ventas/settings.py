@@ -190,21 +190,19 @@ REST_FRAMEWORK = {
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
-    'ROTATE_REFRESH_TOKENS': False,
-    'BLACKLIST_AFTER_ROTATION': False,
     'ALGORITHM': 'HS256',
     'SIGNING_KEY': SECRET_KEY,
     'AUTH_HEADER_TYPES': ('Bearer',),
     'AUTH_HEADER_NAME': 'HTTP_AUTHORIZATION',
     'JTI_CLAIM': 'jti',
-    'AUTH_COOKIE': 'access_token',  # Nombre de la cookie
-    'AUTH_COOKIE_HTTP_ONLY': True,   # Solo accesible por HTTP
-    'AUTH_COOKIE_SECURE': True,      # Solo en HTTPS (True en producción)
-    'AUTH_COOKIE_SAMESITE': 'None',   # Protección CSRF
-    'AUTH_COOKIE_PATH': '/',         # Ruta donde es válida la cookie
-    'AUTH_COOKIE_DOMAIN': None,      # Dominio (None para localhost)
-    'ROTATE_REFRESH_TOKENS': True,
-    'BLACKLIST_AFTER_ROTATION': True,
+    'AUTH_COOKIE': 'access_token',    # Nombre de la cookie
+    'AUTH_COOKIE_HTTP_ONLY': True,    # Solo accesible por HTTP
+    'AUTH_COOKIE_SECURE': True,       # Solo en HTTPS (True en producción)
+    'AUTH_COOKIE_SAMESITE': 'None',   # Protección CSRF, dominios diferentes
+    'AUTH_COOKIE_PATH': '/',          # Ruta donde es válida la cookie
+    'AUTH_COOKIE_DOMAIN': None,       # Dominio (None para localhost)
+    'ROTATE_REFRESH_TOKENS': True,    # Genera un nuevo refres token cada vez que se usa el actual
+    'BLACKLIST_AFTER_ROTATION': True, # Agrega a la lista negra el token que se uso
 }
 
 # Configuracion CORS
