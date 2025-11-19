@@ -791,19 +791,6 @@ Establece cuánto tiempo es válido el token de acceso (access token). Después 
 - Descripción:
 Define la validez del token de refresco (refresh token). Este token se usa para obtener un nuevo access token sin requerir credenciales.
 
-#### ROTATE_REFRESH_TOKENS
-
-- Tipo: bool
-- Valor por defecto: False
-- Descripción:
-Si es True, cada vez que se usa un refresh token para obtener un nuevo access token, se genera un nuevo refresh token (y el anterior se invalida).
-
-#### BLACKLIST_AFTER_ROTATION
-
-- Tipo: bool
-- Valor por defecto: False
-- Descripción:
-Si es True, los refresh tokens anteriores se añaden a una lista negra (blacklist) después de rotarlos. Requiere la configuración de rest_framework_simplejwt.token_blacklist en INSTALLED_APPS.
 
 #### ALGORITHM
 
@@ -880,6 +867,20 @@ Descripción:
 - PATH: Ruta donde la cookie es válida (ej: '/' para todo el sitio).
 - DOMAIN: Dominio donde la cookie es válida (ej: '.midominio.com', None para localhost en desarrollo).
 
+#### ROTATE_REFRESH_TOKENS
+
+- Tipo: bool
+- Valor por defecto: False
+- Descripción:
+Si es True, cada vez que se usa un refresh token para obtener un nuevo access token, se genera un nuevo refresh token (y el anterior se invalida).
+
+#### BLACKLIST_AFTER_ROTATION
+
+- Tipo: bool
+- Valor por defecto: False
+- Descripción:
+Si es True, los refresh tokens anteriores se añaden a una lista negra (blacklist) después de rotarlos. Requiere la configuración de rest_framework_simplejwt.token_blacklist en INSTALLED_APPS.
+
 ### <font color=#ad39dc>CORS_ALLOWED_ORIGINS</font>
 
 Es una configuración importante cuando la API Django necesita ser accedida desde frontends que se ejecutan en diferentes dominios (Cross-Origin Resource Sharing). En este caso por REACT
@@ -916,11 +917,6 @@ CORS (Cross-Origin Resource Sharing) es un mecanismo de seguridad del navegador 
     ]
 ```
 
-*En este proyecto*
-
-```python
-CORS_ALLOWED_ORIGINS = os.getenv('CORS_KEYS', '').split(',') if os.getenv('CORS_KEYS') else []
-```
 
 ## <font color=#ad39dc>CONFIGURACIONES DE SEGURIDAD</font>
 
@@ -938,11 +934,12 @@ CSRF_COOKIE_SAMESITE = 'None' # backend y frontend en dominios diferentes
 CSRF_USE_SESSIONS = False
 CSRF_TRUSTED_ORIGINS = [
     origin for origin in os.getenv('CORS_KEYS', '').split(',') if origin.startswith('https://')
+    or origin.startswith('http://')
     ]
 
 # Cookies de sesión
 SESSION_COOKIE_SECURE = IS_PRODUCTION
-SESSION_COOKIE_SAMESITE = 'Lax'
+SESSION_COOKIE_SAMESITE = 'None'
 
 # Headers de seguridad
 SECURE_CONTENT_TYPE_NOSNIFF = True
@@ -964,6 +961,19 @@ AXES_ENABLED = IS_PRODUCTION
 # HTTPS en produccion
 SECURE_SSL_REDIRECT = IS_PRODUCTION
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+SECURE_REFERRER_POLICY = "strict-origin-when-cross-origin"
+
+# Protección adicional contra ataques de aislamiento entre ventanas
+SECURE_CROSS_ORIGIN_OPENER_POLICY = "same-origin"
+
+# Evita que contenido externo se ejecute sin permisos explícitos
+SECURE_CROSS_ORIGIN_EMBEDDER_POLICY = "require-corp"
+
+# Restringe qué orígenes pueden cargar recursos desde tu servidor
+SECURE_CROSS_ORIGIN_RESOURCE_POLICY = "same-origin"
+
+# Limita el tamaño máximo de subida
+DATA_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024  # 10 MB
 ```
 
 ### <font color=#ad39dc>CORS_ALLOW_CREDENTIALS</font>
@@ -971,13 +981,13 @@ SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 - Propósito: Permite que las solicitudes entre dominios (cross-origin) incluyan credenciales como cookies o headers de autenticación.
 - Cuándo usarlo:
     - Cuando el frontend (ej: React/Vue) necesita enviar cookies/tokens JWT a un backend Django en otro dominio.
-    - Requiere que el frontend configure withCredentials: true en peticiones AJAX.
-- Advertencia: No habilitAR esto si LA API es pública sin autenticación
+    - Requiere que el frontend configure withCredentials: true en peticiones asinconas.
+- Advertencia: No habilitar esto si la API es pública sin autenticación
 
 ### <font color=#ad39dc>CORS_EXPOSE_HEADERS</font>
 
 - Propósito: Define qué headers personalizados pueden ser accedidos por el frontend desde la respuesta del servidor.
-- Ejemplo: X-CSRFToken es necesario para enviar el token CSRF en formularios o peticiones AJAX.
+- Ejemplo: X-CSRFToken es necesario para enviar el token CSRF en formularios o peticiones asincronas.
 
 ### <font color=#ad39dc>CSRF_COOKIE_SECURE</font>
 
@@ -1007,6 +1017,10 @@ SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 - Propósito: Lista de dominios permitidos para enviar solicitudes CSRF seguras.
 
+### <font color=#ad39dc>SESSION_COOKIE_HTTPONLY</font>
+
+- Propósito: Hace que la cookie de sesión solo sea accesible por el servidor y no pueda ser leída o modificada por JavaScript en el navegador.
+
 ### <font color=#ad39dc>SESSION_COOKIE_SECURE</font>
 
 - Propósito: Similar a CSRF_COOKIE_SECURE, pero para la cookie de sesión.
@@ -1030,23 +1044,6 @@ SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 - 'DENY': Bloqueo total.
 - 'SAMEORIGIN': Permite iframes solo desde el mismo dominio.
 
-### <font color=#ad39dc>SECURE_SSL_REDIRECT</font>
-
-Esta opción fuerza que todas las solicitudes HTTP sean redirigidas a HTTPS. Solo se activa si IS_PRODUCTION es True.
-
-- Asegura que los usuarios usen una conexión segura cifrada.
-- Evita exponer cookies, tokens o datos en texto plano.
-- Mejora la puntuación en herramientas como Lighthouse o SSL Labs.
-
-### <font color=#ad39dc>SECURE_PROXY_SSL_HEADER</font>
-
-Cuando la app está detrás de un proxy inverso (como Railway, Heroku, Nginx, Cloudflare, etc.), Django no puede saber directamente si la conexión original del usuario fue segura (HTTPS), porque las solicitudes que recibe internamente pueden venir como HTTP.
-
-Este header le dice a Django:
-
-- “Confía en el valor del encabezado HTTP_X_FORWARDED_PROTO enviado por el proxy para determinar si la conexión fue HTTPS.”
-
-Railway envía este encabezado automáticamente.
 
 ### <font color=#ad39dc>AUTHENTICATION_BACKENDS</font>
 
@@ -1131,7 +1128,7 @@ AUTHENTICATION_BACKENDS = [
 - Comportamiento:
     - True: El contador vuelve a cero tras un login correcto.
     - False: Mantiene el historial de intentos fallidos.
-- Uso típico: Habilitado (True) para no penalizar a usuarios legítimos que eventualmente aciertan su contraseña.
+- Uso típico: Habilitado (True) para no penalizar a usuarios legítimos que eventualmente no aciertan su contraseña.
 
 
 ### <font color=#ad39dc>AXES_ENABLED</font>
@@ -1142,6 +1139,52 @@ AUTHENTICATION_BACKENDS = [
     - Cuando se usan otros sistemas de protección.
     - Para diagnóstico de problemas de autenticación.
 - Precaución: Nunca desactivar en producción sin tener alternativa de protección.
+
+### <font color=#ad39dc>SECURE_SSL_REDIRECT</font>
+
+Esta opción fuerza que todas las solicitudes HTTP sean redirigidas a HTTPS. Solo se activa si IS_PRODUCTION es True.
+
+- Asegura que los usuarios usen una conexión segura cifrada.
+- Evita exponer cookies, tokens o datos en texto plano.
+- Mejora la puntuación en herramientas como Lighthouse o SSL Labs.
+
+### <font color=#ad39dc>SECURE_PROXY_SSL_HEADER</font>
+
+Cuando la app está detrás de un proxy inverso (como Railway, Heroku, Nginx, Cloudflare, etc.), Django no puede saber directamente si la conexión original del usuario fue segura (HTTPS), porque las solicitudes que recibe internamente pueden venir como HTTP.
+
+Este header le dice a Django:
+
+- “Confía en el valor del encabezado HTTP_X_FORWARDED_PROTO enviado por el proxy para determinar si la conexión fue HTTPS.”
+
+Railway envía este encabezado automáticamente.
+
+### <font color=#ad39dc>SECURE_REFERRER_POLICY</font>
+
+Controla como envia la cabezera HTTP Referer cuando un usuario navega de el sitio propio a otro dominio. Cada vez que se hace click en un enlace, el navegador envia:
+
+Referer: https://tusitio.com/pagina/secreta
+
+Esto le dice al servidor de destino desde donde viene el click. Al tenerlo en strict-origin-when-cross-origin, si el destino esta dentro del mismo dominio, se envia la URL completa. Al ser de un dominio diferente se envia el origen (scheme + host + puerto). De esta forma se evita fugas de información, se tiene mayor privacidad y no rompe enlaces internos.
+
+### <font color=#ad39dc>SECURE_CROSS_ORIGIN_OPENER_POLICY</font>
+
+Evita que páginas abiertas desde el sitio (o que lo abren) compartan el mismo contexto de navegación.
+Protege contra ataques como tabnabbing y aisla mejor la ejecución entre ventanas o pestañas.
+
+### <font color=#ad39dc>SECURE_CROSS_ORIGIN_EMBEDDER_POLICY</font>
+
+Impide que el sitio cargue recursos de otros orígenes si no declaran permisos explícitos (CORP/CORS).
+Aumenta la seguridad en APIs modernas como SharedArrayBuffer y previene ejecución de contenido no confiable.
+
+### <font color=#ad39dc>SECURE_CROSS_ORIGIN_RESOURCE_POLICY</font>
+
+Restringe quién puede cargar recursos que provienen del servidor.
+Con same-origin, solo el propio dominio puede usar las imágenes, scripts o recursos, evitando hotlinking y consumo indebido.
+
+### <font color=#ad39dc>DATA_UPLOAD_MAX_MEMORY_SIZE</font>
+
+Establece un límite al tamaño máximo de datos que el backend aceptará en memoria durante una subida.
+Previene abusos de uploads enormes que pueden causar consumo excesivo de RAM y ataques DoS simples.
 
 ### <font color=#ad39dc>LOGGING</font>
 
@@ -1204,6 +1247,208 @@ Traceback (most recent call last):
 - Permite auditar errores sin necesidad de revisar logs del servidor directamente.
 - Útil para debuggear producción cuando no se tiene consola activa (como en Railway).
 - Compatible con herramientas de monitoreo como Sentry, si se quiere mejorar la gestión de errores más adelante.
+
+## <font color=#ad39dc>CONFIGURACIONES DE ARCHIVOS Y CLOUDFLARE</font>
+
+### <font color=#ad39dc>MEDIA_ROOT</font>
+
+Define la carpeta donde Django almacenará los archivos subidos por los usuarios (imágenes, PDFs, etc.).
+
+```Python
+if IS_PRODUCTION:
+    MEDIA_ROOT = Path("/app/media")
+else:
+    MEDIA_ROOT = BASE_DIR / "media"
+```
+
+- En producción, se fija a /app/media, una ruta estable dentro del contenedor.
+- En desarrollo, usa la carpeta media/ dentro del proyecto.
+
+Esto separa claramente los archivos locales de los archivos en el despliegue.
+
+### <font color=#ad39dc>MEDIA_URL</font>
+
+Es la URL base desde la cual los archivos multimedia serán servidos.
+
+```Python
+MEDIA_URL = "/media/"
+```
+
+Ejemplo: una imagen subida podría quedar accesible en
+/media/imagen.jpg
+
+### CLOUDFLARE
+
+Estas variables habilitan la integración con un almacenamiento S3-compatible (Cloudflare R2, MinIO, AWS S3, etc.). Django las usa cuando, como en este caso, el proyecto emplea un storage backend basado en S3.
+
+```Python
+AWS_ACCESS_KEY_ID = os.getenv("AWS_ACCESS_KEY_ID")
+AWS_SECRET_ACCESS_KEY = os.getenv("AWS_SECRET_ACCESS_KEY")
+AWS_STORAGE_BUCKET_NAME = os.getenv("AWS_STORAGE_BUCKET_NAME")
+AWS_S3_ENDPOINT_URL = os.getenv("AWS_S3_ENDPOINT_URL")
+
+AWS_S3_REGION_NAME = "auto"
+AWS_S3_SIGNATURE_VERSION = "s3v4"
+AWS_DEFAULT_ACL = 'private'
+AWS_S3_FILE_OVERWRITE = False
+
+AWS_S3_OBJECT_PARAMETERS = {
+    "ContentDisposition": "inline",
+    "CacheControl": "max-age=86400",
+}
+```
+
+### <font color=#ad39dc>AWS_ACCESS_KEY_ID / AWS_SECRET_ACCESS_KEY</font>
+
+Credenciales que usa Django para autenticar las operaciones en el bucket S3 (subir, leer, borrar archivos).
+
+Estas credenciales:
+
+- Nunca deben estar en el código.
+- Se obtienen desde variables de entorno.
+
+### <font color=#ad39dc>AWS_STORAGE_BUCKET_NAME</font>
+
+Nombre del bucket de R2/S3 donde se guardarán los archivos.
+
+### <font color=#ad39dc>AWS_S3_ENDPOINT_URL</font>
+
+URL específica del endpoint de Cloudflare R2 o del proveedor S3.
+Ejemplo típico en R2:
+
+```Python
+https://<accountid>.r2.cloudflarestorage.com
+```
+
+### <font color=#ad39dc>AWS_S3_REGION_NAME</font>
+
+R2 no usa regiones tradicionales, por eso se establece en "auto".
+
+### <font color=#ad39dc>AWS_S3_SIGNATURE_VERSION</font>
+
+Especifica el método de firma para autenticar peticiones.
+s3v4 es el estándar seguro y moderno recomendado.
+
+### <font color=#ad39dc>AWS_DEFAULT_ACL </font>
+
+Hace que todos los archivos subidos sean privados por defecto, evitando que queden expuestos públicamente a Internet.
+
+### <font color=#ad39dc>AWS_S3_FILE_OVERWRITE</font>
+
+Evita que un archivo con el mismo nombre sobrescriba a otro previamente subido.
+Django generará un nombre único automáticamente.
+
+### <font color=#ad39dc>AWS_S3_OBJECT_PARAMETERS</font>
+
+Parámetros aplicados a cada archivo cuando se almacena:
+
+- ContentDisposition: "inline"
+Permite visualizar archivos directamente en el navegador (PDFs, imágenes), en vez de forzar descarga.
+
+- CacheControl: "max-age=86400"
+Indica un caché de 24 horas para mejorar performance en CDN y navegadores.
+
+### <font color=#ad39dc>PERMISSIONS_POLICY</font>
+
+Controla el acceso a APIs sensibles del navegador, siguiendo el estándar moderno de Permissions Policy (antes Feature Policy).
+
+```Python
+PERMISSIONS_POLICY = {
+    "geolocation": [],
+    "camera": [],
+    "microphone": [],
+}
+```
+
+Esto indica:
+
+- Bloquea completamente el uso de geolocalización, cámara y micrófono.
+- Ningún sitio (incluyendo el mismo dominio) puede usar esas APIs.
+- Reduce superficie de ataque y mejora privacidad.
+
+### CSP
+
+```Python
+CONTENT_SECURITY_POLICY = {
+    "DIRECTIVES": {
+        "default-src": ["'self'"],
+        "script-src": ["'self'"],
+        "style-src": ["'self'", "'unsafe-inline'"],
+        "img-src": ["'self'", "data:", AWS_S3_ENDPOINT_URL],
+        "connect-src": ["'self'", AWS_S3_ENDPOINT_URL],
+        "frame-ancestors": ["'none'"],
+    }
+}
+```
+
+### <font color=#ad39dc>CONTENT_SECURITY_POLICY</font>
+
+Define qué contenido puede cargarse en el sitio. Es una de las protecciones más fuertes contra ataques XSS.
+
+### <font color=#d79bff>default-src: 'self'</font>
+
+Solo carga contenido desde el mismo dominio por defecto.
+
+### <font color=#d79bff>script-src: 'self'</font>
+
+- Solo permite ejecutar scripts servidos desde el propio servidor.
+- Bloquea scripts externos (salvo que se agreguen explícitamente).
+
+### <font color=#d79bff>style-src: 'self', 'unsafe-inline'</font>
+
+- Permite estilos locales.
+- 'unsafe-inline' se incluye para permitir estilos inline (temporales o necesarios para librerías como MUI).Si en el futuro se elimina, se aumenta mucho la seguridad, pero es necesario en este proyecto
+
+### <font color=#d79bff>img-src: 'self', data:, AWS_S3_ENDPOINT_URL</font>
+
+- Permite imágenes locales
+- Imágenes embebidas en base64 (data:)
+- Y las servidas desde R2/S3.
+
+<font color=#d79bff>connect-src: 'self', AWS_S3_ENDPOINT_URL</font>
+
+- Controla las URLs a las que el frontend puede hacer fetch/axios.
+- Permite solo llamadas al mismo dominio y al bucket S3.
+
+### <font color=#d79bff>frame-ancestors: 'none'</font>
+
+Evita que el sitio sea incrustado en iframes de otros sitios (clickjacking mitigation).
+
+## SEGURIDAD DEPENDIENDO DE DESARROLLO O PRODUCCIÓN
+
+```Python
+if not IS_PRODUCTION:
+    CSRF_COOKIE_SAMESITE = 'Lax'
+    SESSION_COOKIE_SAMESITE = 'Lax'
+    CSRF_COOKIE_SECURE = False
+    SESSION_COOKIE_SECURE = False
+```
+
+Esto logra:
+
+- Cookies accesibles durante desarrollo sin HTTPS.
+- Evita problemas al probar peticiones AJAX o formularios locales.
+- Mantiene cierta seguridad con SameSite='Lax'.
+- En producción, estas opciones se vuelven estrictas y seguras automáticamente.
+
+```Python
+if IS_PRODUCTION:
+    SECURE_HSTS_SECONDS = 31536000  # 1 año
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
+```
+
+### <font color=#ad39dc>SECURE_HSTS_SECONDS</font>
+
+Fuerza a los navegadores a usar siempre HTTPS durante 1 año para el dominio.
+
+### <font color=#ad39dc>SECURE_HSTS_INCLUDE_SUBDOMAINS</font>
+
+Aplica la política SSL estricta también a subdominios.
+
+### <font color=#ad39dc>SECURE_HSTS_PRELOAD</font>
+
+Solicita que el dominio sea incluido en la lista HSTS Preload usada por Chrome, Firefox, Safari y Edge, haciendo imposible acceder vía HTTP incluso la primera vez.
 
 ---
 

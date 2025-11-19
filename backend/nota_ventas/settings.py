@@ -249,6 +249,18 @@ SECURE_SSL_REDIRECT = IS_PRODUCTION
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 SECURE_REFERRER_POLICY = "strict-origin-when-cross-origin"
 
+# Protección adicional contra ataques de aislamiento entre ventanas
+SECURE_CROSS_ORIGIN_OPENER_POLICY = "same-origin"
+
+# Evita que contenido externo se ejecute sin permisos explícitos
+SECURE_CROSS_ORIGIN_EMBEDDER_POLICY = "require-corp"
+
+# Restringe qué orígenes pueden cargar recursos desde tu servidor
+SECURE_CROSS_ORIGIN_RESOURCE_POLICY = "same-origin"
+
+# Limita el tamaño máximo de subida
+DATA_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024  # 10 MB
+
 # Configuracion del logger
 if IS_PRODUCTION:
     LOGGING = {
@@ -280,7 +292,6 @@ else:
 MEDIA_URL = "/media/"
 
 # Cloudflare S3
-
 AWS_ACCESS_KEY_ID = os.getenv("AWS_ACCESS_KEY_ID")
 AWS_SECRET_ACCESS_KEY = os.getenv("AWS_SECRET_ACCESS_KEY")
 AWS_STORAGE_BUCKET_NAME = os.getenv("AWS_STORAGE_BUCKET_NAME")
