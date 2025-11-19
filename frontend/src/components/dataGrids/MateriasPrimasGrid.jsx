@@ -33,6 +33,7 @@ const MateriasPrimasGrid = ({ nombre, exportNombre, estado }) => {
     const [pedidoToDelete, setPedidoToDelete] = useState(null);
     const [deletingId, setDeletingId] = useState(null);
     const [confirmOpenDelete, setConfirmOpenDelete] = useState(false);
+    const [productos, setProductos] = useState([]);
     const { enqueueSnackbar } = useSnackbar();
 
     const fetchMateriasPrimas = useCallback(async () => {
@@ -55,6 +56,20 @@ const MateriasPrimasGrid = ({ nombre, exportNombre, estado }) => {
     useEffect(() => {
         fetchMateriasPrimas();
     }, [fetchMateriasPrimas]);
+
+     // Cargar productos
+        useEffect(() => {
+            const fetchProductos = async () => {
+                try {
+                    const res = await api.get("/productos/");
+                    setProductos(res.data);
+                } catch (error) {
+                    console.error("Error al cargar productos:", error);
+                    enqueueSnackbar("Error al cargar productos", { variant: "error" });
+                }
+            };
+            fetchProductos();
+        }, [enqueueSnackbar]);
 
     const onExport = () => {
         const columnsToExport = columns.filter((c) => !c.disableExport);
@@ -220,6 +235,7 @@ const MateriasPrimasGrid = ({ nombre, exportNombre, estado }) => {
                 content={`¿Deseas cambiar el estado del pedido ${pedidoSeleccionado?.nombre_producto} a 'SOLICITADO'?`}
                 onClose={() => setConfirmOpen(false)}
                 onConfirm={handleConfirm}
+                pedido={productos}
             />
 
             <ConfirmDialog

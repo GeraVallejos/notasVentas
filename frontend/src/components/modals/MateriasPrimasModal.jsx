@@ -20,9 +20,9 @@
         observacion: yup.string().nullable(),
     });
 
-    const MateriasPrimasModal = ({ open, onClose, pedido, onUpdated }) => {
+    const MateriasPrimasModal = ({ open, onClose, pedido, onUpdated, productos }) => {
 
-        const [productos, setProductos] = useState([]);
+        
         const { enqueueSnackbar } = useSnackbar();
         const [saving, setSaving] = useState(false);
 
@@ -52,22 +52,6 @@
             }
             return nuevoObj;
         };
-
-        // Cargar productos
-        useEffect(() => {
-            const fetchProductos = async () => {
-                try {
-                    const res = await api.get("/productos/");
-                    setProductos(res.data);
-                } catch (error) {
-                    console.error("Error al cargar productos:", error);
-                    enqueueSnackbar("Error al cargar productos", { variant: "error" });
-                }
-            };
-            fetchProductos();
-        }, [enqueueSnackbar]);
-
-
 
         // Reset al abrir modal
         useEffect(() => {
