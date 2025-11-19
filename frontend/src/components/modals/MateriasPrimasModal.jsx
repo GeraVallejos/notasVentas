@@ -83,7 +83,7 @@
                         : null;
 
                 reset({
-                    producto: productoActual ?? null,
+                    producto: productoActual.nombre ?? null,
                     cantidad: pedido.cantidad || 0,
                     rut_proveedor: pedido.rut_proveedor || "",
                     nombre_proveedor: pedido.nombre_proveedor || "",
