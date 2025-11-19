@@ -9,6 +9,7 @@ from rest_framework.response import Response
 from django.contrib.auth.hashers import check_password
 from django.utils.decorators import method_decorator
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
+from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.permissions import AllowAny
 from rest_framework import status
 from django.db.models import Count, Q
@@ -65,6 +66,20 @@ class UsuarioView(viewsets.ModelViewSet):
     
     @action(detail=False, methods=['post'], permission_classes=[permissions.IsAuthenticated])
     def logout(self, request, **kwargs):
+
+        # 1. Tomamos el refresh token desde la cookie
+        refresh_token = request.COOKIES.get('refresh_token')
+
+        if refresh_token:
+            try:
+                # 2. Convertimos a objeto RefreshToken para invalidarlo
+                token = RefreshToken(refresh_token)
+                token.blacklist()  # Invalida el token globalmente
+            except Exception:
+                # Si está dañado o ya invalidado, se ignora
+                pass
+
+
         response = Response({"message": "Logout exitoso"}, status=status.HTTP_200_OK)
         response.delete_cookie('access_token')
         response.delete_cookie('refresh_token')
