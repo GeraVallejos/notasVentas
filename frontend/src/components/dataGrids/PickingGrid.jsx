@@ -38,6 +38,7 @@ const PickingGrid = ({ estado, nombre, exportNombre, userGroup }) => {
     const [deletingId, setDeletingId] = useState(null);
     const [pedidoSeleccionado, setPedidoSeleccionado] = useState(null);
     const [modalOpen, setModalOpen] = useState(false);
+    const [productos, setProductos] = useState([]);
     const esVentas = userGroup.includes('Ventas');
 
 
@@ -56,6 +57,19 @@ const PickingGrid = ({ estado, nombre, exportNombre, userGroup }) => {
             setLoading(false);
         }
     }, [estado, enqueueSnackbar]);
+
+    useEffect(() => {
+        const fetchProductos = async () => {
+          try {
+            const res = await api.get("/productos/");
+            setProductos(res.data);
+          } catch (error) {
+            console.error("Error al cargar productos:", error);
+            enqueueSnackbar("Error al cargar productos", { variant: "error" });
+          }
+        };
+        fetchProductos();
+      }, [enqueueSnackbar]);
 
     useEffect(() => {
         fetchPickingData();
@@ -279,6 +293,7 @@ const PickingGrid = ({ estado, nombre, exportNombre, userGroup }) => {
                 onClose={() => setModalOpen(false)}
                 pedido={pedidoSeleccionado}
                 onUpdated={fetchPickingData}
+                productos={productos}
             />
         </Box>
 

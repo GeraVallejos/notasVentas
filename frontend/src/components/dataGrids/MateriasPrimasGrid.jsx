@@ -57,19 +57,21 @@ const MateriasPrimasGrid = ({ nombre, exportNombre, estado }) => {
         fetchMateriasPrimas();
     }, [fetchMateriasPrimas]);
 
-     // Cargar productos
-        useEffect(() => {
-            const fetchProductos = async () => {
-                try {
-                    const res = await api.get("/productos/");
-                    setProductos(res.data);
-                } catch (error) {
-                    console.error("Error al cargar productos:", error);
-                    enqueueSnackbar("Error al cargar productos", { variant: "error" });
-                }
-            };
-            fetchProductos();
-        }, [enqueueSnackbar]);
+    // Cargar productos
+    useEffect(() => {
+        const fetchProductos = async () => {
+            try {
+                const res = await api.get("/productos/");
+                setProductos(res.data);
+                
+            } catch (error) {
+                console.error("Error al cargar productos:", error);
+                enqueueSnackbar("Error al cargar productos", { variant: "error" });
+            }
+        };
+        fetchProductos();
+    }, [enqueueSnackbar]);
+
 
     const onExport = () => {
         const columnsToExport = columns.filter((c) => !c.disableExport);
@@ -250,6 +252,7 @@ const MateriasPrimasGrid = ({ nombre, exportNombre, estado }) => {
                 onClose={() => setModalOpen(false)}
                 pedido={pedidoSeleccionado}
                 onUpdated={fetchMateriasPrimas}
+                productos={productos}
             />
         </Box>
     );
