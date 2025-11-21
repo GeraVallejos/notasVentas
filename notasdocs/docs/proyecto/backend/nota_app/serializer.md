@@ -7,7 +7,7 @@ Un serializer se encarga de:
 - Convertir modelos (u otros objetos de Python) a JSON para enviarlos como respuesta en una API.
 - Validar y convertir datos JSON (u otros formatos) a objetos de Python, como instancias de modelos.
 
-Es como un "traductor" entre la base de datos (modelos) y el mundo exterior (clientes que consumen tu API).
+Es como un "traductor" entre la base de datos (modelos) y el mundo exterior (clientes que consumen la API).
 
 ### Tipos de serializers
 
@@ -125,9 +125,9 @@ Con esto se especifica que el campo password debe ser de solo escritura para evi
 
 - El metodo `create(self, validated_data)` sobreescribe el método de creación para gestionar el hash de la contraseña:
 
-    - Extrae el campo password del diccionario validated_data.
+    - Extrae el campo password del diccionario validated_data (método de DRF).
     - Crea la instancia del modelo sin la contraseña.
-    - Asigna la contraseña utilizando el método set_password() (para aplicar hashing).
+    - Asigna la contraseña utilizando el método set_password() (para aplicar hashing) (método de AbstarctUser)
     - Guarda y retorna la instancia.
 
 - El metodo `update(self, instance, validated_data)` sobrescribe el método de actualización:
@@ -137,20 +137,20 @@ Con esto se especifica que el campo password debe ser de solo escritura para evi
 
 ```python
 def create(self, validated_data):
-        password = validated_data.pop('password')
-        user = Usuarios(**validated_data)
-        user.set_password(password)
-        user.save()
-        return user
+    password = validated_data.pop('password')
+    user = Usuarios(**validated_data)
+    user.set_password(password)
+    user.save()
+    return user
     
-    def update(self, instance, validated_data):
-        password = validated_data.pop('password', None)
-        for attr, value in validated_data.items():
-            setattr(instance, attr, value)
-        if password:
-            instance.set_password(password)
-        instance.save()
-        return instance
+def update(self, instance, validated_data):
+    password = validated_data.pop('password', None)
+    for attr, value in validated_data.items():
+        setattr(instance, attr, value)
+    if password:
+        instance.set_password(password)
+    instance.save()
+    return instance
 ```
 
 Django REST Framework, por defecto, no sabe que password requiere hashing, por lo tanto:
