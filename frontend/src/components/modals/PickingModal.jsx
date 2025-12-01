@@ -54,23 +54,17 @@ const PickingModal = ({ open, onClose, pedido, onUpdated, productos }) => {
     return nuevoObj;
   };
 
-  // Cargar productos
-
-
   // Reset al abrir modal
   useEffect(() => {
-    if (pedido) {
-      const productoActual = productos.find(
-        (p) => p.id_producto === pedido.id_producto || p.nombre === pedido.producto_nombre
-      );
-      reset({
-        producto: productoActual.nombre ?? null,
-        cantidad: pedido.cantidad || 0,
-        tipo: pedido.tipo || "",
-        observacion: pedido.observacion || "",
-      });
-    }
-  }, [pedido, productos, reset]);
+
+    
+    reset({
+      producto: pedido.nombre || null,
+      cantidad: pedido.cantidad || 0,
+      tipo: pedido.tipo || "",
+      observacion: pedido.observacion || "",
+    });
+  }, [pedido, reset]);
 
   // 🔹 Guardar cambios
   const onSubmit = async (data) => {

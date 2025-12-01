@@ -20,7 +20,7 @@ const schema = yup.object().shape({
     observacion: yup.string().nullable(),
 });
 
-const MateriasPrimasModal = ({ open, onClose, pedido, onUpdated, productos }) => {
+const MateriasPrimasModal = ({ open, onClose, pedido, onUpdated }) => {
 
 
     const { enqueueSnackbar } = useSnackbar();
@@ -56,12 +56,7 @@ const MateriasPrimasModal = ({ open, onClose, pedido, onUpdated, productos }) =>
     // Reset al abrir modal
     useEffect(() => {
 
-        if (!pedido) return;
-
-        const productoActual = productos.find(
-            (p) => p.id_producto === pedido.id_producto || p.nombre === pedido.nombre_producto
-
-        );
+        
 
         const fechaEntrega =
             pedido.fecha_entrega
@@ -69,18 +64,20 @@ const MateriasPrimasModal = ({ open, onClose, pedido, onUpdated, productos }) =>
                 : null;
 
         reset({
-            producto: productoActual.nombre ?? null,
+            producto: pedido.nombre_producto || null,
             cantidad: pedido.cantidad || 0,
             rut_proveedor: pedido.rut_proveedor || "",
             nombre_proveedor: pedido.nombre_proveedor || "",
-            id_producto: productoActual.id_producto || null,
+            id_producto: pedido.id_producto|| null,
             unidad_medida: pedido.unidad_medida || "",
             fecha_entrega: fechaEntrega || null,
             observacion: pedido.observacion || "",
         });
 
-    }, [pedido, productos, reset]);
+    }, [pedido, reset]);
 
+
+    console.log(pedido)
 
     const handleChangeRut = (e) => {
         const rawValue = e.target.value;
@@ -126,7 +123,6 @@ const MateriasPrimasModal = ({ open, onClose, pedido, onUpdated, productos }) =>
             fecha_entrega: data.fecha_entrega,
             observacion: data.observacion
         };
-        console.log(payload)
 
         try {
             setSaving(true);

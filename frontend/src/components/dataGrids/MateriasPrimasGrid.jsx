@@ -29,6 +29,7 @@ const MateriasPrimasGrid = ({ nombre, exportNombre, estado }) => {
     const [loading, setLoading] = useState(true);
     const [confirmOpen, setConfirmOpen] = useState(false);
     const [pedidoSeleccionado, setPedidoSeleccionado] = useState(null);
+    const [productoSeleccionado, setProductoSeleccionado] = useState({});
     const [modalOpen, setModalOpen] = useState(false);
     const [pedidoToDelete, setPedidoToDelete] = useState(null);
     const [deletingId, setDeletingId] = useState(null);
@@ -63,7 +64,7 @@ const MateriasPrimasGrid = ({ nombre, exportNombre, estado }) => {
             try {
                 const res = await api.get("/productos/");
                 setProductos(res.data);
-                
+
             } catch (error) {
                 console.error("Error al cargar productos:", error);
                 enqueueSnackbar("Error al cargar productos", { variant: "error" });
@@ -78,16 +79,27 @@ const MateriasPrimasGrid = ({ nombre, exportNombre, estado }) => {
         exportExcel(columnsToExport, materiasPrimas, exportNombre);
     };
 
-    const handleOpenConfirm = (row) => {
-        setPedidoSeleccionado(row);
+    const handleOpenConfirm = (pedido) => {
+        setPedidoSeleccionado(pedido);
         setConfirmOpen(true);
     };
 
-    const HandleRowClick = (params) => {
-        setPedidoSeleccionado(params.row);
-        setModalOpen(true);
-    }
+    const handleOpenModal = (pedido) => {
+        console.log("Pedido recibido:", pedido);
+    console.log("Productos:", productos);
+    if (!pedido || !productos.length) return;
 
+    const producto = productos.find(
+        p => p.id_producto === pedido.id_producto ||
+             p.nombre === pedido.nombre_producto
+    );
+
+    if (!producto) return;
+
+    setPedidoSeleccionado(pedido);
+    setProductoSeleccionado(producto);
+    setModalOpen(true);
+};
 
     const handleDeleteRequest = (id) => {
         setPedidoToDelete(id);
@@ -124,6 +136,7 @@ const MateriasPrimasGrid = ({ nombre, exportNombre, estado }) => {
             enqueueSnackbar("Error al actualizar el pedido", { variant: "error" });
         }
     };
+
 
     if (loading) {
         return (
@@ -211,7 +224,7 @@ const MateriasPrimasGrid = ({ nombre, exportNombre, estado }) => {
                 slots={{ toolbar: CustomToolBar }}
                 slotProps={{ toolbar: { onExport } }}
                 showToolbar
-                onRowDoubleClick={HandleRowClick}
+                onRowDoubleClick={(params) => handleOpenModal(params.row)}
                 rowsPerPageOptions={[10, 20, 50]}
                 sx={{
                     userSelect: 'none',
@@ -247,13 +260,15 @@ const MateriasPrimasGrid = ({ nombre, exportNombre, estado }) => {
                 onClose={() => setConfirmOpenDelete(false)}
                 onConfirm={handleConfirmDelete}
             />
-            <MateriasPrimasModal
-                open={modalOpen}
-                onClose={() => setModalOpen(false)}
-                pedido={pedidoSeleccionado}
-                onUpdated={fetchMateriasPrimas}
-                productos={productos}
-            />
+            {modalOpen && pedidoSeleccionado && productos && (
+                <MateriasPrimasModal
+                    open={modalOpen}
+                    onClose={() => setModalOpen(false)}
+                    pedido={pedidoSeleccionado}
+                    onUpdated={fetchMateriasPrimas}
+                    productoSeleccionado={productoSeleccionado}
+                />
+            )}
         </Box>
     );
 };
