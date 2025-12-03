@@ -7,7 +7,7 @@ Un serializer se encarga de:
 - Convertir modelos (u otros objetos de Python) a JSON para enviarlos como respuesta en una API.
 - Validar y convertir datos JSON (u otros formatos) a objetos de Python, como instancias de modelos.
 
-Es como un "traductor" entre la base de datos (modelos) y el mundo exterior (clientes que consumen tu API).
+Es como un "traductor" entre la base de datos (modelos) y el mundo exterior (clientes que consumen la API).
 
 ### Tipos de serializers
 
@@ -125,9 +125,9 @@ Con esto se especifica que el campo password debe ser de solo escritura para evi
 
 - El metodo `create(self, validated_data)` sobreescribe el método de creación para gestionar el hash de la contraseña:
 
-    - Extrae el campo password del diccionario validated_data.
+    - Extrae el campo password del diccionario validated_data (método de DRF).
     - Crea la instancia del modelo sin la contraseña.
-    - Asigna la contraseña utilizando el método set_password() (para aplicar hashing).
+    - Asigna la contraseña utilizando el método set_password() (para aplicar hashing) (método de AbstarctUser)
     - Guarda y retorna la instancia.
 
 - El metodo `update(self, instance, validated_data)` sobrescribe el método de actualización:
@@ -137,20 +137,20 @@ Con esto se especifica que el campo password debe ser de solo escritura para evi
 
 ```python
 def create(self, validated_data):
-        password = validated_data.pop('password')
-        user = Usuarios(**validated_data)
-        user.set_password(password)
-        user.save()
-        return user
+    password = validated_data.pop('password')
+    user = Usuarios(**validated_data)
+    user.set_password(password)
+    user.save()
+    return user
     
-    def update(self, instance, validated_data):
-        password = validated_data.pop('password', None)
-        for attr, value in validated_data.items():
-            setattr(instance, attr, value)
-        if password:
-            instance.set_password(password)
-        instance.save()
-        return instance
+def update(self, instance, validated_data):
+    password = validated_data.pop('password', None)
+    for attr, value in validated_data.items():
+        setattr(instance, attr, value)
+    if password:
+        instance.set_password(password)
+    instance.save()
+    return instance
 ```
 
 Django REST Framework, por defecto, no sabe que password requiere hashing, por lo tanto:
@@ -258,7 +258,6 @@ def create(self, validated_data):
 
 Este método se encarga de crear una nueva instancia del modelo y asociarla a un cliente existente, o crear ese cliente si no existe y se ha solicitado guardarlo. Además, asocia el usuario autenticado que hizo la petición. Este método sobrescribe create para manejar la lógica de asociación de un cliente a una nota. Si el cliente no existe y se ha solicitado su creación (guardar_cliente=True), se crea automáticamente con los datos entregados. Además, se asigna el usuario autenticado como creador tanto del cliente (si es creado) como de la nota.
 
-
 ```python
 def create(self, validated_data):
 ```
@@ -327,8 +326,6 @@ return super().create(validated_data)
 
 - Llama al método original del serializer para continuar con la creación del objeto principal
 
-### Clientes
-
 - Metodos create y update asignan usuarios logueados
 
 ```python
@@ -344,5 +341,24 @@ def update(self, instance, validated_data):
     validated_data['id_usuario_modificacion'] = self.context['request'].user
     return super().update(instance, validated_data)
 ```
+
+## Historico Sabados
+
+Este serializer no utiliza serializer.ModelSerializer (DRF) si no que el serializer.Serializer que viene con Django, ya que no utiliza un modelo para entregar o recibir datos, es por esto que hay que explicitar los campos que se mostraran en la API. 
+
+```python
+class HistoricoSabadosSerializer(serializers.Serializer):
+mes = serializers.CharField(help_text="Mes en formato YYYY-MM")
+id_personal = serializers.IntegerField(help_text="ID del personal")
+nombre = serializers.CharField(help_text="Nombre del empleado")
+apellido = serializers.CharField(help_text="Apellido del empleado")
+sabados = serializers.ListField(
+    child=serializers.CharField(),
+    help_text="Lista de fechas de sábados trabajados en formato DD-MM-YYYY"
+)
+total_sabados = serializers.IntegerField(help_text="Cantidad de sábados trabajados")
+```
+
+Este serializer permite construir y devolver un reporte personalizado de los sábados trabajados por un empleado en un mes. Define explícitamente cada campo necesario para el reporte, en lugar de depender del modelo de la base de datos. Es ideal para endpoints del tipo /personal/historico_sabados/?mes=2025-07 donde se retornan datos calculados.
 
 ---

@@ -15,7 +15,10 @@ Permite que la contraseña ingresada para un nuevo usuario en el admin de Django
 
 ```python
 class UsuarioAdminForm(forms.ModelForm):
-    password = forms.CharField(widget=forms.PasswordInput, required=False, label='Contraseña')
+     password = forms.CharField(widget=forms.PasswordInput(attrs={
+            'autocomplete': 'new-password',  
+            'placeholder': 'Introduce la contraseña'  
+        }), required=False, label='Contraseña')
 
     class Meta:
         model = Usuarios

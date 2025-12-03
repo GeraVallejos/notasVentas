@@ -29,10 +29,10 @@ const schema = yup.object().shape({
   observacion: yup.string().nullable(),
 });
 
-const PickingModal = ({ open, onClose, pedido, onUpdated }) => {
+const PickingModal = ({ open, onClose, pedido, onUpdated, productos }) => {
   const { enqueueSnackbar } = useSnackbar();
   const [saving, setSaving] = useState(false);
-  const [productos, setProductos] = useState([]);
+
 
   const { control, handleSubmit, reset } = useForm({
     resolver: yupResolver(schema),
@@ -54,34 +54,17 @@ const PickingModal = ({ open, onClose, pedido, onUpdated }) => {
     return nuevoObj;
   };
 
-  // Cargar productos
-  useEffect(() => {
-    const fetchProductos = async () => {
-      try {
-        const res = await api.get("/productos/");
-        setProductos(res.data);
-      } catch (error) {
-        console.error("Error al cargar productos:", error);
-        enqueueSnackbar("Error al cargar productos", { variant: "error" });
-      }
-    };
-    fetchProductos();
-  }, [enqueueSnackbar]);
-
   // Reset al abrir modal
   useEffect(() => {
-    if (pedido) {
-      const productoActual = productos.find(
-        (p) => p.id === pedido.producto?.id || p.nombre === pedido.producto_nombre
-      );
-      reset({
-        producto: productoActual || null,
-        cantidad: pedido.cantidad || 0,
-        tipo: pedido.tipo || "",
-        observacion: pedido.observacion || "",
-      });
-    }
-  }, [pedido, productos, reset]);
+
+    
+    reset({
+      producto: pedido.nombre || null,
+      cantidad: pedido.cantidad || 0,
+      tipo: pedido.tipo || "",
+      observacion: pedido.observacion || "",
+    });
+  }, [pedido, reset]);
 
   // 🔹 Guardar cambios
   const onSubmit = async (data) => {
@@ -116,7 +99,7 @@ const PickingModal = ({ open, onClose, pedido, onUpdated }) => {
   return (
     <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
       <DialogTitle>
-          Editar Pedido #{pedido.nota || pedido.id}
+        Editar Pedido #{pedido.nota || pedido.id}
       </DialogTitle>
 
       <DialogContent dividers>
@@ -146,7 +129,9 @@ const PickingModal = ({ open, onClose, pedido, onUpdated }) => {
                 <Autocomplete
                   {...field}
                   options={productos}
-                  getOptionLabel={(option) => option.nombre || ""}
+                  getOptionLabel={(option) =>
+                    typeof option === "string" ? option : option.nombre
+                  }
                   isOptionEqualToValue={(opt, val) => opt.id === val?.id}
                   onChange={(_, newValue) => field.onChange(newValue)}
                   renderInput={(params) => (
@@ -215,9 +200,9 @@ const PickingModal = ({ open, onClose, pedido, onUpdated }) => {
                   helperText={fieldState.error?.message}
                 >
                   <MenuItem value="">Seleccione una opción</MenuItem>
-                  <MenuItem value="Franklin">Franklin</MenuItem>
-                  <MenuItem value="Stock">Stock</MenuItem>
-                  <MenuItem value="Tienda">Tienda</MenuItem>
+                  <MenuItem value="FRANKLIN">Franklin</MenuItem>
+                  <MenuItem value="STOCK">Stock</MenuItem>
+                  <MenuItem value="TIENDA">Tienda</MenuItem>
                 </TextField>
               )}
             />

@@ -10,6 +10,5 @@ Cuando se ejecuta el comando python manage.py makemigrations por primera vez en 
 
 Nunca borrar estos archivos. Si se requiere hacer modificaciones de las tablas, hay que hacerlas en el modelo y no en estos archivos directamente, luego hacer una nueva migración
 
-## `0001_initial.py`
-Esta migración inicial crea tres modelos principales: Usuarios, Notas y Clientes. Los cuales se detallan en el archivo modelos
+---
 

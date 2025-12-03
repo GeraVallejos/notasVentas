@@ -23,8 +23,8 @@ const formatearPicking = (picking) => ({
     estado_solicitud: picking.nota?.estado_solicitud || '',
     id_nota: picking.nota?.id_nota || null,
     fecha_creacion_time: picking.fecha_creacion || ''
-    ? format(parseISO(picking.fecha_creacion), 'HH:mm')
-    : '',
+        ? format(parseISO(picking.fecha_creacion), 'HH:mm')
+        : '',
 });
 
 
@@ -37,7 +37,9 @@ const PickingGrid = ({ estado, nombre, exportNombre, userGroup }) => {
     const [pedidoToDelete, setPedidoToDelete] = useState(null);
     const [deletingId, setDeletingId] = useState(null);
     const [pedidoSeleccionado, setPedidoSeleccionado] = useState(null);
+    const [productoSeleccionado, setProductoSeleccionado] = useState(null);
     const [modalOpen, setModalOpen] = useState(false);
+    const [productos, setProductos] = useState([]);
     const esVentas = userGroup.includes('Ventas');
 
 
@@ -58,13 +60,39 @@ const PickingGrid = ({ estado, nombre, exportNombre, userGroup }) => {
     }, [estado, enqueueSnackbar]);
 
     useEffect(() => {
+        const fetchProductos = async () => {
+            try {
+                const res = await api.get("/productos/");
+                setProductos(res.data);
+            } catch (error) {
+                console.error("Error al cargar productos:", error);
+                enqueueSnackbar("Error al cargar productos", { variant: "error" });
+            }
+        };
+        fetchProductos();
+    }, [enqueueSnackbar]);
+
+    useEffect(() => {
         fetchPickingData();
     }, [fetchPickingData]);
 
-    const HandleRowClick = (params) => {
-        setPedidoSeleccionado(params.row);
+    const handleOpenModal = (pedido) => {
+
+        if (!pedido || !productos.length) return;
+
+        const producto = productos.find(
+            p => p.id_producto === pedido.id_producto ||
+                p.nombre === pedido.nombre_producto
+        );
+
+        if (!producto) return;
+
+        setPedidoSeleccionado(pedido);
+        setProductoSeleccionado(producto);
         setModalOpen(true);
-    }
+    };
+
+    console.log(pedidoSeleccionado)
 
     const handleDeleteRequest = (id) => {
         setPedidoToDelete(id);
@@ -247,10 +275,10 @@ const PickingGrid = ({ estado, nombre, exportNombre, userGroup }) => {
                 pageSize={10}
                 density="compact"
                 rowsPerPageOptions={[10, 25, 50]}
+                onRowDoubleClick={(params) => handleOpenModal(params.row)}
                 slots={{ toolbar: CustomToolBar }}
                 slotProps={{ toolbar: { onExport } }}
                 showToolbar
-                onRowDoubleClick={HandleRowClick}
                 getRowHeight={() => 30}
                 localeText={dataGridEs}
                 sx={{
@@ -274,12 +302,15 @@ const PickingGrid = ({ estado, nombre, exportNombre, userGroup }) => {
                 onClose={() => setConfirmOpen(false)}
                 onConfirm={handleConfirmDelete}
             />
-            <PickingModal
-                open={modalOpen}
-                onClose={() => setModalOpen(false)}
-                pedido={pedidoSeleccionado}
-                onUpdated={fetchPickingData}
-            />
+            {modalOpen && productoSeleccionado && (
+                <PickingModal
+                    open={modalOpen}
+                    onClose={() => setModalOpen(false)}
+                    pedido={pedidoSeleccionado}
+                    onUpdated={fetchPickingData}
+                    productoSeleccionado={productoSeleccionado}
+                />
+            )}
         </Box>
 
     )

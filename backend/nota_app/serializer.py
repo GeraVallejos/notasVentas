@@ -117,17 +117,6 @@ class NotasSerializer(serializers.ModelSerializer):
         return super().update(instance, validated_data)
     
 
-class ProductoProveedorInputSerializer(serializers.ModelSerializer):
-    proveedor_id = serializers.PrimaryKeyRelatedField(
-        queryset=Proveedores.objects.all(),
-        source='proveedor'
-    )
-
-    class Meta:
-        model = ProductoProveedor
-        fields = ['proveedor_id', 'precio_compra', 'fecha_inicio', 'activo']
-
-
 class ProductoProveedorSerializer(serializers.ModelSerializer):
     proveedor_id = serializers.PrimaryKeyRelatedField(
         queryset=Proveedores.objects.all(),

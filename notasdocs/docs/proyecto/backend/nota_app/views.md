@@ -222,6 +222,70 @@ Crea una acción personalizada accesible desde:
 
 ---
 
+#### Acción personalizada: cliente_por_nota
+
+```python
+    @action(detail=False, methods=['get'], url_path='cliente_por_nota')
+```
+
+Crea un endpoint accesible en:
+
+`GET /notas/cliente_por_nota/?nota=12345`
+
+- detail=False → la acción no requiere ID de una nota.
+- url_path='cliente_por_nota' → define la ruta final del endpoint.
+
+```python
+def cliente_por_nota(self, request):
+    num_nota = request.query_params.get('nota')
+```
+
+**Obtiene el parámetro nota desde los query params**
+
+```python
+if not num_nota:
+    return Response({'error': 'Debe proporcionar el número de nota.'}, status=status.HTTP_400_BAD_REQUEST)
+```
+
+- Si no se envía el parámetro nota, responde con 400 Bad Request.
+- Se exige este parámetro para poder buscar la nota.
+
+```python
+nota = Notas.objects.get(num_nota=num_nota)
+cliente = nota.cliente
+```
+
+- Busca una nota cuyo número coincida con num_nota.
+- Luego obtiene el cliente asociado a la nota.
+
+```python
+if cliente:
+    data = {
+        'id_cliente': cliente.id_cliente,
+        'razon_social': cliente.razon_social,
+        'rut_cliente': cliente.rut_cliente,
+        'direccion': cliente.direccion,
+        'comuna': cliente.comuna,
+        'telefono': cliente.telefono,
+        'correo': cliente.correo,
+        'contacto': cliente.contacto,
+        'despacho_retira': nota.despacho_retira,
+        'fecha_despacho': nota.fecha_despacho,
+        'nota_id': nota.id_nota,
+    }
+    return Response(data, status=status.HTTP_200_OK)
+```
+
+**La respuesta incluye:**
+
+- Datos completos del cliente
+- Información adicional de la nota:
+    - despacho_retira
+    - fecha_despacho
+    - id_nota
+
+Devuelve HTTP 200 OK con toda la información.
+
 ## **`class ClientesView(viewsets.ModelViewSet):`**
 
 ```python
@@ -634,5 +698,833 @@ Se usa para agrupar vistas lógicas bajo una sola ruta (como /dashboard/resumen/
 ```
 
 **Cualquier otro error devuelve error 500 y se loggea con exc_info=True.**
+
+---
+
+## ProductosView
+
+```python
+class ProductosView(viewsets.ModelViewSet):
+    serializer_class = ProductosSerializer
+    queryset = Productos.objects.all()
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+
+    @action(detail=False, methods=['get', 'put', 'patch'], url_path='por-codigo')
+    def obtener_por_codigo(self, request):
+        codigo = request.query_params.get('codigo')
+        if not codigo:
+            return Response({'error': 'Código es requerido'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        try:
+            producto = Productos.objects.get(codigo=codigo)
+            
+            # Manejo de métodos PUT/PATCH
+            if request.method in ['PUT', 'PATCH']:
+                partial = request.method == 'PATCH'  # True para PATCH, False para PUT
+                serializer = self.get_serializer(producto, data=request.data, partial=partial)
+                serializer.is_valid(raise_exception=True)
+                serializer.save()
+                return Response(serializer.data)
+            
+            # Manejo del GET
+            data = {
+                'id_producto': producto.id_producto,
+                'nombre': producto.nombre,
+                'codigo': producto.codigo,
+                'descripcion': producto.descripcion,
+                'precio': producto.precio_venta,
+                'stock': producto.stock,
+                'categoria': producto.categoria,
+                'unidad_medida': producto.unidad_medida,
+                'precio_compra': producto.precio_compra,
+            }
+            return Response(data)
+            
+        except Productos.DoesNotExist:
+            return Response({'error': 'Producto no encontrado'}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+```
+
+**Extracción del parámetro**
+
+```python
+codigo = request.query_params.get('codigo')
+```
+
+El método obtiene el parámetro codigo desde la URL
+
+**Validación del parámetro**
+
+```python
+if not codigo:
+    return Response({'error': 'Código es requerido'}, status=status.HTTP_400_BAD_REQUEST)
+```
+
+Si el código no fue entregado, responde con 400 Bad Request.
+
+**Buscar el producto por código**
+
+```python
+producto = Productos.objects.get(codigo=codigo)
+```
+
+- Intenta obtener el producto usando el campo codigo.
+- Si no existe, será capturado por la excepción Productos.DoesNotExist.
+
+**Actualización**
+
+```python
+if request.method in ['PUT', 'PATCH']:
+    partial = request.method == 'PATCH'
+    serializer = self.get_serializer(producto, data=request.data, partial=partial)
+    serializer.is_valid(raise_exception=True)
+    serializer.save()
+    return Response(serializer.data)
+```
+
+Explicación:
+
+- Si llega un PUT, se requiere actualizar todos los campos.
+- Si llega un PATCH, se permiten actualizaciones parciales.
+- Se reutiliza el ProductosSerializer de la vista.
+
+Respuesta: Se devuelve el producto actualizado en formato JSON.
+
+*Este código:*
+
+```python
+    serializer = self.get_serializer(producto, data=request.data, partial=partial)
+```
+
+---
+
+1.- self.get_serializer(...)
+
+get_serializer() es un método de ModelViewSet que:
+
+- Obtiene automáticamente el serializer configurado en serializer_class.
+- Aplica contexto adicional (como request, view, etc.).
+- Permite reutilizar el mismo serializer sin tener que instanciarlo manualmente.
+
+2.- Primer argumento: proveedor
+
+El primer argumento es la instancia existente del modelo que se quiere actualizar.
+
+Ejemplo:
+
+- proveedor = Proveedores.objects.get(rut_proveedor=rut)
+- Ese objeto se pasa al serializer para ser modificado.
+
+Esto le dice al serializer:
+*"Este objeto es el que quiero actualizar."*
+
+3.- data=request.data
+
+Aquí se le pasa la nueva información enviada por el cliente (generalmente desde un PUT o PATCH). 
+El serializer usará estos datos para validar y actualizar el objeto existente.
+
+4.-  partial=partial
+
+Si es PATCH → partial=True
+
+- La actualización es parcial
+- Solo actualiza los campos enviados
+- Los campos obligatorios NO son requeridos
+
+Si es PUT → partial=False
+
+- La actualización debe ser completa
+- Todos los campos requeridos deben estar presentes
+- Un PUT reemplaza el objeto entero
+
+Esto le indica al serializer:
+
+*"¿Debo actualizar solo lo enviado (PATCH) o validar todo el objeto completo (PUT)?"*
+
+---
+
+**Respuesta para método GET**
+
+```python
+data = {
+    'id_producto': producto.id_producto,
+    'nombre': producto.nombre,
+    'codigo': producto.codigo,
+    'descripcion': producto.descripcion,
+    'precio': producto.precio_venta,
+    'stock': producto.stock,
+    'categoria': producto.categoria,
+    'unidad_medida': producto.unidad_medida,
+    'precio_compra': producto.precio_compra,
+}
+return Response(data)
+```
+
+En caso de GET:
+
+- Devuelve la información básica del producto.
+- No usa serializer para mayor eficiencia.
+
+**Manejo de errores**
+
+```python
+except Productos.DoesNotExist:
+    return Response({'error': 'Producto no encontrado'}, status=status.HTTP_404_NOT_FOUND)
+except Exception as e:
+    return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+```
+
+- Si el producto no existe → HTTP 404.
+- Cualquier otro error inesperado → HTTP 400.
+
+---
+
+## ProveedoresView
+
+```python
+class ProveedoresView(viewsets.ModelViewSet):
+    serializer_class = ProveedoresSerializer
+    queryset = Proveedores.objects.all()
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+
+    @action(detail=False, methods=['get', 'put', 'patch'], url_path='por-rut')
+    def obtener_por_rut(self, request):
+        rut = request.query_params.get('rut')
+        if not rut:
+            return Response({'error': 'RUT es requerido'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        try:
+            proveedor = Proveedores.objects.get(rut_proveedor=rut)
+            
+            # Manejo de métodos PUT/PATCH
+            if request.method in ['PUT', 'PATCH']:
+                partial = request.method == 'PATCH'  # True para PATCH, False para PUT
+                serializer = self.get_serializer(proveedor, data=request.data, partial=partial)
+                serializer.is_valid(raise_exception=True)
+                serializer.save()
+                return Response(serializer.data)
+            
+            # Manejo del GET
+            data = {
+                'id_proveedor': proveedor.id_proveedor,
+                'razon_social': proveedor.razon_social,
+                'rut_proveedor': proveedor.rut_proveedor,
+            }
+            return Response(data)
+            
+        except Proveedores.DoesNotExist:
+            return Response({'error': 'Proveedor no encontrado'}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+```
+
+**Similar al ProductosView**
+
+---
+
+## PersonalView
+
+```python
+class PersonalView(viewsets.ModelViewSet):
+    serializer_class = PersonalSerializer
+    queryset = Personal.objects.all()
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+
+    @action(detail=True, methods=['post'], url_path='asignar-sabados')
+    def asignar_sabados(self, request, pk=None):
+        personal = self.get_object()
+        fechas = request.data.get('sabados', [])
+
+        if not isinstance(fechas, list):
+            return Response(
+                {'error': 'El campo "sabados" debe ser una lista de fechas.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        try:
+            with transaction.atomic():
+                # Crear o obtener sábados
+                sabados_objs = []
+                for fecha_str in fechas:
+                    sabado, _ = Sabado.objects.get_or_create(fecha=fecha_str)
+                    sabados_objs.append(sabado)
+
+                # Obtener IDs de sábados existentes
+                sabados_existentes = personal.sabados_trabajados.all()
+                sabados_existentes_ids = set(sabados_existentes.values_list('sabado__id_sabado', flat=True))
+                
+                # Eliminar relaciones que ya no están
+                personal.sabados_trabajados.exclude(sabado__in=sabados_objs).delete()
+                
+                # Crear nuevas relaciones
+                nuevos_sabados = [
+                    SabadoTrabajado(personal=personal, sabado=sabado)
+                    for sabado in sabados_objs 
+                    if sabado.id_sabado not in sabados_existentes_ids
+                ]
+                SabadoTrabajado.objects.bulk_create(nuevos_sabados)
+
+                return Response({
+                    'message': f'Sábados actualizados. {len(nuevos_sabados)} nuevos.'
+                }, status=status.HTTP_200_OK)
+
+        except Exception as e:
+            return Response(
+                {'error': f'Error al actualizar sábados: {str(e)}'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+
+    @action(detail=True, methods=['get'], url_path='sabados-trabajados')
+    def obtener_sabados_trabajados(self, request, pk=None):
+        personal = self.get_object()
+        sabados = personal.sabados_trabajados.all().select_related('sabado')
+        fechas = [s.sabado.fecha.strftime("%Y-%m-%d") for s in sabados]
+        return Response({'sabados': fechas}, status=status.HTTP_200_OK)
+    
+    @action(detail=False, methods=['get'], url_path='historico-sabados')
+    def historico_sabados(self, request):
+        """
+        Obtiene el histórico de sábados trabajados agrupados por mes y persona
+        """
+        # Obtener los últimos 6 meses de datos
+        sabados_trabajados = (
+            SabadoTrabajado.objects
+            .filter(sabado__fecha__gte=timezone.now()-timedelta(days=180))
+            .select_related('personal', 'sabado')
+            .order_by('sabado__fecha', 'personal__nombre')
+        )
+
+        # Procesamiento para agrupar por mes y persona
+        historico = defaultdict(lambda: defaultdict(list))
+        
+        for st in sabados_trabajados:
+            mes = st.sabado.fecha.strftime('%Y-%m')  # Formato: AAAA-MM
+            historico[mes][st.personal].append(st.sabado.fecha.strftime('%d-%m-%Y'))
+
+        # Preparar respuesta estructurada
+        response_data = []
+        for mes, personal_data in sorted(historico.items(), reverse=True):
+            for personal, sabados in sorted(personal_data.items(), key=lambda x: (x[0].apellido, x[0].nombre)):
+                response_data.append({
+                    'mes': mes,
+                    'id_personal': personal.id_personal,
+                    'nombre': personal.nombre,
+                    'apellido': personal.apellido,
+                    'sabados': sabados,
+                    'total_sabados': len(sabados)
+                })
+
+        # Validar y serializar la respuesta
+        serializer = HistoricoSabadosSerializer(response_data, many=True)
+        return Response(serializer.data)
+```
+
+**Define el CRUD y permisos**
+
+```python
+serializer_class = PersonalSerializer
+queryset = Personal.objects.all()
+permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+```
+
+- Usuarios autenticados → pueden crear, actualizar o eliminar.
+- Usuarios no autenticados → solo lectura (GET).
+
+### Acción personalizada: asignar_sabados
+
+```python
+@action(detail=True, methods=['post'], url_path='asignar-sabados')
+```
+
+Crea un endpoint accesible.
+
+- detail=True → requiere un ID de persona.
+- methods=['post'] → solo acepta POST.
+- url_path='asignar-sabados' → define la URL final.
+
+**Extracción de datos enviados por el cliente**
+
+```python
+personal = self.get_object()
+fechas = request.data.get('sabados', [])
+```
+
+- self.get_object() retorna la instancia de Personal según el pk.
+- Extrae la lista sabados del body del POST.
+
+**Validación de formato**
+
+```python
+if not isinstance(fechas, list):
+    return Response({'error': 'El campo "sabados" debe ser una lista de fechas.'}, status=400)
+```
+
+Se asegura de que sabados sea una lista.
+
+**Bloque transaccional**
+
+```python
+with transaction.atomic():
+```
+
+Garantiza que todo el proceso se guarde o se revierta si ocurre un error.
+
+**Crear o recuperar los objetos Sabado**
+
+```python
+sabados_objs = []
+for fecha_str in fechas:
+    sabado, _ = Sabado.objects.get_or_create(fecha=fecha_str)
+    sabados_objs.append(sabado)
+```
+
+- Crea (o reutiliza) cada fecha de sábado.
+- Los guarda en una lista para procesarlos después.
+
+**Obtener sábados ya asignados**
+
+```python
+sabados_existentes = personal.sabados_trabajados.all()
+sabados_existentes_ids = set(sabados_existentes.values_list('sabado__id_sabado', flat=True))
+```
+
+Permite comparar qué sábados ya estaban asociados al trabajador.
+
+**Eliminar relaciones que ya no están**
+
+```python
+personal.sabados_trabajados.exclude(sabado__in=sabados_objs).delete()
+```
+
+Si un sábado ya no aparece en la nueva lista, se elimina la relación.
+
+**Agregar nuevas relaciones**
+
+```python
+nuevos_sabados = [
+    SabadoTrabajado(personal=personal, sabado=sabado)
+    for sabado in sabados_objs 
+    if sabado.id_sabado not in sabados_existentes_ids
+]
+SabadoTrabajado.objects.bulk_create(nuevos_sabados)
+```
+
+- Se generan solo las relaciones nuevas.
+- Se guardan todas juntas usando bulk_create → mucho más eficiente.
+
+**Respuesta**
+
+```python
+return Response({'message': f'Sábados actualizados. {len(nuevos_sabados)} nuevos.'})
+```
+
+Devuelve un mensaje indicando cuántos fueron agregados.
+
+## Acción personalizada: obtener_sabados_trabajados
+
+**Consulta simplificada**
+
+```python
+sabados = personal.sabados_trabajados.all().select_related('sabado')
+```
+
+select_related evita consultas adicionales al traer el objeto sabado.
+
+**Formateo de fechas**
+
+```python
+fechas = [s.sabado.fecha.strftime("%Y-%m-%d") for s in sabados]
+```
+
+Devuelve un array de fechas en formato AÑO-MES-DÍA.
+
+## Acción personalizada: historico_sabados
+
+**Consulta de los últimos 180 días**
+
+```python
+sabados_trabajados = (
+    SabadoTrabajado.objects
+    .filter(sabado__fecha__gte=timezone.now()-timedelta(days=180))
+    .select_related('personal', 'sabado')
+    .order_by('sabado__fecha', 'personal__nombre')
+)
+```
+
+**Agrupación por mes y persona**
+
+```python
+historico = defaultdict(lambda: defaultdict(list))
+```
+
+Genera estructura:
+
+```python
+{
+  '2025-01': {
+      PersonalObj: ['10-01-2025', '24-01-2025']
+  },
+  ...
+}
+```
+
+**Construcción de la respuesta final**
+
+```python
+response_data.append({
+    'mes': mes,
+    'id_personal': personal.id_personal,
+    'nombre': personal.nombre,
+    'apellido': personal.apellido,
+    'sabados': sabados,
+    'total_sabados': len(sabados)
+})
+```
+
+**Serialización final**
+
+serializer = HistoricoSabadosSerializer(response_data, many=True)
+return Response(serializer.data)
+
+---
+
+## PedidoMateriasPrimasView
+
+```python
+class PedidoMateriasPrimasView(viewsets.ModelViewSet):
+    serializer_class = PedidoMateriasPrimasSerializer
+    queryset = PedidoMateriasPrimas.objects.all()
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+
+    @action(detail=False, methods=['get'], url_path='buscar-proveedores')
+    def buscar_proveedores(self, request):
+        q = request.GET.get('q', '')
+        proveedores = Proveedores.objects.filter(razon_social__icontains=q)[:10]
+        serializer = ProveedoresSerializer(proveedores, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    @action(detail=False, methods=['get'], url_path='buscar-productos')
+    def buscar_productos(self, request):
+        q = request.GET.get('q', '')
+        productos = Productos.objects.filter(nombre__icontains=q)[:10]
+        serializer = ProductosSerializer(productos, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+```
+
+**buscar_proveedores**
+
+```python
+  q = request.GET.get('q', '')
+```
+
+- Extrae el parámetro q de la URL
+- Si no viene nada, usa string vacío ('').
+
+```python
+    proveedores = Proveedores.objects.filter(razon_social__icontains=q)[:10]
+```
+
+- Busca en la base datos coincidencias parciales.
+- icontains → insensible a mayúsculas/minúsculas.
+- [:10] → limita resultados a 10 → ideal para autocompletar.
+
+```python
+    serializer = ProductosSerializer(productos, many=True)
+```
+
+- Serializa la lista para devolverla como JSON.
+
+```python
+    return Response(serializer.data, status=status.HTTP_200_OK)
+```
+
+- Devuelve JSON con los proveedores encontrados.
+
+--- 
+
+## DocumentFacturasView
+
+```python
+class DocumentFacturasView(viewsets.ModelViewSet):
+    serializer_class = DocumentFacturasSerializer
+    queryset = DocumentFacturas.objects.all()
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+
+   
+    @action(detail=False, methods=['get'], url_path='buscar-por-titulo')
+    def buscar_por_titulo(self, request):
+        q = request.GET.get('q', '')
+        pdfs = DocumentFacturas.objects.filter(title__icontains=q)[:10]
+        serializer = self.get_serializer(pdfs, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+
+        # Obtener el nombre del archivo del campo file_url
+        file_key = instance.file_url.split(f"{os.getenv('AWS_STORAGE_BUCKET_NAME')}/")[-1]
+
+        # Conexión a R2
+        s3 = boto3.client(
+            "s3",
+            endpoint_url=os.getenv("AWS_S3_ENDPOINT_URL"),
+            aws_access_key_id=os.getenv("AWS_ACCESS_KEY_ID"),
+            aws_secret_access_key=os.getenv("AWS_SECRET_ACCESS_KEY"),
+        )
+
+        try:
+            s3.delete_object(Bucket=os.getenv("AWS_STORAGE_BUCKET_NAME"), Key=file_key)
+            print(f"✅ Archivo eliminado de R2: {file_key}")
+        except Exception as e:
+            print(f"⚠️ Error al eliminar en R2: {e}")
+
+        # Finalmente elimina el registro en la base de datos
+        self.perform_destroy(instance)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+```
+
+**buscar_por_titulo**
+
+```python
+  q = request.GET.get('q', '')
+```
+
+- Extrae el parámetro q de la URL
+- Si no viene nada, usa string vacío ('').
+
+```python
+    pdfs = DocumentFacturas.objects.filter(title__icontains=q)[:10]
+```
+
+- Busca en la base datos coincidencias parciales.
+- icontains → insensible a mayúsculas/minúsculas.
+- [:10] → limita resultados a 10 → ideal para autocompletar.
+
+```python
+   serializer = self.get_serializer(pdfs, many=True)
+```
+
+- Serializa la lista para devolverla como JSON.
+
+```python
+    return Response(serializer.data, status=status.HTTP_200_OK)
+```
+
+- Devuelve JSON con los pdfs encontrados.
+
+**destroy**
+
+Se sobreescribe este método para agregar la lógica de borrar archivos del storage
+
+```python
+instance = self.get_object()
+file_key = instance.file_url.split(f"{os.getenv('AWS_STORAGE_BUCKET_NAME')}/")[-1]
+```
+
+- Obtiene la instancia a eliminar
+    -Obtiene el queryset definido en tu view (o lo que devuelva get_queryset()).
+    - Lee el lookup field (por defecto pk) desde la URL.
+    - Hace un query a la base de datos para obtener ese objeto.
+    - Si no lo encuentra → lanza automáticamente un 404 (NotFound).
+    - Aplica permisos y filtros si existen.
+
+- Extrae el nombre del archivo de la URL de R2.
+- file_url normalmente contiene algo como:
+    - https://bucket/nombre-archivo.pdf
+    - Esta línea separa para obtener el 'Key' que S3 necesita
+
+```python
+s3 = boto3.client(
+            "s3",
+            endpoint_url=os.getenv("AWS_S3_ENDPOINT_URL"),
+            aws_access_key_id=os.getenv("AWS_ACCESS_KEY_ID"),
+            aws_secret_access_key=os.getenv("AWS_SECRET_ACCESS_KEY"),
+        )
+```
+
+Se crea un cliente S3, es decir, un objeto que permite ejecutar comandos contra S3
+
+- Crea una conexión hacia el bucket S3/R2,
+- Usando las credenciales
+- Con la URL base configurada
+
+```python
+  try:
+            s3.delete_object(Bucket=os.getenv("AWS_STORAGE_BUCKET_NAME"), Key=file_key)
+            print(f"✅ Archivo eliminado de R2: {file_key}")
+        except Exception as e:
+            print(f"⚠️ Error al eliminar en R2: {e}")
+```
+
+Se elimina el archivo del bucket 
+
+```python
+ self.perform_destroy(instance)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+```
+
+Borra el registro en la BD
+
+---
+
+## NotaProductoView
+
+```python
+class NotaProductoView(viewsets.ModelViewSet):
+    """
+    ViewSet para manejar NotaProducto.
+    - CRUD de NotaProducto
+    - Subida de Excel para cargar/actualizar datos
+    """
+    permission_classes = [permissions.IsAuthenticated]
+    queryset = NotaProducto.objects.all()
+    serializer_class = NotaProductoSerializer
+
+
+    @action(detail=False, methods=['post'], url_path='upload_excel')
+    def upload_excel(self, request):
+        """
+        Sube un Excel con columnas [numnota, cod_articu, pend] y
+        lo guarda en la tabla NotaProducto (crea o actualiza).
+        """
+        file = request.FILES.get("file")
+        if not file:
+            return Response(
+                {"error": "No se recibió archivo"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        try:
+            columnas_necesarias = ['numnota', 'cod_articu', 'pend']
+            df = pd.read_excel(file, usecols=columnas_necesarias)
+
+            registros_procesados = 0
+            for _, row in df.iterrows():
+
+                num_nota_excel = int(row['numnota'])
+                cod_articu_excel = str(row['cod_articu']).strip()
+                cantidad = int(row['pend'])
+
+                try:
+                   
+                    nota = Notas.objects.get(num_nota=num_nota_excel)
+                    producto = Productos.objects.get(codigo=cod_articu_excel)
+
+                    obj, created = NotaProducto.objects.update_or_create(
+                        nota=nota,
+                        producto=producto,
+                        defaults={
+                            'cantidad': cantidad,
+                            'usuario_creacion': request.user, 
+                            'usuario_modificacion': request.user
+                            }
+                    )
+                    if created:
+                        obj.usuario_creacion = request.user
+                        obj.save()
+                    registros_procesados += 1
+
+                except (Notas.DoesNotExist, Productos.DoesNotExist):
+                    # Si no existe la nota o el producto, se omite
+                    continue
+
+            return Response(
+                {"msg": f"Archivo procesado correctamente. {registros_procesados} registros cargados/actualizados."},
+                status=status.HTTP_200_OK
+            )
+
+        except Exception as e:
+            return Response(
+                {"error": f"Error al procesar el archivo: {str(e)}"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+```
+
+**upload_excel**
+
+Carga un archivo Excel para crear o actualizar registros de NotaProducto.
+
+Descripción
+
+Este endpoint recibe un archivo Excel con columnas:
+
+- numnota → Número de nota asociada.
+- cod_articu → Código del producto.
+- pend → Cantidad pendiente.
+
+Por cada fila, el sistema:
+
+- Verifica si existe la Nota (Notas) y el Producto (Productos).
+- Crea o actualiza el registro en NotaProducto mediante update_or_create.
+- Registra el usuario que carga o modifica el registro.
+- Omite filas cuyo producto o nota no existan.
+
+```python
+try:
+            columnas_necesarias = ['numnota', 'cod_articu', 'pend']
+            df = pd.read_excel(file, usecols=columnas_necesarias)
+
+            registros_procesados = 0
+            for _, row in df.iterrows():
+
+                num_nota_excel = int(row['numnota'])
+                cod_articu_excel = str(row['cod_articu']).strip()
+                cantidad = int(row['pend'])
+```
+
+- Lee el archivo Excel enviado por el usuario (file).
+- Pandas (pd) interpreta el archivo y lo convierte en un DataFrame (una tabla en memoria).
+- usecols=columnas_necesarias indica que solo debe leer estas columnas
+- df.iterrows() devuelve cada fila del DataFrame una por una.
+- Cada vuelta del for entrega:
+    - _: índice de la fila (se ignora con _ porque no se usa).
+    - row: un objeto tipo Serie con los valores de la fila.
+- Obtiene el valor de la columna numnota.
+- Lo convierte a entero, porque los modelos del sistema probablemente esperan int.
+- Convierte a string (por si Excel lo interpreta como número).
+- strip() elimina espacios en blanco antes y después, para evitar errores
+
+```python
+if created:
+    obj.usuario_creacion = request.user
+    obj.save()
+    registros_procesados += 1
+
+    except (Notas.DoesNotExist, Productos.DoesNotExist):
+        # Si no existe la nota o el producto, se omite
+        continue
+```
+
+**if created:**
+Esta variable viene desde update_or_create().
+
+update_or_create retorna: (objeto, created)
+
+- donde:
+    - created = True	El registro NO existía → se creó uno nuevo.
+    - created = False	El registro existía → solo se actualizó.
+
+Entonces este if es para ejecutar un código solo cuando el registro es nuevo.
+
+**obj.usuario_creacion = request.user**
+
+- Se asigna el usuario autenticado que está realizando la carga del Excel.
+- Esto solo se hace si es un objeto nuevo, porque:
+    - usuario_creacion debe representar quién creó el registro.
+    - Si se está actualizando (created=False), no corresponde cambiar el usuario de creación.
+
+**obj.save()**
+
+- Guarda en base de datos el cambio del campo usuario_creacion.
+- Aunque update_or_create ya guardó el registro, este segundo .save() se necesita porque se está modificando un campo adicional (usuario_creacion) después de la creación.
+
+**continue**
+
+- Hace que el bucle for pase inmediatamente al siguiente registro del Excel.
+- No ejecuta lo que queda dentro del ciclo.
+- En este caso, significa:
+“Este registro no es válido → saltarlo y seguir con el siguiente”.
 
 ---

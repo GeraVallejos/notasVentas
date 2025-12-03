@@ -1,4 +1,5 @@
 site_name: Software de Gestión
+site_url: https://geravallejos.github.io/notasVentas/
 dev_addr: 'localhost:9000'
 nav:
     - Introducción: index.md

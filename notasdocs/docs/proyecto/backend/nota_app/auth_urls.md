@@ -39,3 +39,5 @@ urlpatterns = [
 ---
 
 Este módulo es comúnmente usado como parte de una implementación de autenticación JWT basada en cookies, segura frente a ataques de XSS y CSRF cuando se configura adecuadamente.
+
+---
