@@ -20,6 +20,12 @@ router.register(r'usuario', UsuarioView, 'usuario')
 router.register(r'nota', NotasView, 'nota')
 router.register(r'cliente', ClientesView, 'cliente')
 router.register(r'dashboard', DashboardViewSet, 'dashboard')
+router.register(r'productos', ProductosView, 'productos')
+router.register(r'proveedores', ProveedoresView, 'proveedores')
+router.register(r'personal', PersonalView, 'personal')
+router.register(r'pedido_materias_primas', PedidoMateriasPrimasView, 'pedido_materias_primas')
+router.register(r'facturas', DocumentFacturasView, 'facturas')
+router.register(r'notas_productos', NotaProductoView, 'notas_productos')
 ```
 
 - DefaultRouter(): Crea un router que genera URLs estándar para CRUD.
@@ -56,6 +62,8 @@ urlpatterns = [
 ]
 ```
 
-- Llama a una vista basada en clase llamada CSRFTokenView, para entregar el token CSRF al frontend
+- Llama a una vista basada en la clase llamada CSRFTokenView, para entregar el token CSRF al frontend
 - include(router.urls): Incluye todas las URLs generadas por el router.
 - *usuario_extra_routes: Desempaqueta las rutas personalizadas en la lista.
+
+---
