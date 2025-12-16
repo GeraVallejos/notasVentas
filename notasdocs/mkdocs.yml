@@ -21,6 +21,9 @@ nav:
             - Excel JS: dependencias/react/exceljs.md
             - Notistack: dependencias/react/notistack.md
             - React Hook Form: dependencias/react/react-hook-form.md
+            - Yup: dependencias/react/yup.md
+            - Material UI: dependencias/react/mui.md
+            - Redux Tool Kit: dependencias/react/reduxToolKit.md
     - Estructura Backend: 
         - Proyecto: 
             - __pycache__.py: proyecto/backend/nota_ventas/pycache.md
@@ -41,9 +44,48 @@ nav:
             - serializer.py : proyecto/backend/nota_app/serializer.md
             - urls.py: proyecto/backend/nota_app/urls_app.md
             - views.py: proyecto/backend/nota_app/views.md
-    # - Estructura Frontend:
-    #     - Auth:
-    #         - authSlice.js: compras/frontend/auth/authSlice.md
+    - Estructura Frontend:
+        - Auth:
+            - authSlice.js: compras/frontend/auth/authSlice.md
+        - Assets:
+            - images, iconos, mapas: proyecto/frontend/src/assets/assets.md
+        - Components:
+            - common: 
+                - ActionButton.jsx: proyecto/frontend/src/components/common/actionButton.md
+                - ComunaAutoComplete.jsx: proyecto/frontend/src/components/common/comunaAutoComplete.md
+                - ConfirmDialog.jsx: proyecto/frontend/src/components/common/confirmDialog.md
+                - CSRFLoader.jsx: proyecto/frontend/src/components/common/csrfLoader.md
+                - CustomToolbar.jsx: proyecto/frontend/src/components/common/customToolbar.md
+                - DropZone.jsx: proyecto/frontend/src/components/common/dropZone.md
+                - GlobalLoader.jsx: proyecto/frontend/src/components/common/globalLoader.md
+                - PickingLoad.jsx: proyecto/frontend/src/components/common/pickingLoad.md
+                - SearchSelect.jsx: proyecto/frontend/src/components/common/searchSelect.md
+            - dashboard:
+                - Dashboard.jsx: proyecto/frontend/src/components/dashboard/dashboard.md
+                - FilterComponent.jsx: proyecto/frontend/src/components/dashboard/filterComponent.md
+                - MapaDespachos.jsx: proyecto/frontend/src/components/dashboard/mapaDespachos.md
+            - dataGrids:
+                - NotasDataGrid.jsx: proyecto/frontend/src/components/dataGrids/notasDataGrid.md
+                - FacturasDataGrid.jsx: proyecto/frontend/src/components/dataGrids/facturasDataGrid.md
+                - SabadoMesGrid.jsx: proyecto/frontend/src/components/dataGrids/sabadoMesGrid.md
+                - HistoricoSabados.jsx: proyecto/frontend/src/components/dataGrids/historicoSabados.md
+
+            
+                
+            # - Hooks:
+                
+            # - Layouts:
+                
+            # - Pages:
+                
+        - Routes:
+            - Routes.jsx: proyecto/frontend/src/routes/routes.md
+            - loader.js: proyecto/frontend/src/routes/loader.md
+            - GroupsRouter.jsx: proyecto/frontend/src/routes/groupsRouter.md
+            # - Theme:
+                
+            # - Utils: 
+                
     
 theme:
   name: material
