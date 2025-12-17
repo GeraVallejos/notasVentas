@@ -80,11 +80,9 @@ nav:
                 - PDFMetadataModal.jsx: proyecto/frontend/src/components/modal/pdfMetadataModal.md
             - ui:
                 - navBar.jsx: proyecto/frontend/src/components/ui/navBar.md
-                - sideBar.jsx: proyecto/frontend/src/components/ui/sideBar.md
-
-            
-                
-            # - Hooks:
+                - sideBar.jsx: proyecto/frontend/src/components/ui/sideBar.md  
+        - Hooks:
+            - useLoginForm.js: proyecto/frontend/src/hooks/useLoginForm.md
                 
             # - Layouts:
                 
