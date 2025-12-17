@@ -159,3 +159,5 @@ Esta API permite una integración clara y explícita en componentes, evitando de
 * Integración con validaciones previas a la carga.
 
 Este enfoque mantiene el hook como una pieza reutilizable, predecible y alineada con buenas prácticas de arquitectura en React.
+
+---

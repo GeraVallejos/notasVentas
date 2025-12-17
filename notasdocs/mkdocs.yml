@@ -46,7 +46,8 @@ nav:
             - views.py: proyecto/backend/nota_app/views.md
     - Estructura Frontend:
         - Auth:
-            - authSlice.js: compras/frontend/auth/authSlice.md
+            - authSlice.js: proyecto/frontend/src/auth/authSlice.md
+            - authThunks.js: proyecto/frontend/src/auth/authThunk.md
         - Assets:
             - images, iconos, mapas: proyecto/frontend/src/assets/assets.md
         - Components:
@@ -85,6 +86,7 @@ nav:
             - useLoginForm.js: proyecto/frontend/src/hooks/useLoginForm.md
             - useNotaForm.js: proyecto/frontend/src/hooks/useNotaForm.md
             - usePDFMetadata.js: proyecto/frontend/src/hooks/usePDFMetadata.md
+
                 
             # - Layouts:
                 
