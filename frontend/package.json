@@ -28,7 +28,7 @@
     "leaflet": "^1.9.4",
     "lodash.debounce": "^4.0.8",
     "notistack": "^3.0.2",
-    "pdfjs-dist": "^5.4.54",
+    "pdfjs-dist": "^5.4.394",
     "react": "^19.1.0",
     "react-dom": "^19.2.0",
     "react-hook-form": "^7.65.0",
