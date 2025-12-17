@@ -69,6 +69,18 @@ nav:
                 - FacturasDataGrid.jsx: proyecto/frontend/src/components/dataGrids/facturasDataGrid.md
                 - SabadoMesGrid.jsx: proyecto/frontend/src/components/dataGrids/sabadoMesGrid.md
                 - HistoricoSabados.jsx: proyecto/frontend/src/components/dataGrids/historicoSabados.md
+            - forms:
+                - LoginForm.jsx: proyecto/frontend/src/components/forms/loginForm.md
+                - NotaForm.jsx: proyecto/frontend/src/components/forms/notaForm.md
+                - MPrimasForm.jsx: proyecto/frontend/src/components/forms/mPrimasForm.md
+                - PickingForm.jsx: proyecto/frontend/src/components/forms/pickingForm.md
+            - modal:
+                - EditNotaModal.jsx: proyecto/frontend/src/components/modal/editNotaModal.md
+                - MateriasPrimasModal.jsx: proyecto/frontend/src/components/modal/materiasPrimasModal.md
+                - PDFMetadataModal.jsx: proyecto/frontend/src/components/modal/pdfMetadataModal.md
+            - ui:
+                - navBar.jsx: proyecto/frontend/src/components/ui/navBar.md
+                - sideBar.jsx: proyecto/frontend/src/components/ui/sideBar.md
 
             
                 
