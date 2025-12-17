@@ -83,6 +83,8 @@ nav:
                 - sideBar.jsx: proyecto/frontend/src/components/ui/sideBar.md  
         - Hooks:
             - useLoginForm.js: proyecto/frontend/src/hooks/useLoginForm.md
+            - useNotaForm.js: proyecto/frontend/src/hooks/useNotaForm.md
+            - usePDFMetadata.js: proyecto/frontend/src/hooks/usePDFMetadata.md
                 
             # - Layouts:
                 
