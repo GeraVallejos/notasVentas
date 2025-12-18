@@ -142,12 +142,8 @@ src/
 
 ---
 
-## Diagrama de arquitectura
-
-![Diagrama de arquitectura](images/DjangoDiagrama.jpg)
-
----
-
 ## Conclusión
 
 Este sistema proporciona una **solución robusta, escalable y mantenible** para complementar un ERP existente, mejorando los flujos operativos, la trazabilidad de la información y la experiencia de usuario mediante el uso de tecnologías modernas y buenas prácticas de desarrollo.
+
+---

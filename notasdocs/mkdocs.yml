@@ -2,6 +2,7 @@ site_name: Software de Gestión
 site_url: https://geravallejos.github.io/notasVentas/
 dev_addr: 'localhost:9000'
 nav:
+    - Arquitectura de Proyectos: arquitectura/arquitectura.md
     - Introducción: index.md
     - Guía de Instalación: 
         - Django: instalacion/instalacion_Django.md
