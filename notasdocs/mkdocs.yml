@@ -47,7 +47,7 @@ nav:
     - Estructura Frontend:
         - App.jsx: proyecto/frontend/src/app.md
         - index.css: proyecto/frontend/src/indexcss.md
-        - main.jsx: proyecto/frontend/src/mainjsx.md
+        - main.jsx: proyecto/frontend/src/main.md
         - store.js: proyecto/frontend/src/store.md
         - Auth:
             - authSlice.js: proyecto/frontend/src/auth/authSlice.md
@@ -103,7 +103,7 @@ nav:
             - GroupsRouter.jsx: proyecto/frontend/src/routes/groupsRouter.md
         - Theme:
             - AppTheme.jsx: proyecto/frontend/src/theme/appTheme.md
-            - theme.js: proyecto/frontend/src/theme/appTheme.md   
+            - theme.js: proyecto/frontend/src/theme/theme.md   
         - Utils: 
             - api.js: proyecto/frontend/src/utils/api.md
             - dataGridEs.js: proyecto/frontend/src/utils/dataGridEs.md
@@ -111,10 +111,10 @@ nav:
             - formatearRut.js: proyecto/frontend/src/utils/formatearRut.md
             - normalizarNombre.js: proyecto/frontend/src/utils/normalizarNombre.md
         - Archivos fuera de src:
-            - eslint.config.js: proyecto/frontend/eslintConfig.md
-            - index.html: proyecto/frontend/indexHtml.md
-            - vercel.json: proyecto/frontend/vercelJson.md
-            - vite.config.js: proyecto/frontend/viteConfig.md
+            - eslint.config.js: proyecto/frontend/Afuera/eslintConfig.md
+            - index.html: proyecto/frontend/Afuera/indexHtml.md
+            - vercel.json: proyecto/frontend/Afuera/vercelJson.md
+            - vite.config.js: proyecto/frontend/Afuera/viteConfig.md
                  
 theme:
   name: material

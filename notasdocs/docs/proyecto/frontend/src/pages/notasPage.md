@@ -1,6 +1,4 @@
-## NotasPage
-
-### Propósito
+## Propósito
 
 Este componente representa la **página de creación o edición de una nota de venta**. Su única responsabilidad es renderizar el formulario principal encapsulado en `NotaForm`.
 
