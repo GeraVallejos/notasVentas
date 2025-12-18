@@ -111,10 +111,10 @@ nav:
             - formatearRut.js: proyecto/frontend/src/utils/formatearRut.md
             - normalizarNombre.js: proyecto/frontend/src/utils/normalizarNombre.md
         - Archivos fuera de src:
-            - eslint.config.js: proyecto/frontend/afuera/eslint.config.md
-            - index.html: proyecto/frontend/afuera/index.md
-            - vercel.json: proyecto/frontend/afuera/vercel.md
-            - vite.config.js: proyecto/frontend/afuera/vite.config.md
+            - eslint.config.js: proyecto/frontend/separado/eslint.config.md
+            - index.html: proyecto/frontend/separado/index.md
+            - vercel.json: proyecto/frontend/separado/vercel.md
+            - vite.config.js: proyecto/frontend/separado/vite.config.md
                  
 theme:
   name: material
