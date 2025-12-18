@@ -21,7 +21,7 @@ import { NotaForm } from "../components/forms/NotaForm"
 
 ---
 
-```text
+```js
 const NotasPage = () => {
   return (
     <>
@@ -31,7 +31,7 @@ const NotasPage = () => {
 }
 ```
 
-* El fragmento (`<>...</>`) no añade nodos innecesarios al DOM.
+* El fragmento (<>...</>) no añade nodos innecesarios al DOM.
 * Toda la complejidad queda encapsulada dentro del formulario.
 * La página cumple el rol de **contenedor de ruta**, no de lógica.
 
