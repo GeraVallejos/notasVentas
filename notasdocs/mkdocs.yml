@@ -45,6 +45,10 @@ nav:
             - urls.py: proyecto/backend/nota_app/urls_app.md
             - views.py: proyecto/backend/nota_app/views.md
     - Estructura Frontend:
+        - App.jsx: proyecto/frontend/src/app.md
+        - index.css: proyecto/frontend/src/indexcss.md
+        - main.jsx: proyecto/frontend/src/mainjsx.md
+        - store.js: proyecto/frontend/src/store.md
         - Auth:
             - authSlice.js: proyecto/frontend/src/auth/authSlice.md
             - authThunks.js: proyecto/frontend/src/auth/authThunk.md
@@ -85,22 +89,33 @@ nav:
         - Hooks:
             - useLoginForm.js: proyecto/frontend/src/hooks/useLoginForm.md
             - useNotaForm.js: proyecto/frontend/src/hooks/useNotaForm.md
-            - usePDFMetadata.js: proyecto/frontend/src/hooks/usePDFMetadata.md
-
-                
-            # - Layouts:
-                
-            # - Pages:
-                
+            - usePDFMetadata.js: proyecto/frontend/src/hooks/usePDFMetadata.md    
+        - Layouts:
+            - AppLayout.jsx: proyecto/frontend/src/layouts/appLayout.md
+            - AuthLayout.jsx: proyecto/frontend/src/layouts/authLayout.md     
+        - Pages:
+            - LoginPage.jsx: proyecto/frontend/src/pages/loginPage.md
+            - NotasDataPage.jsx: proyecto/frontend/src/pages/notasDataPage.md
+            - NotasPage.jsx: proyecto/frontend/src/pages/notasPage.md
         - Routes:
             - Routes.jsx: proyecto/frontend/src/routes/routes.md
             - loader.js: proyecto/frontend/src/routes/loader.md
             - GroupsRouter.jsx: proyecto/frontend/src/routes/groupsRouter.md
-            # - Theme:
-                
-            # - Utils: 
-                
-    
+        - Theme:
+            - AppTheme.jsx: proyecto/frontend/src/theme/appTheme.md
+            - theme.js: proyecto/frontend/src/theme/appTheme.md   
+        - Utils: 
+            - api.js: proyecto/frontend/src/utils/api.md
+            - dataGridEs.js: proyecto/frontend/src/utils/dataGridEs.md
+            - exportExcel.js: proyecto/frontend/src/utils/exportExcel.md
+            - formatearRut.js: proyecto/frontend/src/utils/formatearRut.md
+            - normalizarNombre.js: proyecto/frontend/src/utils/normalizarNombre.md
+        - Archivos fuera de src:
+            - eslint.config.js: proyecto/frontend/eslintConfig.md
+            - index.html: proyecto/frontend/indexHtml.md
+            - vercel.json: proyecto/frontend/vercelJson.md
+            - vite.config.js: proyecto/frontend/viteConfig.md
+                 
 theme:
   name: material
   palette:
