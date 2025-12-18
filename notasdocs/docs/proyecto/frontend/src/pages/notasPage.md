@@ -21,7 +21,7 @@ import { NotaForm } from "../components/forms/NotaForm"
 
 ---
 
-```tsx
+```text
 const NotasPage = () => {
   return (
     <>
