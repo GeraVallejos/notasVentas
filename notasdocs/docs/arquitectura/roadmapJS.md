@@ -1,4 +1,4 @@
-# Roadmap Intensivo JavaScript + React (3 horas diarias)
+# Roadmap Intensivo JavaScript + React 
 
 **Objetivo:** Alcanzar **nivel Semi Senior en teoría JavaScript** y **criterio sólido en React**
 
@@ -345,6 +345,8 @@ Debes poder responder:
 
 ✅ **Si completas este roadmap, tendrás criterio teórico de Semi Senior JS + React.**
 
+---
+
 ### Recursos BASE (no más de estos)
 **1. MDN Web Docs (OBLIGATORIO)**
 
@@ -396,3 +398,5 @@ Lee con foco en:
 - Effects
 - StrictMode
 - Rendering
+
+---
