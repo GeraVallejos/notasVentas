@@ -30,7 +30,7 @@
     "notistack": "^3.0.2",
     "pdfjs-dist": "^5.4.394",
     "react": "^19.1.0",
-    "react-dom": "^19.2.0",
+    "react-dom": "^19.2.1",
     "react-hook-form": "^7.68.0",
     "react-leaflet": "^5.0.0",
     "react-redux": "^9.2.0",
